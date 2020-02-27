@@ -1,4 +1,4 @@
-use eyre::eyre;
+use eyre::{ErrReport, eyre};
 use std::error::Error as StdError;
 use std::io;
 use thiserror::Error;
@@ -12,7 +12,7 @@ struct MyError {
 #[test]
 fn test_boxed_str() {
     let error = Box::<dyn StdError + Send + Sync>::from("oh no!");
-    let error = eyre!(error);
+    let error: ErrReport = eyre!(error);
     assert_eq!("oh no!", error.to_string());
     assert_eq!(
         "oh no!",

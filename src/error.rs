@@ -1,4 +1,5 @@
 use crate::alloc::Box;
+use std::any::Any;
 use crate::backtrace::Backtrace;
 use crate::chain::Chain;
 use crate::{ErrReport, StdError};
@@ -6,11 +7,15 @@ use core::any::TypeId;
 use core::fmt::{self, Debug, Display};
 use core::mem::{self, ManuallyDrop};
 use core::ptr::{self, NonNull};
+use crate::EyreContext;
 
 #[cfg(feature = "std")]
 use core::ops::{Deref, DerefMut};
 
-impl ErrReport {
+impl<C> ErrReport<C>
+where
+    C: EyreContext,
+{
     /// Create a new error object from any error type.
     ///
     /// The error type must be threadsafe and `'static`, so that the `ErrReport`
@@ -23,8 +28,7 @@ impl ErrReport {
     where
         E: StdError + Send + Sync + 'static,
     {
-        let backtrace = backtrace_if_absent!(error);
-        ErrReport::from_std(error, backtrace)
+        ErrReport::from_std(error)
     }
 
     /// Create a new error object from a printable error message.
@@ -68,112 +72,111 @@ impl ErrReport {
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        ErrReport::from_adhoc(message, backtrace!())
+        ErrReport::from_adhoc(message)
     }
 
     #[cfg(feature = "std")]
-    pub(crate) fn from_std<E>(error: E, backtrace: Option<Backtrace>) -> Self
+    pub(crate) fn from_std<E>(error: E) -> Self
     where
         E: StdError + Send + Sync + 'static,
     {
         let vtable = &ErrorVTable {
-            object_drop: object_drop::<E>,
-            object_ref: object_ref::<E>,
+            object_drop: object_drop::<E, C>,
+            object_ref: object_ref::<E, C>,
             #[cfg(feature = "std")]
-            object_mut: object_mut::<E>,
-            object_boxed: object_boxed::<E>,
-            object_downcast: object_downcast::<E>,
-            object_drop_rest: object_drop_front::<E>,
+            object_mut: object_mut::<E, C>,
+            object_boxed: object_boxed::<E, C>,
+            object_downcast: object_downcast::<E, C>,
+            object_drop_rest: object_drop_front::<E, C>,
         };
 
         // Safety: passing vtable that operates on the right type E.
-        unsafe { ErrReport::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable) }
     }
 
-    pub(crate) fn from_adhoc<M>(message: M, backtrace: Option<Backtrace>) -> Self
+    pub(crate) fn from_adhoc<M>(message: M) -> Self
     where
         M: Display + Debug + Send + Sync + 'static,
     {
         use crate::wrapper::MessageError;
         let error: MessageError<M> = MessageError(message);
         let vtable = &ErrorVTable {
-            object_drop: object_drop::<MessageError<M>>,
-            object_ref: object_ref::<MessageError<M>>,
+            object_drop: object_drop::<MessageError<M>, C>,
+            object_ref: object_ref::<MessageError<M>, C>,
             #[cfg(feature = "std")]
-            object_mut: object_mut::<MessageError<M>>,
-            object_boxed: object_boxed::<MessageError<M>>,
-            object_downcast: object_downcast::<M>,
-            object_drop_rest: object_drop_front::<M>,
+            object_mut: object_mut::<MessageError<M>, C>,
+            object_boxed: object_boxed::<MessageError<M>, C>,
+            object_downcast: object_downcast::<M, C>,
+            object_drop_rest: object_drop_front::<M, C>,
         };
 
         // Safety: MessageError is repr(transparent) so it is okay for the
         // vtable to allow casting the MessageError<M> to M.
-        unsafe { ErrReport::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable) }
     }
 
-    pub(crate) fn from_display<M>(message: M, backtrace: Option<Backtrace>) -> Self
+    pub(crate) fn from_display<M>(message: M) -> Self
     where
         M: Display + Send + Sync + 'static,
     {
         use crate::wrapper::DisplayError;
         let error: DisplayError<M> = DisplayError(message);
         let vtable = &ErrorVTable {
-            object_drop: object_drop::<DisplayError<M>>,
-            object_ref: object_ref::<DisplayError<M>>,
+            object_drop: object_drop::<DisplayError<M>, C>,
+            object_ref: object_ref::<DisplayError<M>, C>,
             #[cfg(feature = "std")]
-            object_mut: object_mut::<DisplayError<M>>,
-            object_boxed: object_boxed::<DisplayError<M>>,
-            object_downcast: object_downcast::<M>,
-            object_drop_rest: object_drop_front::<M>,
+            object_mut: object_mut::<DisplayError<M>, C>,
+            object_boxed: object_boxed::<DisplayError<M>, C>,
+            object_downcast: object_downcast::<M, C>,
+            object_drop_rest: object_drop_front::<M, C>,
         };
 
         // Safety: DisplayError is repr(transparent) so it is okay for the
         // vtable to allow casting the DisplayError<M> to M.
-        unsafe { ErrReport::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable) }
     }
 
     #[cfg(feature = "std")]
-    pub(crate) fn from_context<C, E>(context: C, error: E, backtrace: Option<Backtrace>) -> Self
+    pub(crate) fn from_context<D, E>(msg: D, error: E) -> Self
     where
-        C: Display + Send + Sync + 'static,
+        D: Display + Send + Sync + 'static,
         E: StdError + Send + Sync + 'static,
     {
-        let error: ContextError<C, E> = ContextError { context, error };
+        let error: ContextError<D, E> = ContextError { msg, error };
 
         let vtable = &ErrorVTable {
-            object_drop: object_drop::<ContextError<C, E>>,
-            object_ref: object_ref::<ContextError<C, E>>,
+            object_drop: object_drop::<ContextError<D, E>, C>,
+            object_ref: object_ref::<ContextError<D, E>, C>,
             #[cfg(feature = "std")]
-            object_mut: object_mut::<ContextError<C, E>>,
-            object_boxed: object_boxed::<ContextError<C, E>>,
-            object_downcast: context_downcast::<C, E>,
-            object_drop_rest: context_drop_rest::<C, E>,
+            object_mut: object_mut::<ContextError<D, E>, C>,
+            object_boxed: object_boxed::<ContextError<D, E>, C>,
+            object_downcast: context_downcast::<D, E, C>,
+            object_drop_rest: context_drop_rest::<D, E, C>,
         };
 
         // Safety: passing vtable that operates on the right type.
-        unsafe { ErrReport::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable) }
     }
 
     #[cfg(feature = "std")]
     pub(crate) fn from_boxed(
         error: Box<dyn StdError + Send + Sync>,
-        backtrace: Option<Backtrace>,
     ) -> Self {
         use crate::wrapper::BoxedError;
         let error = BoxedError(error);
         let vtable = &ErrorVTable {
-            object_drop: object_drop::<BoxedError>,
-            object_ref: object_ref::<BoxedError>,
+            object_drop: object_drop::<BoxedError, C>,
+            object_ref: object_ref::<BoxedError, C>,
             #[cfg(feature = "std")]
-            object_mut: object_mut::<BoxedError>,
-            object_boxed: object_boxed::<BoxedError>,
-            object_downcast: object_downcast::<Box<dyn StdError + Send + Sync>>,
-            object_drop_rest: object_drop_front::<Box<dyn StdError + Send + Sync>>,
+            object_mut: object_mut::<BoxedError, C>,
+            object_boxed: object_boxed::<BoxedError, C>,
+            object_downcast: object_downcast::<Box<dyn StdError + Send + Sync>, C>,
+            object_drop_rest: object_drop_front::<Box<dyn StdError + Send + Sync>, C>,
         };
 
         // Safety: BoxedError is repr(transparent) so it is okay for the vtable
         // to allow casting to Box<dyn StdError + Send + Sync>.
-        unsafe { ErrReport::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable) }
     }
 
     // Takes backtrace as argument rather than capturing it here so that the
@@ -183,15 +186,15 @@ impl ErrReport {
     // value of type E.
     unsafe fn construct<E>(
         error: E,
-        vtable: &'static ErrorVTable,
-        backtrace: Option<Backtrace>,
+        vtable: &'static ErrorVTable<C>,
     ) -> Self
     where
         E: StdError + Send + Sync + 'static,
     {
+        let context = C::default(&error);
         let inner = Box::new(ErrorImpl {
             vtable,
-            backtrace,
+            context,
             _object: error,
         });
         // Erase the concrete type of E from the compile-time type system. This
@@ -200,7 +203,7 @@ impl ErrReport {
         // result is a thin pointer. The necessary behavior for manipulating the
         // underlying ErrorImpl<E> is preserved in the vtable provided by the
         // caller rather than a builtin fat pointer vtable.
-        let erased = mem::transmute::<Box<ErrorImpl<E>>, Box<ErrorImpl<()>>>(inner);
+        let erased = mem::transmute::<Box<ErrorImpl<E, C>>, Box<ErrorImpl<(), C>>>(inner);
         let inner = ManuallyDrop::new(erased);
         ErrReport { inner }
     }
@@ -259,30 +262,27 @@ impl ErrReport {
     ///     })
     /// }
     /// ```
-    pub fn context<C>(self, context: C) -> Self
+    pub fn context<D>(self, msg: D) -> Self
     where
-        C: Display + Send + Sync + 'static,
+        D: Display + Send + Sync + 'static,
     {
-        let error: ContextError<C, ErrReport> = ContextError {
-            context,
+        let error: ContextError<D, ErrReport<C>> = ContextError {
+            msg,
             error: self,
         };
 
         let vtable = &ErrorVTable {
-            object_drop: object_drop::<ContextError<C, ErrReport>>,
-            object_ref: object_ref::<ContextError<C, ErrReport>>,
+            object_drop: object_drop::<ContextError<D, ErrReport<C>>, C>,
+            object_ref: object_ref::<ContextError<D, ErrReport<C>>, C>,
             #[cfg(feature = "std")]
-            object_mut: object_mut::<ContextError<C, ErrReport>>,
-            object_boxed: object_boxed::<ContextError<C, ErrReport>>,
-            object_downcast: context_chain_downcast::<C>,
-            object_drop_rest: context_chain_drop_rest::<C>,
+            object_mut: object_mut::<ContextError<D, ErrReport<C>>, C>,
+            object_boxed: object_boxed::<ContextError<D, ErrReport<C>>, C>,
+            object_downcast: context_chain_downcast::<D, C>,
+            object_drop_rest: context_chain_drop_rest::<D, C>,
         };
 
-        // As the cause is eyre::ErrReport, we already have a backtrace for it.
-        let backtrace = None;
-
         // Safety: passing vtable that operates on the right type.
-        unsafe { ErrReport::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable) }
     }
 
     /// Get the backtrace for this ErrReport.
@@ -345,7 +345,7 @@ impl ErrReport {
     /// Returns true if `E` is the type held by this error object.
     ///
     /// For errors with context, this method returns true if `E` matches the
-    /// type of the context `C` **or** the type of the error on which the
+    /// type of the context `D` **or** the type of the error on which the
     /// context has been attached. For details about the interaction between
     /// context and downcasting, [see here].
     ///
@@ -395,7 +395,7 @@ impl ErrReport {
     /// # Example
     ///
     /// ```
-    /// # use eyre::eyre;
+    /// # use eyre::{ErrReport, eyre};
     /// # use std::fmt::{self, Display};
     /// # use std::task::Poll;
     /// #
@@ -414,7 +414,7 @@ impl ErrReport {
     /// #
     /// # const REDACTED_CONTENT: () = ();
     /// #
-    /// # let error = eyre!("...");
+    /// # let error: ErrReport = eyre!("...");
     /// # let root_cause = &error;
     /// #
     /// # let ret =
@@ -455,18 +455,18 @@ impl ErrReport {
 }
 
 #[cfg(feature = "std")]
-impl<E> From<E> for ErrReport
+impl<E, C> From<E> for ErrReport<C>
 where
+    C: EyreContext,
     E: StdError + Send + Sync + 'static,
 {
     fn from(error: E) -> Self {
-        let backtrace = backtrace_if_absent!(error);
-        ErrReport::from_std(error, backtrace)
+        ErrReport::from_std(error)
     }
 }
 
 #[cfg(feature = "std")]
-impl Deref for ErrReport {
+impl<C: EyreContext> Deref for ErrReport<C> {
     type Target = dyn StdError + Send + Sync + 'static;
 
     fn deref(&self) -> &Self::Target {
@@ -475,25 +475,28 @@ impl Deref for ErrReport {
 }
 
 #[cfg(feature = "std")]
-impl DerefMut for ErrReport {
+impl<C: EyreContext> DerefMut for ErrReport<C> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.inner.error_mut()
     }
 }
 
-impl Display for ErrReport {
+impl<C: EyreContext> Display for ErrReport<C> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.inner.display(formatter)
     }
 }
 
-impl Debug for ErrReport {
+impl<C: EyreContext> Debug for ErrReport<C> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.inner.debug(formatter)
     }
 }
 
-impl Drop for ErrReport {
+impl<C> Drop for ErrReport<C>
+where
+    C: EyreContext,
+{
     fn drop(&mut self) {
         unsafe {
             // Read Box<ErrorImpl<()>> from self.
@@ -506,71 +509,85 @@ impl Drop for ErrReport {
     }
 }
 
-struct ErrorVTable {
-    object_drop: unsafe fn(Box<ErrorImpl<()>>),
-    object_ref: unsafe fn(&ErrorImpl<()>) -> &(dyn StdError + Send + Sync + 'static),
+struct ErrorVTable<C>
+where
+        C: EyreContext,
+{
+    object_drop: unsafe fn(Box<ErrorImpl<(), C>>),
+    object_ref: unsafe fn(&ErrorImpl<(), C>) -> &(dyn StdError + Send + Sync + 'static),
     #[cfg(feature = "std")]
-    object_mut: unsafe fn(&mut ErrorImpl<()>) -> &mut (dyn StdError + Send + Sync + 'static),
-    object_boxed: unsafe fn(Box<ErrorImpl<()>>) -> Box<dyn StdError + Send + Sync + 'static>,
-    object_downcast: unsafe fn(&ErrorImpl<()>, TypeId) -> Option<NonNull<()>>,
-    object_drop_rest: unsafe fn(Box<ErrorImpl<()>>, TypeId),
+    object_mut: unsafe fn(&mut ErrorImpl<(), C>) -> &mut (dyn StdError + Send + Sync + 'static),
+    object_boxed: unsafe fn(Box<ErrorImpl<(), C>>) -> Box<dyn StdError + Send + Sync + 'static>,
+    object_downcast: unsafe fn(&ErrorImpl<(), C>, TypeId) -> Option<NonNull<()>>,
+    object_drop_rest: unsafe fn(Box<ErrorImpl<(), C>>, TypeId),
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
-unsafe fn object_drop<E>(e: Box<ErrorImpl<()>>) {
+unsafe fn object_drop<E, C>(e: Box<ErrorImpl<(), C>>)
+where
+    C: EyreContext,
+{
     // Cast back to ErrorImpl<E> so that the allocator receives the correct
     // Layout to deallocate the Box's memory.
-    let unerased = mem::transmute::<Box<ErrorImpl<()>>, Box<ErrorImpl<E>>>(e);
+    let unerased = mem::transmute::<Box<ErrorImpl<(), C>>, Box<ErrorImpl<E, C>>>(e);
     drop(unerased);
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
-unsafe fn object_drop_front<E>(e: Box<ErrorImpl<()>>, target: TypeId) {
+unsafe fn object_drop_front<E, C>(e: Box<ErrorImpl<(), C>>, target: TypeId)
+where
+    C: EyreContext,
+{
     // Drop the fields of ErrorImpl other than E as well as the Box allocation,
     // without dropping E itself. This is used by downcast after doing a
     // ptr::read to take ownership of the E.
     let _ = target;
-    let unerased = mem::transmute::<Box<ErrorImpl<()>>, Box<ErrorImpl<ManuallyDrop<E>>>>(e);
+    let unerased = mem::transmute::<Box<ErrorImpl<(), C>>, Box<ErrorImpl<ManuallyDrop<E>, C>>>(e);
     drop(unerased);
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
-unsafe fn object_ref<E>(e: &ErrorImpl<()>) -> &(dyn StdError + Send + Sync + 'static)
+unsafe fn object_ref<E, C>(e: &ErrorImpl<(), C>) -> &(dyn StdError + Send + Sync + 'static)
 where
+    C: EyreContext,
     E: StdError + Send + Sync + 'static,
 {
     // Attach E's native StdError vtable onto a pointer to self._object.
-    &(*(e as *const ErrorImpl<()> as *const ErrorImpl<E>))._object
+    &(*(e as *const ErrorImpl<(), C> as *const ErrorImpl<E, C>))._object
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
 #[cfg(feature = "std")]
-unsafe fn object_mut<E>(e: &mut ErrorImpl<()>) -> &mut (dyn StdError + Send + Sync + 'static)
+unsafe fn object_mut<E, C>(e: &mut ErrorImpl<(), C>) -> &mut (dyn StdError + Send + Sync + 'static)
 where
+    C: EyreContext,
     E: StdError + Send + Sync + 'static,
 {
     // Attach E's native StdError vtable onto a pointer to self._object.
-    &mut (*(e as *mut ErrorImpl<()> as *mut ErrorImpl<E>))._object
+    &mut (*(e as *mut ErrorImpl<(), C> as *mut ErrorImpl<E, C>))._object
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
-unsafe fn object_boxed<E>(e: Box<ErrorImpl<()>>) -> Box<dyn StdError + Send + Sync + 'static>
+unsafe fn object_boxed<E, C>(e: Box<ErrorImpl<(), C>>) -> Box<dyn StdError + Send + Sync + 'static>
 where
+    C: EyreContext,
     E: StdError + Send + Sync + 'static,
+    C: Send + Sync + 'static,
 {
     // Attach ErrorImpl<E>'s native StdError vtable. The StdError impl is below.
-    mem::transmute::<Box<ErrorImpl<()>>, Box<ErrorImpl<E>>>(e)
+    mem::transmute::<Box<ErrorImpl<(), C>>, Box<ErrorImpl<E, C>>>(e)
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
-unsafe fn object_downcast<E>(e: &ErrorImpl<()>, target: TypeId) -> Option<NonNull<()>>
+unsafe fn object_downcast<E, C>(e: &ErrorImpl<(), C>, target: TypeId) -> Option<NonNull<()>>
 where
+    C: EyreContext,
     E: 'static,
 {
     if TypeId::of::<E>() == target {
         // Caller is looking for an E pointer and e is ErrorImpl<E>, take a
         // pointer to its E field.
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<E>;
+        let unerased = e as *const ErrorImpl<(), C> as *const ErrorImpl<E, C>;
         let addr = &(*unerased)._object as *const E as *mut ();
         Some(NonNull::new_unchecked(addr))
     } else {
@@ -578,19 +595,20 @@ where
     }
 }
 
-// Safety: requires layout of *e to match ErrorImpl<ContextError<C, E>>.
+// Safety: requires layout of *e to match ErrorImpl<ContextError<D, E>>.
 #[cfg(feature = "std")]
-unsafe fn context_downcast<C, E>(e: &ErrorImpl<()>, target: TypeId) -> Option<NonNull<()>>
+unsafe fn context_downcast<D, E, C>(e: &ErrorImpl<(), C>, target: TypeId) -> Option<NonNull<()>>
 where
-    C: 'static,
+    C: EyreContext,
+    D: 'static,
     E: 'static,
 {
-    if TypeId::of::<C>() == target {
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, E>>;
-        let addr = &(*unerased)._object.context as *const C as *mut ();
+    if TypeId::of::<D>() == target {
+        let unerased = e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, E>, C>;
+        let addr = &(*unerased)._object.msg as *const D as *mut ();
         Some(NonNull::new_unchecked(addr))
     } else if TypeId::of::<E>() == target {
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, E>>;
+        let unerased = e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, E>, C>;
         let addr = &(*unerased)._object.error as *const E as *mut ();
         Some(NonNull::new_unchecked(addr))
     } else {
@@ -598,65 +616,68 @@ where
     }
 }
 
-// Safety: requires layout of *e to match ErrorImpl<ContextError<C, E>>.
+// Safety: requires layout of *e to match ErrorImpl<ContextError<D, E>>.
 #[cfg(feature = "std")]
-unsafe fn context_drop_rest<C, E>(e: Box<ErrorImpl<()>>, target: TypeId)
+unsafe fn context_drop_rest<D, E, C>(e: Box<ErrorImpl<(), C>>, target: TypeId)
 where
-    C: 'static,
+    C: EyreContext,
+    D: 'static,
     E: 'static,
 {
-    // Called after downcasting by value to either the C or the E and doing a
+    // Called after downcasting by value to either the D or the E and doing a
     // ptr::read to take ownership of that value.
-    if TypeId::of::<C>() == target {
+    if TypeId::of::<D>() == target {
         let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<ManuallyDrop<C>, E>>>,
+            Box<ErrorImpl<(), C>>,
+            Box<ErrorImpl<ContextError<ManuallyDrop<D>, E>, C>>,
         >(e);
         drop(unerased);
     } else {
         let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<C, ManuallyDrop<E>>>>,
+            Box<ErrorImpl<(), C>>,
+            Box<ErrorImpl<ContextError<D, ManuallyDrop<E>>, C>>,
         >(e);
         drop(unerased);
     }
 }
 
-// Safety: requires layout of *e to match ErrorImpl<ContextError<C, ErrReport>>.
-unsafe fn context_chain_downcast<C>(e: &ErrorImpl<()>, target: TypeId) -> Option<NonNull<()>>
+// Safety: requires layout of *e to match ErrorImpl<ContextError<D, ErrReport>>.
+unsafe fn context_chain_downcast<D, C>(e: &ErrorImpl<(), C>, target: TypeId) -> Option<NonNull<()>>
 where
-    C: 'static,
+    C: EyreContext,
+    D: 'static,
 {
-    if TypeId::of::<C>() == target {
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, ErrReport>>;
-        let addr = &(*unerased)._object.context as *const C as *mut ();
+    if TypeId::of::<D>() == target {
+        let unerased = e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, ErrReport<C>>, C>;
+        let addr = &(*unerased)._object.msg as *const D as *mut ();
         Some(NonNull::new_unchecked(addr))
     } else {
         // Recurse down the context chain per the inner error's vtable.
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, ErrReport>>;
+        let unerased = e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, ErrReport<C>>, C>;
         let source = &(*unerased)._object.error;
         (source.inner.vtable.object_downcast)(&source.inner, target)
     }
 }
 
-// Safety: requires layout of *e to match ErrorImpl<ContextError<C, ErrReport>>.
-unsafe fn context_chain_drop_rest<C>(e: Box<ErrorImpl<()>>, target: TypeId)
+// Safety: requires layout of *e to match ErrorImpl<ContextError<D, ErrReport>>.
+unsafe fn context_chain_drop_rest<D, C>(e: Box<ErrorImpl<(), C>>, target: TypeId)
 where
-    C: 'static,
+    C: EyreContext,
+    D: 'static,
 {
-    // Called after downcasting by value to either the C or one of the causes
+    // Called after downcasting by value to either the D or one of the causes
     // and doing a ptr::read to take ownership of that value.
-    if TypeId::of::<C>() == target {
+    if TypeId::of::<D>() == target {
         let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<ManuallyDrop<C>, ErrReport>>>,
+            Box<ErrorImpl<(), C>>,
+            Box<ErrorImpl<ContextError<ManuallyDrop<D>, ErrReport<C>>, C>>,
         >(e);
         // Drop the entire rest of the data structure rooted in the next ErrReport.
         drop(unerased);
     } else {
         let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<C, ManuallyDrop<ErrReport>>>>,
+            Box<ErrorImpl<(), C>>,
+            Box<ErrorImpl<ContextError<D, ManuallyDrop<ErrReport<C>>>, C>>,
         >(e);
         // Read out a ManuallyDrop<Box<ErrorImpl<()>>> from the next error.
         let inner = ptr::read(&unerased._object.error.inner);
@@ -669,32 +690,41 @@ where
 
 // repr C to ensure that E remains in the final position.
 #[repr(C)]
-pub(crate) struct ErrorImpl<E> {
-    vtable: &'static ErrorVTable,
-    backtrace: Option<Backtrace>,
+pub(crate) struct ErrorImpl<E, C>
+where
+    C: EyreContext,
+{
+    vtable: &'static ErrorVTable<C>,
+    context: C,
     // NOTE: Don't use directly. Use only through vtable. Erased type may have
     // different alignment.
     _object: E,
 }
 
-// repr C to ensure that ContextError<C, E> has the same layout as
-// ContextError<ManuallyDrop<C>, E> and ContextError<C, ManuallyDrop<E>>.
+// repr C to ensure that ContextError<D, E> has the same layout as
+// ContextError<ManuallyDrop<D>, E> and ContextError<D, ManuallyDrop<E>>.
 #[repr(C)]
-pub(crate) struct ContextError<C, E> {
-    pub context: C,
+pub(crate) struct ContextError<D, E> {
+    pub msg: D,
     pub error: E,
 }
 
-impl<E> ErrorImpl<E> {
-    fn erase(&self) -> &ErrorImpl<()> {
+impl<E, C> ErrorImpl<E, C>
+where
+    C: EyreContext,
+{
+    fn erase(&self) -> &ErrorImpl<(), C> {
         // Erase the concrete type of E but preserve the vtable in self.vtable
         // for manipulating the resulting thin pointer. This is analogous to an
         // unsize coersion.
-        unsafe { &*(self as *const ErrorImpl<E> as *const ErrorImpl<()>) }
+        unsafe { &*(self as *const ErrorImpl<E, C> as *const ErrorImpl<(), C>) }
     }
 }
 
-impl ErrorImpl<()> {
+impl<C> ErrorImpl<(), C>
+where
+    C: EyreContext,
+{
     pub(crate) fn error(&self) -> &(dyn StdError + Send + Sync + 'static) {
         // Use vtable to attach E's native StdError vtable for the right
         // original type E.
@@ -708,13 +738,17 @@ impl ErrorImpl<()> {
         unsafe { &mut *(self.vtable.object_mut)(self) }
     }
 
+
+    pub fn context<T: Any>(&self) -> Option<&T> {
+        self.context.context_raw(TypeId::of::<T>())?.downcast_ref::<T>()
+    }
+
     #[cfg(backtrace)]
     pub(crate) fn backtrace(&self) -> &Backtrace {
         // This unwrap can only panic if the underlying error's backtrace method
         // is nondeterministic, which would only happen in maliciously
         // constructed code.
-        self.backtrace
-            .as_ref()
+        self.context()
             .or_else(|| self.error().backtrace())
             .expect("backtrace capture failed")
     }
@@ -724,8 +758,9 @@ impl ErrorImpl<()> {
     }
 }
 
-impl<E> StdError for ErrorImpl<E>
+impl<E, C> StdError for ErrorImpl<E, C>
 where
+    C: EyreContext,
     E: StdError,
 {
     #[cfg(backtrace)]
@@ -738,8 +773,9 @@ where
     }
 }
 
-impl<E> Debug for ErrorImpl<E>
+impl<E, C> Debug for ErrorImpl<E, C>
 where
+    C: EyreContext,
     E: Debug,
 {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -747,8 +783,9 @@ where
     }
 }
 
-impl<E> Display for ErrorImpl<E>
+impl<E, C> Display for ErrorImpl<E, C>
 where
+    C: EyreContext,
     E: Display,
 {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -756,8 +793,8 @@ where
     }
 }
 
-impl From<ErrReport> for Box<dyn StdError + Send + Sync + 'static> {
-    fn from(error: ErrReport) -> Self {
+impl<C: EyreContext> From<ErrReport<C>> for Box<dyn StdError + Send + Sync + 'static> {
+    fn from(error: ErrReport<C>) -> Self {
         let outer = ManuallyDrop::new(error);
         unsafe {
             // Read Box<ErrorImpl<()>> from error. Can't move it out because
@@ -772,21 +809,21 @@ impl From<ErrReport> for Box<dyn StdError + Send + Sync + 'static> {
     }
 }
 
-impl From<ErrReport> for Box<dyn StdError + 'static> {
-    fn from(error: ErrReport) -> Self {
+impl<C: EyreContext> From<ErrReport<C>> for Box<dyn StdError + 'static> {
+    fn from(error: ErrReport<C>) -> Self {
         Box::<dyn StdError + Send + Sync>::from(error)
     }
 }
 
 #[cfg(feature = "std")]
-impl AsRef<dyn StdError + Send + Sync> for ErrReport {
+impl<C: EyreContext> AsRef<dyn StdError + Send + Sync> for ErrReport<C> {
     fn as_ref(&self) -> &(dyn StdError + Send + Sync + 'static) {
         &**self
     }
 }
 
 #[cfg(feature = "std")]
-impl AsRef<dyn StdError> for ErrReport {
+impl<C: EyreContext> AsRef<dyn StdError> for ErrReport<C> {
     fn as_ref(&self) -> &(dyn StdError + 'static) {
         &**self
     }

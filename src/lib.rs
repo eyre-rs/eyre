@@ -88,7 +88,7 @@
 //!   mutable reference as needed.
 //!
 //!   ```
-//!   # use eyre::eyre;
+//!   # use eyre::{ErrReport, eyre};
 //!   # use std::fmt::{self, Display};
 //!   # use std::task::Poll;
 //!   #
@@ -107,7 +107,7 @@
 //!   #
 //!   # const REDACTED_CONTENT: () = ();
 //!   #
-//!   # let error = eyre!("...");
+//!   # let error: ErrReport = eyre!("...");
 //!   # let root_cause = &error;
 //!   #
 //!   # let ret =
@@ -211,6 +211,9 @@ use crate::alloc::Box;
 use crate::error::ErrorImpl;
 use core::fmt::Display;
 use core::mem::ManuallyDrop;
+use std::backtrace::Backtrace;
+use std::any::{Any, TypeId};
+
 
 #[cfg(not(feature = "std"))]
 use core::fmt::Debug;
@@ -319,8 +322,38 @@ pub use eyre as format_err;
 ///     # Ok(())
 /// }
 /// ```
-pub struct ErrReport {
-    inner: ManuallyDrop<Box<ErrorImpl<()>>>,
+pub struct ErrReport<C = DefaultContext>
+where
+    C: EyreContext,
+{
+    inner: ManuallyDrop<Box<ErrorImpl<(), C>>>,
+}
+
+pub trait EyreContext: Sized + Send + Sync + 'static {
+    fn default(err: &(dyn std::error::Error + 'static)) -> Self;
+
+    fn context_raw(&self, typeid: TypeId) -> Option<&dyn Any>;
+}
+
+pub struct DefaultContext {
+    backtrace: Option<Backtrace>,
+}
+
+impl EyreContext for DefaultContext {
+    fn default(error: &(dyn std::error::Error + 'static)) -> Self {
+        let backtrace = backtrace_if_absent!(error);
+
+        Self {
+            backtrace
+        }
+    }
+
+    fn context_raw(&self, typid: TypeId) -> Option<&dyn Any> {
+        match typid {
+            t if t == TypeId::of::<Backtrace>() => self.backtrace.as_ref().map(|b| b as &dyn Any),
+            _ => None,
+        }
+    }
 }
 
 /// Iterator of a chain of source errors.
@@ -397,7 +430,7 @@ pub struct Chain<'a> {
 ///     Ok(())
 /// }
 /// ```
-pub type Result<T, E = ErrReport> = core::result::Result<T, E>;
+pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 
 /// Provides the `context` method for `Result`.
 ///
@@ -542,13 +575,13 @@ pub type Result<T, E = ErrReport> = core::result::Result<T, E>;
 ///     ```
 pub trait Report<T, E>: context::private::Sealed {
     /// Wrap the error value with additional context.
-    fn context<C>(self, context: C) -> Result<T, ErrReport>
+    fn context<C>(self, context: C) -> Result<T, ErrReport<DefaultContext>>
     where
         C: Display + Send + Sync + 'static;
 
     /// Wrap the error value with additional context that is evaluated lazily
     /// only once an error does occur.
-    fn with_context<C, F>(self, f: F) -> Result<T, ErrReport>
+    fn with_context<C, F>(self, f: F) -> Result<T, ErrReport<DefaultContext>>
     where
         C: Display + Send + Sync + 'static,
         F: FnOnce() -> C;
@@ -557,11 +590,11 @@ pub trait Report<T, E>: context::private::Sealed {
 // Not public API. Referenced by macro-generated code.
 #[doc(hidden)]
 pub mod private {
-    use crate::ErrReport;
+    use crate::{EyreContext, ErrReport};
     use core::fmt::{Debug, Display};
 
-    #[cfg(backtrace)]
-    use std::backtrace::Backtrace;
+//     #[cfg(backtrace)]
+//     use std::backtrace::Backtrace;
 
     pub use core::result::Result::Err;
 
@@ -573,10 +606,11 @@ pub mod private {
         pub use crate::kind::BoxedKind;
     }
 
-    pub fn new_adhoc<M>(message: M) -> ErrReport
+    pub fn new_adhoc<M, C>(message: M) -> ErrReport<C>
     where
+        C: EyreContext,
         M: Display + Debug + Send + Sync + 'static,
     {
-        ErrReport::from_adhoc(message, backtrace!())
+        ErrReport::from_adhoc(message)
     }
 }

@@ -44,14 +44,14 @@
 //     let error = $msg;
 //     (&error).eyre_kind().new(error)
 
-use crate::ErrReport;
+use crate::{EyreContext, ErrReport};
 use core::fmt::{Debug, Display};
 
 #[cfg(feature = "std")]
 use crate::StdError;
 
-#[cfg(backtrace)]
-use std::backtrace::Backtrace;
+// #[cfg(backtrace)]
+// use std::backtrace::Backtrace;
 
 pub struct Adhoc;
 
@@ -65,11 +65,11 @@ pub trait AdhocKind: Sized {
 impl<T> AdhocKind for &T where T: ?Sized + Display + Debug + Send + Sync + 'static {}
 
 impl Adhoc {
-    pub fn new<M>(self, message: M) -> ErrReport
+    pub fn new<M, C: EyreContext>(self, message: M) -> ErrReport<C>
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        ErrReport::from_adhoc(message, backtrace!())
+        ErrReport::from_adhoc(message)
     }
 }
 
@@ -109,8 +109,7 @@ impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 
 #[cfg(feature = "std")]
 impl Boxed {
-    pub fn new(self, error: Box<dyn StdError + Send + Sync>) -> ErrReport {
-        let backtrace = backtrace_if_absent!(error);
-        ErrReport::from_boxed(error, backtrace)
+    pub fn new<C: EyreContext>(self, error: Box<dyn StdError + Send + Sync>) -> ErrReport<C> {
+        ErrReport::from_boxed(error)
     }
 }

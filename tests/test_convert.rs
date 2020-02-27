@@ -7,7 +7,7 @@ use std::error::Error as StdError;
 #[test]
 fn test_convert() {
     let has_dropped = Flag::new();
-    let error = ErrReport::new(DetectDrop::new(&has_dropped));
+    let error: ErrReport = ErrReport::new(DetectDrop::new(&has_dropped));
     let box_dyn = Box::<dyn StdError + Send + Sync>::from(error);
     assert_eq!("oh no!", box_dyn.to_string());
     drop(box_dyn);

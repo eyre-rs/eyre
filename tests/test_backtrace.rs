@@ -6,8 +6,8 @@ fn test_backtrace() {}
 #[rustversion::nightly]
 #[test]
 fn test_backtrace() {
-    use eyre::eyre;
+    use eyre::{eyre, ErrReport};
 
-    let error = eyre!("oh no!");
+    let error: ErrReport = eyre!("oh no!");
     let _ = error.backtrace();
 }

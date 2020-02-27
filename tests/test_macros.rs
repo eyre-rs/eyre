@@ -1,7 +1,7 @@
 mod common;
 
 use self::common::*;
-use eyre::ensure;
+use eyre::{Result, ensure};
 
 #[test]
 fn test_messages() {
@@ -12,20 +12,20 @@ fn test_messages() {
 
 #[test]
 fn test_ensure() {
-    let f = || {
+    let f = || -> Result<()> {
         ensure!(1 + 1 == 2, "This is correct");
         Ok(())
     };
     assert!(f().is_ok());
 
     let v = 1;
-    let f = || {
+    let f = ||  -> Result<()>{
         ensure!(v + v == 2, "This is correct, v: {}", v);
         Ok(())
     };
     assert!(f().is_ok());
 
-    let f = || {
+    let f = ||  -> Result<()>{
         ensure!(v + v == 1, "This is not correct, v: {}", v);
         Ok(())
     };

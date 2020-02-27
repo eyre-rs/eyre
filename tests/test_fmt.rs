@@ -45,7 +45,7 @@ Custom {
 
 const EXPECTED_ALTDEBUG_G: &str = "\
 Error {
-    context: \"f failed\",
+    msg: \"f failed\",
     source: Custom {
         kind: PermissionDenied,
         error: \"oh no!\",
@@ -55,9 +55,9 @@ Error {
 
 const EXPECTED_ALTDEBUG_H: &str = "\
 Error {
-    context: \"g failed\",
+    msg: \"g failed\",
     source: Error {
-        context: \"f failed\",
+        msg: \"f failed\",
         source: Custom {
             kind: PermissionDenied,
             error: \"oh no!\",
