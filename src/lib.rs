@@ -52,7 +52,7 @@
 //!   #     }
 //!   # }
 //!   #
-//!   use eyre::{Context, Result};
+//!   use eyre::{Report, Result};
 //!
 //!   fn main() -> Result<()> {
 //!       # return Ok(());
@@ -273,7 +273,7 @@ pub use eyre as format_err;
 ///              at /git/eyre/src/backtrace.rs:26
 ///    1: core::result::Result<T,E>::map_err
 ///              at /git/rustc/src/libcore/result.rs:596
-///    2: eyre::context::<impl eyre::Context<T,E> for core::result::Result<T,E>>::with_context
+///    2: eyre::context::<impl eyre::Report<T,E> for core::result::Result<T,E>>::with_context
 ///              at /git/eyre/src/context.rs:58
 ///    3: testing::main
 ///              at src/main.rs:5
@@ -302,7 +302,7 @@ pub use eyre as format_err;
 /// like this:
 ///
 /// ```
-/// use eyre::{Context, Result};
+/// use eyre::{Report, Result};
 ///
 /// fn main() {
 ///     if let Err(err) = try_main() {
@@ -352,7 +352,7 @@ pub struct Chain<'a> {
 ///
 /// This is a reasonable return type to use throughout your application but also
 /// for `fn main`; if you do, failures will be printed along with any
-/// [context][Context] and a backtrace if one was captured.
+/// [context][Report] and a backtrace if one was captured.
 ///
 /// `eyre::Result` may be used with one *or* two type parameters.
 ///
@@ -409,7 +409,7 @@ pub type Result<T, E = ErrReport> = core::result::Result<T, E>;
 /// # Example
 ///
 /// ```
-/// use eyre::{Context, Result};
+/// use eyre::{Report, Result};
 /// use std::fs;
 /// use std::path::PathBuf;
 ///
@@ -479,7 +479,7 @@ pub type Result<T, E = ErrReport> = core::result::Result<T, E>;
 ///     #     bail!(SuspiciousError);
 ///     # }
 ///     #
-///     use eyre::{Context, Result};
+///     use eyre::{Report, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().context("Failed to complete the work")?;
@@ -519,7 +519,7 @@ pub type Result<T, E = ErrReport> = core::result::Result<T, E>;
 ///     #     bail!("no such file or directory");
 ///     # }
 ///     #
-///     use eyre::{Context, Result};
+///     use eyre::{Report, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().context(HelperFailed)?;
@@ -540,7 +540,7 @@ pub type Result<T, E = ErrReport> = core::result::Result<T, E>;
 ///         # panic!("expected downcast to succeed");
 ///     }
 ///     ```
-pub trait Context<T, E>: context::private::Sealed {
+pub trait Report<T, E>: context::private::Sealed {
     /// Wrap the error value with additional context.
     fn context<C>(self, context: C) -> Result<T, ErrReport>
     where

@@ -1,7 +1,7 @@
 mod drop;
 
 use crate::drop::{DetectDrop, Flag};
-use eyre::{Context, ErrReport, Result};
+use eyre::{Report, ErrReport, Result};
 use std::fmt::{self, Display};
 use thiserror::Error;
 
@@ -68,7 +68,7 @@ fn make_chain() -> (ErrReport, Dropped) {
         drop: DetectDrop::new(&dropped.low),
     };
 
-    // impl Context for Result<T, E>
+    // impl Report for Result<T, E>
     let mid = Err::<(), LowLevel>(low)
         .context(MidLevel {
             message: "failed to load config",
@@ -76,7 +76,7 @@ fn make_chain() -> (ErrReport, Dropped) {
         })
         .unwrap_err();
 
-    // impl Context for Result<T, Error>
+    // impl Report for Result<T, Error>
     let high = Err::<(), ErrReport>(mid)
         .context(HighLevel {
             message: "failed to start server",

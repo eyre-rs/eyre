@@ -208,11 +208,11 @@ impl ErrReport {
     /// Wrap the error value with additional context.
     ///
     /// For attaching context to a `Result` as it is propagated, the
-    /// [`Context`][crate::Context] extension trait may be more convenient than
+    /// [`Report`][crate::Report] extension trait may be more convenient than
     /// this function.
     ///
     /// The primary reason to use `error.context(...)` instead of
-    /// `result.context(...)` via the `Context` trait would be if the context
+    /// `result.context(...)` via the `Report` trait would be if the context
     /// needs to depend on some data held by the underlying error:
     ///
     /// ```
@@ -349,7 +349,7 @@ impl ErrReport {
     /// context has been attached. For details about the interaction between
     /// context and downcasting, [see here].
     ///
-    /// [see here]: trait.Context.html#effect-on-downcasting
+    /// [see here]: trait.Report.html#effect-on-downcasting
     pub fn is<E>(&self) -> bool
     where
         E: Display + Debug + Send + Sync + 'static,

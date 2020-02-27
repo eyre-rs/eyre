@@ -1,5 +1,5 @@
 use crate::error::ContextError;
-use crate::{Context, ErrReport, StdError};
+use crate::{Report, ErrReport, StdError};
 use core::convert::Infallible;
 use core::fmt::{self, Debug, Display, Write};
 
@@ -39,7 +39,7 @@ mod ext {
     }
 }
 
-impl<T, E> Context<T, E> for Result<T, E>
+impl<T, E> Report<T, E> for Result<T, E>
 where
     E: ext::StdError + Send + Sync + 'static,
 {
@@ -62,7 +62,7 @@ where
 /// ```
 /// # type T = ();
 /// #
-/// use eyre::{Context, Result};
+/// use eyre::{Report, Result};
 ///
 /// fn maybe_get() -> Option<T> {
 ///     # const IGNORE: &str = stringify! {
@@ -79,7 +79,7 @@ where
 ///     # unimplemented!()
 /// }
 /// ```
-impl<T> Context<T, Infallible> for Option<T> {
+impl<T> Report<T, Infallible> for Option<T> {
     fn context<C>(self, context: C) -> Result<T, ErrReport>
     where
         C: Display + Send + Sync + 'static,

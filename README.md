@@ -43,7 +43,7 @@ eyre = "1.0"
   application was in the middle of.
 
   ```rust
-  use eyre::{Context, Result};
+  use eyre::{Report, Result};
 
   fn main() -> Result<()> {
       ...
