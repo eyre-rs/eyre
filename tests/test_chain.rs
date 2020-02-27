@@ -1,7 +1,7 @@
-use anyhow::{anyhow, Error};
+use eyre::{eyre, ErrReport};
 
-fn error() -> Error {
-    anyhow!(0).context(1).context(2).context(3)
+fn error() -> ErrReport {
+    eyre!(0).context(1).context(2).context(3)
 }
 
 #[test]

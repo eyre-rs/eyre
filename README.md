@@ -1,18 +1,18 @@
 Anyhow&ensp;¯\\\_(ツ)\_/¯
 =========================
 
-[![Build Status](https://api.travis-ci.com/dtolnay/anyhow.svg?branch=master)](https://travis-ci.com/dtolnay/anyhow)
-[![Latest Version](https://img.shields.io/crates/v/anyhow.svg)](https://crates.io/crates/anyhow)
-[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/anyhow)
+[![Build Status](https://api.travis-ci.com/dtolnay/eyre.svg?branch=master)](https://travis-ci.com/dtolnay/eyre)
+[![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
+[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/eyre)
 
-This library provides [`anyhow::Error`][Error], a trait object based error type
+This library provides [`eyre::Error`][Error], a trait object based error type
 for easy idiomatic error handling in Rust applications.
 
-[Error]: https://docs.rs/anyhow/1.0/anyhow/struct.Error.html
+[Error]: https://docs.rs/eyre/1.0/eyre/struct.Error.html
 
 ```toml
 [dependencies]
-anyhow = "1.0"
+eyre = "1.0"
 ```
 
 *Compiler support: requires rustc 1.34+*
@@ -21,14 +21,14 @@ anyhow = "1.0"
 
 ## Details
 
-- Use `Result<T, anyhow::Error>`, or equivalently `anyhow::Result<T>`, as the
+- Use `Result<T, eyre::Error>`, or equivalently `eyre::Result<T>`, as the
   return type of any fallible function.
 
   Within the function, use `?` to easily propagate any error that implements the
   `std::error::Error` trait.
 
   ```rust
-  use anyhow::Result;
+  use eyre::Result;
 
   fn get_cluster_info() -> Result<ClusterMap> {
       let config = std::fs::read_to_string("cluster.json")?;
@@ -43,7 +43,7 @@ anyhow = "1.0"
   application was in the middle of.
 
   ```rust
-  use anyhow::{Context, Result};
+  use eyre::{Context, Result};
 
   fn main() -> Result<()> {
       ...
@@ -98,11 +98,11 @@ anyhow = "1.0"
   }
   ```
 
-- One-off error messages can be constructed using the `anyhow!` macro, which
-  supports string interpolation and produces an `anyhow::Error`.
+- One-off error messages can be constructed using the `eyre!` macro, which
+  supports string interpolation and produces an `eyre::Error`.
 
   ```rust
-  return Err(anyhow!("Missing attribute: {}", missing));
+  return Err(eyre!("Missing attribute: {}", missing));
   ```
 
 <br>
@@ -115,7 +115,7 @@ Cargo.toml. A global allocator is required.
 
 ```toml
 [dependencies]
-anyhow = { version = "1.0", default-features = false }
+eyre = { version = "1.0", default-features = false }
 ```
 
 Since the `?`-based error conversions would normally rely on the
@@ -127,7 +127,7 @@ type inside a function that returns Anyhow's error type.
 
 ## Comparison to failure
 
-The `anyhow::Error` type works something like `failure::Error`, but unlike
+The `eyre::Error` type works something like `failure::Error`, but unlike
 failure ours is built around the standard library's `std::error::Error` trait
 rather than a separate trait `failure::Fail`. The standard library has adopted
 the necessary improvements for this to be possible as part of [RFC 2504].

@@ -1,8 +1,8 @@
-use anyhow::anyhow;
+use eyre::eyre;
 
 #[derive(Debug)]
 struct Error;
 
 fn main() {
-    let _ = anyhow!(Error);
+    let _ = eyre!(Error);
 }

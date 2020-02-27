@@ -1,7 +1,7 @@
 mod common;
 
 use self::common::*;
-use anyhow::ensure;
+use eyre::ensure;
 
 #[test]
 fn test_messages() {

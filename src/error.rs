@@ -1,7 +1,7 @@
 use crate::alloc::Box;
 use crate::backtrace::Backtrace;
 use crate::chain::Chain;
-use crate::{Error, StdError};
+use crate::{ErrReport, StdError};
 use core::any::TypeId;
 use core::fmt::{self, Debug, Display};
 use core::mem::{self, ManuallyDrop};
@@ -10,10 +10,10 @@ use core::ptr::{self, NonNull};
 #[cfg(feature = "std")]
 use core::ops::{Deref, DerefMut};
 
-impl Error {
+impl ErrReport {
     /// Create a new error object from any error type.
     ///
-    /// The error type must be threadsafe and `'static`, so that the `Error`
+    /// The error type must be threadsafe and `'static`, so that the `ErrReport`
     /// will be as well.
     ///
     /// If the error type does not provide a backtrace, a backtrace will be
@@ -24,18 +24,18 @@ impl Error {
         E: StdError + Send + Sync + 'static,
     {
         let backtrace = backtrace_if_absent!(error);
-        Error::from_std(error, backtrace)
+        ErrReport::from_std(error, backtrace)
     }
 
     /// Create a new error object from a printable error message.
     ///
-    /// If the argument implements std::error::Error, prefer `Error::new`
+    /// If the argument implements std::error::Error, prefer `ErrReport::new`
     /// instead which preserves the underlying error's cause chain and
     /// backtrace. If the argument may or may not implement std::error::Error
-    /// now or in the future, use `anyhow!(err)` which handles either way
+    /// now or in the future, use `eyre!(err)` which handles either way
     /// correctly.
     ///
-    /// `Error::msg("...")` is equivalent to `anyhow!("...")` but occasionally
+    /// `ErrReport::msg("...")` is equivalent to `eyre!("...")` but occasionally
     /// convenient in places where a function is preferable over a macro, such
     /// as iterator or stream combinators:
     ///
@@ -50,7 +50,7 @@ impl Error {
     /// #
     /// # use ffi::{Input, Output};
     /// #
-    /// use anyhow::{Error, Result};
+    /// use eyre::{ErrReport, Result};
     /// use futures::stream::{Stream, StreamExt, TryStreamExt};
     ///
     /// async fn demo<S>(stream: S) -> Result<Vec<Output>>
@@ -59,7 +59,7 @@ impl Error {
     /// {
     ///     stream
     ///         .then(ffi::do_some_work) // returns Result<Output, &str>
-    ///         .map_err(Error::msg)
+    ///         .map_err(ErrReport::msg)
     ///         .try_collect()
     ///         .await
     /// }
@@ -68,7 +68,7 @@ impl Error {
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        Error::from_adhoc(message, backtrace!())
+        ErrReport::from_adhoc(message, backtrace!())
     }
 
     #[cfg(feature = "std")]
@@ -87,7 +87,7 @@ impl Error {
         };
 
         // Safety: passing vtable that operates on the right type E.
-        unsafe { Error::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable, backtrace) }
     }
 
     pub(crate) fn from_adhoc<M>(message: M, backtrace: Option<Backtrace>) -> Self
@@ -108,7 +108,7 @@ impl Error {
 
         // Safety: MessageError is repr(transparent) so it is okay for the
         // vtable to allow casting the MessageError<M> to M.
-        unsafe { Error::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable, backtrace) }
     }
 
     pub(crate) fn from_display<M>(message: M, backtrace: Option<Backtrace>) -> Self
@@ -129,7 +129,7 @@ impl Error {
 
         // Safety: DisplayError is repr(transparent) so it is okay for the
         // vtable to allow casting the DisplayError<M> to M.
-        unsafe { Error::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable, backtrace) }
     }
 
     #[cfg(feature = "std")]
@@ -151,7 +151,7 @@ impl Error {
         };
 
         // Safety: passing vtable that operates on the right type.
-        unsafe { Error::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable, backtrace) }
     }
 
     #[cfg(feature = "std")]
@@ -173,7 +173,7 @@ impl Error {
 
         // Safety: BoxedError is repr(transparent) so it is okay for the vtable
         // to allow casting to Box<dyn StdError + Send + Sync>.
-        unsafe { Error::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable, backtrace) }
     }
 
     // Takes backtrace as argument rather than capturing it here so that the
@@ -202,7 +202,7 @@ impl Error {
         // caller rather than a builtin fat pointer vtable.
         let erased = mem::transmute::<Box<ErrorImpl<E>>, Box<ErrorImpl<()>>>(inner);
         let inner = ManuallyDrop::new(erased);
-        Error { inner }
+        ErrReport { inner }
     }
 
     /// Wrap the error value with additional context.
@@ -232,7 +232,7 @@ impl Error {
     /// #     }
     /// # }
     /// #
-    /// use anyhow::Result;
+    /// use eyre::Result;
     /// use std::fs::File;
     /// use std::path::Path;
     ///
@@ -255,7 +255,7 @@ impl Error {
     ///             "only the first {} lines of {} are valid",
     ///             error.line, path.as_ref().display(),
     ///         );
-    ///         anyhow::Error::new(error).context(context)
+    ///         eyre::ErrReport::new(error).context(context)
     ///     })
     /// }
     /// ```
@@ -263,29 +263,29 @@ impl Error {
     where
         C: Display + Send + Sync + 'static,
     {
-        let error: ContextError<C, Error> = ContextError {
+        let error: ContextError<C, ErrReport> = ContextError {
             context,
             error: self,
         };
 
         let vtable = &ErrorVTable {
-            object_drop: object_drop::<ContextError<C, Error>>,
-            object_ref: object_ref::<ContextError<C, Error>>,
+            object_drop: object_drop::<ContextError<C, ErrReport>>,
+            object_ref: object_ref::<ContextError<C, ErrReport>>,
             #[cfg(feature = "std")]
-            object_mut: object_mut::<ContextError<C, Error>>,
-            object_boxed: object_boxed::<ContextError<C, Error>>,
+            object_mut: object_mut::<ContextError<C, ErrReport>>,
+            object_boxed: object_boxed::<ContextError<C, ErrReport>>,
             object_downcast: context_chain_downcast::<C>,
             object_drop_rest: context_chain_drop_rest::<C>,
         };
 
-        // As the cause is anyhow::Error, we already have a backtrace for it.
+        // As the cause is eyre::ErrReport, we already have a backtrace for it.
         let backtrace = None;
 
         // Safety: passing vtable that operates on the right type.
-        unsafe { Error::construct(error, vtable, backtrace) }
+        unsafe { ErrReport::construct(error, vtable, backtrace) }
     }
 
-    /// Get the backtrace for this Error.
+    /// Get the backtrace for this ErrReport.
     ///
     /// Backtraces are only available on the nightly channel. Tracking issue:
     /// [rust-lang/rust#53487][tracking].
@@ -301,7 +301,7 @@ impl Error {
         self.inner.backtrace()
     }
 
-    /// An iterator of the chain of source errors contained by this Error.
+    /// An iterator of the chain of source errors contained by this ErrReport.
     ///
     /// This iterator will visit every error in the cause chain of this error
     /// object, beginning with the error that this error object was created
@@ -310,10 +310,10 @@ impl Error {
     /// # Example
     ///
     /// ```
-    /// use anyhow::Error;
+    /// use eyre::ErrReport;
     /// use std::io;
     ///
-    /// pub fn underlying_io_error_kind(error: &Error) -> Option<io::ErrorKind> {
+    /// pub fn underlying_io_error_kind(error: &ErrReport) -> Option<io::ErrorKind> {
     ///     for cause in error.chain() {
     ///         if let Some(io_error) = cause.downcast_ref::<io::Error>() {
     ///             return Some(io_error.kind());
@@ -331,7 +331,7 @@ impl Error {
     /// cause's cause etc.
     ///
     /// The root cause is the last error in the iterator produced by
-    /// [`chain()`][Error::chain].
+    /// [`chain()`][ErrReport::chain].
     #[cfg(feature = "std")]
     pub fn root_cause(&self) -> &(dyn StdError + 'static) {
         let mut chain = self.chain();
@@ -379,7 +379,7 @@ impl Error {
             let error = ptr::read(addr.cast::<E>().as_ptr());
 
             // Read Box<ErrorImpl<()>> from self. Can't move it out because
-            // Error has a Drop impl which we want to not run.
+            // ErrReport has a Drop impl which we want to not run.
             let inner = ptr::read(&outer.inner);
             let erased = ManuallyDrop::into_inner(inner);
 
@@ -395,7 +395,7 @@ impl Error {
     /// # Example
     ///
     /// ```
-    /// # use anyhow::anyhow;
+    /// # use eyre::eyre;
     /// # use std::fmt::{self, Display};
     /// # use std::task::Poll;
     /// #
@@ -414,7 +414,7 @@ impl Error {
     /// #
     /// # const REDACTED_CONTENT: () = ();
     /// #
-    /// # let error = anyhow!("...");
+    /// # let error = eyre!("...");
     /// # let root_cause = &error;
     /// #
     /// # let ret =
@@ -455,18 +455,18 @@ impl Error {
 }
 
 #[cfg(feature = "std")]
-impl<E> From<E> for Error
+impl<E> From<E> for ErrReport
 where
     E: StdError + Send + Sync + 'static,
 {
     fn from(error: E) -> Self {
         let backtrace = backtrace_if_absent!(error);
-        Error::from_std(error, backtrace)
+        ErrReport::from_std(error, backtrace)
     }
 }
 
 #[cfg(feature = "std")]
-impl Deref for Error {
+impl Deref for ErrReport {
     type Target = dyn StdError + Send + Sync + 'static;
 
     fn deref(&self) -> &Self::Target {
@@ -475,25 +475,25 @@ impl Deref for Error {
 }
 
 #[cfg(feature = "std")]
-impl DerefMut for Error {
+impl DerefMut for ErrReport {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.inner.error_mut()
     }
 }
 
-impl Display for Error {
+impl Display for ErrReport {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.inner.display(formatter)
     }
 }
 
-impl Debug for Error {
+impl Debug for ErrReport {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         self.inner.debug(formatter)
     }
 }
 
-impl Drop for Error {
+impl Drop for ErrReport {
     fn drop(&mut self) {
         unsafe {
             // Read Box<ErrorImpl<()>> from self.
@@ -622,24 +622,24 @@ where
     }
 }
 
-// Safety: requires layout of *e to match ErrorImpl<ContextError<C, Error>>.
+// Safety: requires layout of *e to match ErrorImpl<ContextError<C, ErrReport>>.
 unsafe fn context_chain_downcast<C>(e: &ErrorImpl<()>, target: TypeId) -> Option<NonNull<()>>
 where
     C: 'static,
 {
     if TypeId::of::<C>() == target {
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, Error>>;
+        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, ErrReport>>;
         let addr = &(*unerased)._object.context as *const C as *mut ();
         Some(NonNull::new_unchecked(addr))
     } else {
         // Recurse down the context chain per the inner error's vtable.
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, Error>>;
+        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<C, ErrReport>>;
         let source = &(*unerased)._object.error;
         (source.inner.vtable.object_downcast)(&source.inner, target)
     }
 }
 
-// Safety: requires layout of *e to match ErrorImpl<ContextError<C, Error>>.
+// Safety: requires layout of *e to match ErrorImpl<ContextError<C, ErrReport>>.
 unsafe fn context_chain_drop_rest<C>(e: Box<ErrorImpl<()>>, target: TypeId)
 where
     C: 'static,
@@ -649,14 +649,14 @@ where
     if TypeId::of::<C>() == target {
         let unerased = mem::transmute::<
             Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<ManuallyDrop<C>, Error>>>,
+            Box<ErrorImpl<ContextError<ManuallyDrop<C>, ErrReport>>>,
         >(e);
-        // Drop the entire rest of the data structure rooted in the next Error.
+        // Drop the entire rest of the data structure rooted in the next ErrReport.
         drop(unerased);
     } else {
         let unerased = mem::transmute::<
             Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<C, ManuallyDrop<Error>>>>,
+            Box<ErrorImpl<ContextError<C, ManuallyDrop<ErrReport>>>>,
         >(e);
         // Read out a ManuallyDrop<Box<ErrorImpl<()>>> from the next error.
         let inner = ptr::read(&unerased._object.error.inner);
@@ -756,12 +756,12 @@ where
     }
 }
 
-impl From<Error> for Box<dyn StdError + Send + Sync + 'static> {
-    fn from(error: Error) -> Self {
+impl From<ErrReport> for Box<dyn StdError + Send + Sync + 'static> {
+    fn from(error: ErrReport) -> Self {
         let outer = ManuallyDrop::new(error);
         unsafe {
             // Read Box<ErrorImpl<()>> from error. Can't move it out because
-            // Error has a Drop impl which we want to not run.
+            // ErrReport has a Drop impl which we want to not run.
             let inner = ptr::read(&outer.inner);
             let erased = ManuallyDrop::into_inner(inner);
 
@@ -772,21 +772,21 @@ impl From<Error> for Box<dyn StdError + Send + Sync + 'static> {
     }
 }
 
-impl From<Error> for Box<dyn StdError + 'static> {
-    fn from(error: Error) -> Self {
+impl From<ErrReport> for Box<dyn StdError + 'static> {
+    fn from(error: ErrReport) -> Self {
         Box::<dyn StdError + Send + Sync>::from(error)
     }
 }
 
 #[cfg(feature = "std")]
-impl AsRef<dyn StdError + Send + Sync> for Error {
+impl AsRef<dyn StdError + Send + Sync> for ErrReport {
     fn as_ref(&self) -> &(dyn StdError + Send + Sync + 'static) {
         &**self
     }
 }
 
 #[cfg(feature = "std")]
-impl AsRef<dyn StdError> for Error {
+impl AsRef<dyn StdError> for ErrReport {
     fn as_ref(&self) -> &(dyn StdError + 'static) {
         &**self
     }

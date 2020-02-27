@@ -1,11 +1,11 @@
 mod drop;
 
 use crate::drop::{DetectDrop, Flag};
-use anyhow::{Context, Error, Result};
+use eyre::{Context, ErrReport, Result};
 use std::fmt::{self, Display};
 use thiserror::Error;
 
-// https://github.com/dtolnay/anyhow/issues/18
+// https://github.com/dtolnay/eyre/issues/18
 #[test]
 fn test_inference() -> Result<()> {
     let x = "1";
@@ -56,7 +56,7 @@ impl Dropped {
     }
 }
 
-fn make_chain() -> (Error, Dropped) {
+fn make_chain() -> (ErrReport, Dropped) {
     let dropped = Dropped {
         low: Flag::new(),
         mid: Flag::new(),
@@ -77,7 +77,7 @@ fn make_chain() -> (Error, Dropped) {
         .unwrap_err();
 
     // impl Context for Result<T, Error>
-    let high = Err::<(), Error>(mid)
+    let high = Err::<(), ErrReport>(mid)
         .context(HighLevel {
             message: "failed to start server",
             drop: DetectDrop::new(&dropped.high),

@@ -1,13 +1,13 @@
-use anyhow::Error;
+use eyre::ErrReport;
 
 #[test]
 fn test_send() {
     fn assert_send<T: Send>() {}
-    assert_send::<Error>();
+    assert_send::<ErrReport>();
 }
 
 #[test]
 fn test_sync() {
     fn assert_sync<T: Sync>() {}
-    assert_sync::<Error>();
+    assert_sync::<ErrReport>();
 }

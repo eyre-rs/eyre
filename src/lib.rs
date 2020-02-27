@@ -1,15 +1,15 @@
-//! This library provides [`anyhow::Error`][Error], a trait object based error
+//! This library provides [`eyre::ErrReport`][ErrReport], a trait object based error
 //! type for easy idiomatic error handling in Rust applications.
 //!
 //! <br>
 //!
 //! # Details
 //!
-//! - Use `Result<T, anyhow::Error>`, or equivalently `anyhow::Result<T>`, as
+//! - Use `Result<T, eyre::ErrReport>`, or equivalently `eyre::Result<T>`, as
 //!   the return type of any fallible function.
 //!
 //!   Within the function, use `?` to easily propagate any error that implements
-//!   the `std::error::Error` trait.
+//!   the `std::error::ErrReport` trait.
 //!
 //!   ```
 //!   # pub trait Deserialize {}
@@ -27,7 +27,7 @@
 //!   #
 //!   # impl Deserialize for ClusterMap {}
 //!   #
-//!   use anyhow::Result;
+//!   use eyre::Result;
 //!
 //!   fn get_cluster_info() -> Result<ClusterMap> {
 //!       let config = std::fs::read_to_string("cluster.json")?;
@@ -52,7 +52,7 @@
 //!   #     }
 //!   # }
 //!   #
-//!   use anyhow::{Context, Result};
+//!   use eyre::{Context, Result};
 //!
 //!   fn main() -> Result<()> {
 //!       # return Ok(());
@@ -88,7 +88,7 @@
 //!   mutable reference as needed.
 //!
 //!   ```
-//!   # use anyhow::anyhow;
+//!   # use eyre::eyre;
 //!   # use std::fmt::{self, Display};
 //!   # use std::task::Poll;
 //!   #
@@ -107,7 +107,7 @@
 //!   #
 //!   # const REDACTED_CONTENT: () = ();
 //!   #
-//!   # let error = anyhow!("...");
+//!   # let error = eyre!("...");
 //!   # let root_cause = &error;
 //!   #
 //!   # let ret =
@@ -146,15 +146,15 @@
 //!   }
 //!   ```
 //!
-//! - One-off error messages can be constructed using the `anyhow!` macro, which
-//!   supports string interpolation and produces an `anyhow::Error`.
+//! - One-off error messages can be constructed using the `eyre!` macro, which
+//!   supports string interpolation and produces an `eyre::ErrReport`.
 //!
 //!   ```
-//!   # use anyhow::{anyhow, Result};
+//!   # use eyre::{eyre, Result};
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   return Err(anyhow!("Missing attribute: {}", missing));
+//!   return Err(eyre!("Missing attribute: {}", missing));
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -169,15 +169,15 @@
 //!
 //! ```toml
 //! [dependencies]
-//! anyhow = { version = "1.0", default-features = false }
+//! eyre = { version = "1.0", default-features = false }
 //! ```
 //!
 //! Since the `?`-based error conversions would normally rely on the
-//! `std::error::Error` trait which is only available through std, no_std mode
-//! will require an explicit `.map_err(Error::msg)` when working with a
+//! `std::error::ErrReport` trait which is only available through std, no_std mode
+//! will require an explicit `.map_err(ErrReport::msg)` when working with a
 //! non-Anyhow error type inside a function that returns Anyhow's error type.
 
-#![doc(html_root_url = "https://docs.rs/anyhow/1.0.26")]
+#![doc(html_root_url = "https://docs.rs/eyre/1.0.26")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
@@ -225,17 +225,17 @@ trait StdError: Debug + Display {
     }
 }
 
-pub use anyhow as format_err;
+pub use eyre as format_err;
 
-/// The `Error` type, a wrapper around a dynamic error type.
+/// The `ErrReport` type, a wrapper around a dynamic error type.
 ///
-/// `Error` works a lot like `Box<dyn std::error::Error>`, but with these
+/// `ErrReport` works a lot like `Box<dyn std::error::Error>`, but with these
 /// differences:
 ///
-/// - `Error` requires that the error is `Send`, `Sync`, and `'static`.
-/// - `Error` guarantees that a backtrace is available, even if the underlying
+/// - `ErrReport` requires that the error is `Send`, `Sync`, and `'static`.
+/// - `ErrReport` guarantees that a backtrace is available, even if the underlying
 ///   error type does not provide one.
-/// - `Error` is represented as a narrow pointer &mdash; exactly one word in
+/// - `ErrReport` is represented as a narrow pointer &mdash; exactly one word in
 ///   size instead of two.
 ///
 /// <br>
@@ -245,13 +245,13 @@ pub use anyhow as format_err;
 /// When you print an error object using "{}" or to_string(), only the outermost
 /// underlying error or context is printed, not any of the lower level causes.
 /// This is exactly as if you had called the Display impl of the error from
-/// which you constructed your anyhow::Error.
+/// which you constructed your eyre::ErrReport.
 ///
 /// ```console
 /// Failed to read instrs from ./path/to/instrs.json
 /// ```
 ///
-/// To print causes as well using anyhow's default formatting of causes, use the
+/// To print causes as well using eyre's default formatting of causes, use the
 /// alternate selector "{:#}".
 ///
 /// ```console
@@ -269,12 +269,12 @@ pub use anyhow as format_err;
 ///     No such file or directory (os error 2)
 ///
 /// Stack backtrace:
-///    0: <E as anyhow::context::ext::StdError>::ext_context
-///              at /git/anyhow/src/backtrace.rs:26
+///    0: <E as eyre::context::ext::StdError>::ext_context
+///              at /git/eyre/src/backtrace.rs:26
 ///    1: core::result::Result<T,E>::map_err
 ///              at /git/rustc/src/libcore/result.rs:596
-///    2: anyhow::context::<impl anyhow::Context<T,E> for core::result::Result<T,E>>::with_context
-///              at /git/anyhow/src/context.rs:58
+///    2: eyre::context::<impl eyre::Context<T,E> for core::result::Result<T,E>>::with_context
+///              at /git/eyre/src/context.rs:58
 ///    3: testing::main
 ///              at src/main.rs:5
 ///    4: std::rt::lang_start
@@ -302,7 +302,7 @@ pub use anyhow as format_err;
 /// like this:
 ///
 /// ```
-/// use anyhow::{Context, Result};
+/// use eyre::{Context, Result};
 ///
 /// fn main() {
 ///     if let Err(err) = try_main() {
@@ -319,21 +319,21 @@ pub use anyhow as format_err;
 ///     # Ok(())
 /// }
 /// ```
-pub struct Error {
+pub struct ErrReport {
     inner: ManuallyDrop<Box<ErrorImpl<()>>>,
 }
 
 /// Iterator of a chain of source errors.
 ///
-/// This type is the iterator returned by [`Error::chain`].
+/// This type is the iterator returned by [`ErrReport::chain`].
 ///
 /// # Example
 ///
 /// ```
-/// use anyhow::Error;
+/// use eyre::ErrReport;
 /// use std::io;
 ///
-/// pub fn underlying_io_error_kind(error: &Error) -> Option<io::ErrorKind> {
+/// pub fn underlying_io_error_kind(error: &ErrReport) -> Option<io::ErrorKind> {
 ///     for cause in error.chain() {
 ///         if let Some(io_error) = cause.downcast_ref::<io::Error>() {
 ///             return Some(io_error.kind());
@@ -354,14 +354,14 @@ pub struct Chain<'a> {
 /// for `fn main`; if you do, failures will be printed along with any
 /// [context][Context] and a backtrace if one was captured.
 ///
-/// `anyhow::Result` may be used with one *or* two type parameters.
+/// `eyre::Result` may be used with one *or* two type parameters.
 ///
 /// ```rust
-/// use anyhow::Result;
+/// use eyre::Result;
 ///
 /// # const IGNORE: &str = stringify! {
 /// fn demo1() -> Result<T> {...}
-///            // ^ equivalent to std::result::Result<T, anyhow::Error>
+///            // ^ equivalent to std::result::Result<T, eyre::Error>
 ///
 /// fn demo2() -> Result<T, OtherError> {...}
 ///            // ^ equivalent to std::result::Result<T, OtherError>
@@ -387,7 +387,7 @@ pub struct Chain<'a> {
 /// #
 /// # impl Deserialize for ClusterMap {}
 /// #
-/// use anyhow::Result;
+/// use eyre::Result;
 ///
 /// fn main() -> Result<()> {
 ///     # return Ok(());
@@ -397,19 +397,19 @@ pub struct Chain<'a> {
 ///     Ok(())
 /// }
 /// ```
-pub type Result<T, E = Error> = core::result::Result<T, E>;
+pub type Result<T, E = ErrReport> = core::result::Result<T, E>;
 
 /// Provides the `context` method for `Result`.
 ///
 /// This trait is sealed and cannot be implemented for types outside of
-/// `anyhow`.
+/// `eyre`.
 ///
 /// <br>
 ///
 /// # Example
 ///
 /// ```
-/// use anyhow::{Context, Result};
+/// use eyre::{Context, Result};
 /// use std::fs;
 /// use std::path::PathBuf;
 ///
@@ -452,7 +452,7 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 /// # Effect on downcasting
 ///
 /// After attaching context of type `C` onto an error of type `E`, the resulting
-/// `anyhow::Error` may be downcast to `C` **or** to `E`.
+/// `eyre::Error` may be downcast to `C` **or** to `E`.
 ///
 /// That is, in codebases that rely on downcasting, Anyhow's context supports
 /// both of the following use cases:
@@ -468,7 +468,7 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 ///     be helpful.
 ///
 ///     ```
-///     # use anyhow::bail;
+///     # use eyre::bail;
 ///     # use thiserror::Error;
 ///     #
 ///     # #[derive(Error, Debug)]
@@ -479,7 +479,7 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 ///     #     bail!(SuspiciousError);
 ///     # }
 ///     #
-///     use anyhow::{Context, Result};
+///     use eyre::{Context, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().context("Failed to complete the work")?;
@@ -508,7 +508,7 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 ///     the application.
 ///
 ///     ```
-///     # use anyhow::bail;
+///     # use eyre::bail;
 ///     # use thiserror::Error;
 ///     #
 ///     # #[derive(Error, Debug)]
@@ -519,7 +519,7 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 ///     #     bail!("no such file or directory");
 ///     # }
 ///     #
-///     use anyhow::{Context, Result};
+///     use eyre::{Context, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().context(HelperFailed)?;
@@ -542,13 +542,13 @@ pub type Result<T, E = Error> = core::result::Result<T, E>;
 ///     ```
 pub trait Context<T, E>: context::private::Sealed {
     /// Wrap the error value with additional context.
-    fn context<C>(self, context: C) -> Result<T, Error>
+    fn context<C>(self, context: C) -> Result<T, ErrReport>
     where
         C: Display + Send + Sync + 'static;
 
     /// Wrap the error value with additional context that is evaluated lazily
     /// only once an error does occur.
-    fn with_context<C, F>(self, f: F) -> Result<T, Error>
+    fn with_context<C, F>(self, f: F) -> Result<T, ErrReport>
     where
         C: Display + Send + Sync + 'static,
         F: FnOnce() -> C;
@@ -557,7 +557,7 @@ pub trait Context<T, E>: context::private::Sealed {
 // Not public API. Referenced by macro-generated code.
 #[doc(hidden)]
 pub mod private {
-    use crate::Error;
+    use crate::ErrReport;
     use core::fmt::{Debug, Display};
 
     #[cfg(backtrace)]
@@ -573,10 +573,10 @@ pub mod private {
         pub use crate::kind::BoxedKind;
     }
 
-    pub fn new_adhoc<M>(message: M) -> Error
+    pub fn new_adhoc<M>(message: M) -> ErrReport
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        Error::from_adhoc(message, backtrace!())
+        ErrReport::from_adhoc(message, backtrace!())
     }
 }
