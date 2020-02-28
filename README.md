@@ -1,4 +1,4 @@
-Eyre&ensp;¯\\\_(ツ)\_/¯
+Jane-Eyre
 =========================
 
 [![Build Status][actions-badge]][actions-url]
@@ -55,10 +55,9 @@ via your return type or a type annotation.
 // Will work fine
 let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 ```
-
 [ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
-[actions-badge]: https://github.com/yaahc/eyre/workflows/ci/badge.svg
-[actions-url]:https://github.com/yaahc/eyre/actions?query=workflow%3Aci
+[actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
+[actions-url]:https://github.com/yaahc/eyre/actions?query=workflow%3A"Continuous+Integration"
 
 ## Customization
 
