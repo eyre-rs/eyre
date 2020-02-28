@@ -426,8 +426,20 @@ where
         }
     }
 
-    pub fn context<T: Any>(&self) -> Option<&T> {
-        self.inner.context()
+    pub fn member_ref<T: Any>(&self) -> Option<&T> {
+        self.inner.member_ref()
+    }
+
+    pub fn member_mut<T: Any>(&mut self) -> Option<&mut T> {
+        self.inner.member_mut()
+    }
+
+    pub fn context(&self) -> &C {
+        &self.inner.context
+    }
+
+    pub fn context_mut(&mut self) -> &mut C {
+        &mut self.inner.context
     }
 }
 
@@ -718,10 +730,16 @@ where
         unsafe { &mut *(self.vtable.object_mut)(self) }
     }
 
-    pub fn context<T: Any>(&self) -> Option<&T> {
+    pub fn member_ref<T: Any>(&self) -> Option<&T> {
         self.context
-            .context_raw(TypeId::of::<T>())?
+            .member_ref(TypeId::of::<T>())?
             .downcast_ref::<T>()
+    }
+
+    pub fn member_mut<T: Any>(&mut self) -> Option<&mut T> {
+        self.context
+            .member_mut(TypeId::of::<T>())?
+            .downcast_mut::<T>()
     }
 
     #[cfg(backtrace)]
@@ -729,7 +747,7 @@ where
         // This unwrap can only panic if the underlying error's backtrace method
         // is nondeterministic, which would only happen in maliciously
         // constructed code.
-        self.context()
+        self.member_ref()
             .or_else(|| self.error().backtrace())
             .expect("backtrace capture failed")
     }

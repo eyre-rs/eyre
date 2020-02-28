@@ -337,7 +337,13 @@ where
 pub trait EyreContext: Sized + Send + Sync + 'static {
     fn default(err: &(dyn StdError + 'static)) -> Self;
 
-    fn context_raw(&self, typeid: TypeId) -> Option<&dyn Any>;
+    fn member_ref(&self, _typeid: TypeId) -> Option<&dyn Any> {
+        None
+    }
+
+    fn member_mut(&mut self, _typeid: TypeId) -> Option<&mut dyn Any> {
+        None
+    }
 
     fn display(
         &self,
@@ -364,7 +370,7 @@ impl EyreContext for DefaultContext {
         Self { backtrace }
     }
 
-    fn context_raw(&self, typeid: TypeId) -> Option<&dyn Any> {
+    fn member_ref(&self, typeid: TypeId) -> Option<&dyn Any> {
         if typeid == TypeId::of::<Backtrace>() {
             self.backtrace.as_ref().map(|b| b as &dyn Any)
         } else {
@@ -406,12 +412,11 @@ impl EyreContext for DefaultContext {
             let multiple = cause.source().is_some();
             for (n, error) in crate::chain::Chain::new(cause).enumerate() {
                 writeln!(f)?;
-                let mut indented = fmt::Indented {
-                    inner: f,
-                    number: if multiple { Some(n) } else { None },
-                    started: false,
-                };
-                write!(indented, "{}", error)?;
+                if multiple {
+                    write!(indenter::Indented::numbered(f, n), "{}", error)?;
+                } else {
+                    write!(indenter::Indented::new(f), "{}", error)?;
+                }
             }
         }
 
