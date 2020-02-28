@@ -357,7 +357,8 @@ pub struct DefaultContext {
 }
 
 impl EyreContext for DefaultContext {
-    fn default(_error: &(dyn StdError + 'static)) -> Self {
+    #[allow(unused_variables)]
+    fn default(error: &(dyn StdError + 'static)) -> Self {
         let backtrace = backtrace_if_absent!(error);
 
         Self { backtrace }
