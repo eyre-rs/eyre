@@ -1,4 +1,4 @@
-use eyre::{ErrReport, eyre};
+use eyre::{eyre, ErrReport};
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;

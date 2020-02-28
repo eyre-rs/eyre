@@ -1,6 +1,6 @@
 use crate::error::ErrorImpl;
-use core::fmt::{self, Write};
 use crate::EyreContext;
+use core::fmt::{self, Write};
 
 impl<C> ErrorImpl<(), C>
 where
@@ -52,6 +52,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::alloc::String;
 
     #[test]
     fn one_digit() {

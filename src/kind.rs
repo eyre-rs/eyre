@@ -44,7 +44,7 @@
 //     let error = $msg;
 //     (&error).eyre_kind().new(error)
 
-use crate::{EyreContext, ErrReport};
+use crate::{ErrReport, EyreContext};
 use core::fmt::{Debug, Display};
 
 #[cfg(feature = "std")]

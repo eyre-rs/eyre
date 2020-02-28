@@ -1,13 +1,15 @@
 use crate::alloc::Box;
-use std::any::Any;
-use crate::backtrace::Backtrace;
 use crate::chain::Chain;
+use crate::EyreContext;
 use crate::{ErrReport, StdError};
+use core::any::Any;
 use core::any::TypeId;
 use core::fmt::{self, Debug, Display};
 use core::mem::{self, ManuallyDrop};
 use core::ptr::{self, NonNull};
-use crate::EyreContext;
+
+#[cfg(backtrace)]
+use crate::backtrace::Backtrace;
 
 #[cfg(feature = "std")]
 use core::ops::{Deref, DerefMut};
@@ -138,9 +140,7 @@ where
     }
 
     #[cfg(feature = "std")]
-    pub(crate) fn from_boxed(
-        error: Box<dyn StdError + Send + Sync>,
-    ) -> Self {
+    pub(crate) fn from_boxed(error: Box<dyn StdError + Send + Sync>) -> Self {
         use crate::wrapper::BoxedError;
         let error = BoxedError(error);
         let vtable = &ErrorVTable {
@@ -163,10 +163,7 @@ where
     //
     // Unsafe because the given vtable must have sensible behavior on the error
     // value of type E.
-    unsafe fn construct<E>(
-        error: E,
-        vtable: &'static ErrorVTable<C>,
-    ) -> Self
+    unsafe fn construct<E>(error: E, vtable: &'static ErrorVTable<C>) -> Self
     where
         E: StdError + Send + Sync + 'static,
     {
@@ -245,10 +242,7 @@ where
     where
         D: Display + Send + Sync + 'static,
     {
-        let error: ContextError<D, ErrReport<C>> = ContextError {
-            msg,
-            error: self,
-        };
+        let error: ContextError<D, ErrReport<C>> = ContextError { msg, error: self };
 
         let vtable = &ErrorVTable {
             object_drop: object_drop::<ContextError<D, ErrReport<C>>, C>,
@@ -431,6 +425,10 @@ where
             Some(&mut *addr.cast::<E>().as_ptr())
         }
     }
+
+    pub fn context<T: Any>(&self) -> Option<&T> {
+        self.inner.context()
+    }
 }
 
 #[cfg(feature = "std")]
@@ -490,7 +488,7 @@ where
 
 struct ErrorVTable<C>
 where
-        C: EyreContext,
+    C: EyreContext,
 {
     object_drop: unsafe fn(Box<ErrorImpl<(), C>>),
     object_ref: unsafe fn(&ErrorImpl<(), C>) -> &(dyn StdError + Send + Sync + 'static),
@@ -627,12 +625,14 @@ where
     D: 'static,
 {
     if TypeId::of::<D>() == target {
-        let unerased = e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, ErrReport<C>>, C>;
+        let unerased =
+            e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, ErrReport<C>>, C>;
         let addr = &(*unerased)._object.msg as *const D as *mut ();
         Some(NonNull::new_unchecked(addr))
     } else {
         // Recurse down the context chain per the inner error's vtable.
-        let unerased = e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, ErrReport<C>>, C>;
+        let unerased =
+            e as *const ErrorImpl<(), C> as *const ErrorImpl<ContextError<D, ErrReport<C>>, C>;
         let source = &(*unerased)._object.error;
         (source.inner.vtable.object_downcast)(&source.inner, target)
     }
@@ -717,9 +717,10 @@ where
         unsafe { &mut *(self.vtable.object_mut)(self) }
     }
 
-
     pub fn context<T: Any>(&self) -> Option<&T> {
-        self.context.context_raw(TypeId::of::<T>())?.downcast_ref::<T>()
+        self.context
+            .context_raw(TypeId::of::<T>())?
+            .downcast_ref::<T>()
     }
 
     #[cfg(backtrace)]

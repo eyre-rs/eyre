@@ -1,5 +1,5 @@
 use crate::error::ContextError;
-use crate::{WrapErr, ErrReport, StdError, EyreContext};
+use crate::{ErrReport, EyreContext, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]

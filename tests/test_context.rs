@@ -1,7 +1,7 @@
 mod drop;
 
 use crate::drop::{DetectDrop, Flag};
-use eyre::{WrapErr, ErrReport, Result};
+use eyre::{ErrReport, Result, WrapErr};
 use std::fmt::{self, Display};
 use thiserror::Error;
 

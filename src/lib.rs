@@ -195,6 +195,12 @@ mod alloc {
 
     #[cfg(feature = "std")]
     pub use std::boxed::Box;
+
+    #[cfg(not(feature = "std"))]
+    pub use alloc::string::String;
+
+    #[cfg(feature = "std")]
+    pub use std::string::String;
 }
 
 #[macro_use]
@@ -208,12 +214,11 @@ mod macros;
 mod wrapper;
 
 use crate::alloc::Box;
+use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
+use core::any::{Any, TypeId};
 use core::fmt::Display;
 use core::mem::ManuallyDrop;
-use std::backtrace::Backtrace;
-use std::any::{Any, TypeId};
-
 
 #[cfg(not(feature = "std"))]
 use core::fmt::Debug;
@@ -222,7 +227,7 @@ use core::fmt::Debug;
 use std::error::Error as StdError;
 
 #[cfg(not(feature = "std"))]
-trait StdError: Debug + Display {
+pub trait StdError: Debug + Display {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         None
     }
@@ -330,26 +335,32 @@ where
 }
 
 pub trait EyreContext: Sized + Send + Sync + 'static {
-    fn default(err: &(dyn std::error::Error + 'static)) -> Self;
+    fn default(err: &(dyn StdError + 'static)) -> Self;
 
     fn context_raw(&self, typeid: TypeId) -> Option<&dyn Any>;
 
-    fn display(&self, error: &(dyn std::error::Error + 'static), f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result;
+    fn display(
+        &self,
+        error: &(dyn StdError + 'static),
+        f: &mut core::fmt::Formatter<'_>,
+    ) -> core::fmt::Result;
 
-    fn debug(&self, error: &(dyn std::error::Error + 'static), f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result;
+    fn debug(
+        &self,
+        error: &(dyn StdError + 'static),
+        f: &mut core::fmt::Formatter<'_>,
+    ) -> core::fmt::Result;
 }
 
 pub struct DefaultContext {
-    pub backtrace: Option<Backtrace>,
+    backtrace: Option<Backtrace>,
 }
 
 impl EyreContext for DefaultContext {
-    fn default(error: &(dyn std::error::Error + 'static)) -> Self {
+    fn default(_error: &(dyn StdError + 'static)) -> Self {
         let backtrace = backtrace_if_absent!(error);
 
-        Self {
-            backtrace
-        }
+        Self { backtrace }
     }
 
     fn context_raw(&self, typid: TypeId) -> Option<&dyn Any> {
@@ -359,11 +370,15 @@ impl EyreContext for DefaultContext {
         }
     }
 
-    fn display(&self, error: &(dyn std::error::Error + 'static), f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    fn display(
+        &self,
+        error: &(dyn StdError + 'static),
+        f: &mut core::fmt::Formatter<'_>,
+    ) -> core::fmt::Result {
         write!(f, "{}", error)?;
 
         if f.alternate() {
-            for cause in Chain::new(error).skip(1) {
+            for cause in crate::chain::Chain::new(error).skip(1) {
                 write!(f, ": {}", cause)?;
             }
         }
@@ -371,7 +386,11 @@ impl EyreContext for DefaultContext {
         Ok(())
     }
 
-    fn debug(&self, error: &(dyn std::error::Error + 'static), f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    fn debug(
+        &self,
+        error: &(dyn StdError + 'static),
+        f: &mut core::fmt::Formatter<'_>,
+    ) -> core::fmt::Result {
         use core::fmt::Write as _;
 
         if f.alternate() {
@@ -383,7 +402,7 @@ impl EyreContext for DefaultContext {
         if let Some(cause) = error.source() {
             write!(f, "\n\nCaused by:")?;
             let multiple = cause.source().is_some();
-            for (n, error) in Chain::new(cause).enumerate() {
+            for (n, error) in crate::chain::Chain::new(cause).enumerate() {
                 writeln!(f)?;
                 let mut indented = fmt::Indented {
                     inner: f,
@@ -398,7 +417,11 @@ impl EyreContext for DefaultContext {
         {
             use std::backtrace::BacktraceStatus;
 
-            let backtrace = self.backtrace.as_ref().or_else(|| error.backtrace()).expect("backtrace capture failed");
+            let backtrace = self
+                .backtrace
+                .as_ref()
+                .or_else(|| error.backtrace())
+                .expect("backtrace capture failed");
             if let BacktraceStatus::Captured = backtrace.status() {
                 let mut backtrace = backtrace.to_string();
                 if backtrace.starts_with("stack backtrace:") {
@@ -650,11 +673,11 @@ where
 // Not public API. Referenced by macro-generated code.
 #[doc(hidden)]
 pub mod private {
-    use crate::{EyreContext, ErrReport};
+    use crate::{ErrReport, EyreContext};
     use core::fmt::{Debug, Display};
 
-//     #[cfg(backtrace)]
-//     use std::backtrace::Backtrace;
+    //     #[cfg(backtrace)]
+    //     use std::backtrace::Backtrace;
 
     pub use core::result::Result::Err;
 
