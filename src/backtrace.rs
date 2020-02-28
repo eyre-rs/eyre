@@ -5,20 +5,6 @@ pub(crate) use std::backtrace::Backtrace;
 pub(crate) enum Backtrace {}
 
 #[cfg(backtrace)]
-macro_rules! backtrace {
-    () => {
-        Some(Backtrace::capture())
-    };
-}
-
-#[cfg(not(backtrace))]
-macro_rules! backtrace {
-    () => {
-        None
-    };
-}
-
-#[cfg(backtrace)]
 macro_rules! backtrace_if_absent {
     ($err:expr) => {
         match $err.backtrace() {
@@ -28,7 +14,7 @@ macro_rules! backtrace_if_absent {
     };
 }
 
-#[cfg(all(feature = "std", not(backtrace)))]
+#[cfg(not(backtrace))]
 macro_rules! backtrace_if_absent {
     ($err:expr) => {
         None

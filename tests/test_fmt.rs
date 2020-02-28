@@ -1,4 +1,4 @@
-use anyhow::{bail, Context, Result};
+use eyre::{bail, Result, WrapErr};
 use std::io;
 
 fn f() -> Result<()> {
@@ -6,11 +6,11 @@ fn f() -> Result<()> {
 }
 
 fn g() -> Result<()> {
-    f().context("f failed")
+    f().wrap_err("f failed")
 }
 
 fn h() -> Result<()> {
-    g().context("g failed")
+    g().wrap_err("g failed")
 }
 
 const EXPECTED_ALTDISPLAY_F: &str = "oh no!";
@@ -45,7 +45,7 @@ Custom {
 
 const EXPECTED_ALTDEBUG_G: &str = "\
 Error {
-    context: \"f failed\",
+    msg: \"f failed\",
     source: Custom {
         kind: PermissionDenied,
         error: \"oh no!\",
@@ -55,9 +55,9 @@ Error {
 
 const EXPECTED_ALTDEBUG_H: &str = "\
 Error {
-    context: \"g failed\",
+    msg: \"g failed\",
     source: Error {
-        context: \"f failed\",
+        msg: \"f failed\",
         source: Custom {
             kind: PermissionDenied,
             error: \"oh no!\",

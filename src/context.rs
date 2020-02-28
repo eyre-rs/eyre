@@ -1,6 +1,5 @@
 use crate::error::ContextError;
-use crate::{Context, Error, StdError};
-use core::convert::Infallible;
+use crate::{ErrReport, EyreContext, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]
@@ -9,118 +8,88 @@ use std::backtrace::Backtrace;
 mod ext {
     use super::*;
 
-    pub trait StdError {
-        fn ext_context<C>(self, context: C) -> Error
+    pub trait StdError<C>
+    where
+        C: EyreContext,
+    {
+        fn ext_report<D>(self, msg: D) -> ErrReport<C>
         where
-            C: Display + Send + Sync + 'static;
+            D: Display + Send + Sync + 'static;
     }
 
     #[cfg(feature = "std")]
-    impl<E> StdError for E
+    impl<E, C> StdError<C> for E
     where
+        C: EyreContext,
         E: std::error::Error + Send + Sync + 'static,
     {
-        fn ext_context<C>(self, context: C) -> Error
+        fn ext_report<D>(self, msg: D) -> ErrReport<C>
         where
-            C: Display + Send + Sync + 'static,
+            D: Display + Send + Sync + 'static,
         {
-            let backtrace = backtrace_if_absent!(self);
-            Error::from_context(context, self, backtrace)
+            ErrReport::from_msg(msg, self)
         }
     }
 
-    impl StdError for Error {
-        fn ext_context<C>(self, context: C) -> Error
+    impl<C> StdError<C> for ErrReport<C>
+    where
+        C: EyreContext,
+    {
+        fn ext_report<D>(self, msg: D) -> ErrReport<C>
         where
-            C: Display + Send + Sync + 'static,
+            D: Display + Send + Sync + 'static,
         {
-            self.context(context)
+            self.wrap_err(msg)
         }
     }
 }
 
-impl<T, E> Context<T, E> for Result<T, E>
+impl<T, E, C> WrapErr<T, E, C> for Result<T, E>
 where
-    E: ext::StdError + Send + Sync + 'static,
+    C: EyreContext,
+    E: ext::StdError<C> + Send + Sync + 'static,
 {
-    fn context<C>(self, context: C) -> Result<T, Error>
+    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<C>>
     where
-        C: Display + Send + Sync + 'static,
+        D: Display + Send + Sync + 'static,
     {
-        self.map_err(|error| error.ext_context(context))
+        self.map_err(|error| error.ext_report(msg))
     }
 
-    fn with_context<C, F>(self, context: F) -> Result<T, Error>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, ErrReport<C>>
     where
-        C: Display + Send + Sync + 'static,
-        F: FnOnce() -> C,
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
     {
-        self.map_err(|error| error.ext_context(context()))
-    }
-}
-
-/// ```
-/// # type T = ();
-/// #
-/// use anyhow::{Context, Result};
-///
-/// fn maybe_get() -> Option<T> {
-///     # const IGNORE: &str = stringify! {
-///     ...
-///     # };
-///     # unimplemented!()
-/// }
-///
-/// fn demo() -> Result<()> {
-///     let t = maybe_get().context("there is no T")?;
-///     # const IGNORE: &str = stringify! {
-///     ...
-///     # };
-///     # unimplemented!()
-/// }
-/// ```
-impl<T> Context<T, Infallible> for Option<T> {
-    fn context<C>(self, context: C) -> Result<T, Error>
-    where
-        C: Display + Send + Sync + 'static,
-    {
-        self.ok_or_else(|| Error::from_display(context, backtrace!()))
-    }
-
-    fn with_context<C, F>(self, context: F) -> Result<T, Error>
-    where
-        C: Display + Send + Sync + 'static,
-        F: FnOnce() -> C,
-    {
-        self.ok_or_else(|| Error::from_display(context(), backtrace!()))
+        self.map_err(|error| error.ext_report(msg()))
     }
 }
 
-impl<C, E> Debug for ContextError<C, E>
+impl<D, E> Debug for ContextError<D, E>
 where
-    C: Display,
+    D: Display,
     E: Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.debug_struct("Error")
-            .field("context", &Quoted(&self.context))
+            .field("msg", &Quoted(&self.msg))
             .field("source", &self.error)
             .finish()
     }
 }
 
-impl<C, E> Display for ContextError<C, E>
+impl<D, E> Display for ContextError<D, E>
 where
-    C: Display,
+    D: Display,
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Display::fmt(&self.context, f)
+        Display::fmt(&self.msg, f)
     }
 }
 
-impl<C, E> StdError for ContextError<C, E>
+impl<D, E> StdError for ContextError<D, E>
 where
-    C: Display,
+    D: Display,
     E: StdError + 'static,
 {
     #[cfg(backtrace)]
@@ -133,9 +102,10 @@ where
     }
 }
 
-impl<C> StdError for ContextError<C, Error>
+impl<D, C> StdError for ContextError<D, ErrReport<C>>
 where
-    C: Display,
+    C: EyreContext,
+    D: Display,
 {
     #[cfg(backtrace)]
     fn backtrace(&self) -> Option<&Backtrace> {
@@ -147,11 +117,11 @@ where
     }
 }
 
-struct Quoted<C>(C);
+struct Quoted<D>(D);
 
-impl<C> Debug for Quoted<C>
+impl<D> Debug for Quoted<D>
 where
-    C: Display,
+    D: Display,
 {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_char('"')?;
@@ -170,8 +140,7 @@ impl Write for Quoted<&mut fmt::Formatter<'_>> {
 pub(crate) mod private {
     use super::*;
 
-    pub trait Sealed {}
+    pub trait Sealed<C: EyreContext> {}
 
-    impl<T, E> Sealed for Result<T, E> where E: ext::StdError {}
-    impl<T> Sealed for Option<T> {}
+    impl<T, E, C: EyreContext> Sealed<C> for Result<T, E> where E: ext::StdError<C> {}
 }

@@ -5,7 +5,7 @@
 /// # Example
 ///
 /// ```
-/// # use anyhow::{bail, Result};
+/// # use eyre::{bail, Result};
 /// #
 /// # fn has_permission(user: usize, resource: usize) -> bool {
 /// #     true
@@ -23,7 +23,7 @@
 /// ```
 ///
 /// ```
-/// # use anyhow::{bail, Result};
+/// # use eyre::{bail, Result};
 /// # use thiserror::Error;
 /// #
 /// # const MAX_DEPTH: usize = 1;
@@ -50,13 +50,13 @@
 #[macro_export]
 macro_rules! bail {
     ($msg:literal $(,)?) => {
-        return $crate::private::Err($crate::anyhow!($msg));
+        return $crate::private::Err($crate::eyre!($msg));
     };
     ($err:expr $(,)?) => {
-        return $crate::private::Err($crate::anyhow!($err));
+        return $crate::private::Err($crate::eyre!($err));
     };
     ($fmt:expr, $($arg:tt)*) => {
-        return $crate::private::Err($crate::anyhow!($fmt, $($arg)*));
+        return $crate::private::Err($crate::eyre!($fmt, $($arg)*));
     };
 }
 
@@ -71,7 +71,7 @@ macro_rules! bail {
 /// # Example
 ///
 /// ```
-/// # use anyhow::{ensure, Result};
+/// # use eyre::{ensure, Result};
 /// #
 /// # fn main() -> Result<()> {
 /// #     let user = 0;
@@ -82,7 +82,7 @@ macro_rules! bail {
 /// ```
 ///
 /// ```
-/// # use anyhow::{ensure, Result};
+/// # use eyre::{ensure, Result};
 /// # use thiserror::Error;
 /// #
 /// # const MAX_DEPTH: usize = 1;
@@ -108,17 +108,17 @@ macro_rules! bail {
 macro_rules! ensure {
     ($cond:expr, $msg:literal $(,)?) => {
         if !$cond {
-            return $crate::private::Err($crate::anyhow!($msg));
+            return $crate::private::Err($crate::eyre!($msg));
         }
     };
     ($cond:expr, $err:expr $(,)?) => {
         if !$cond {
-            return $crate::private::Err($crate::anyhow!($err));
+            return $crate::private::Err($crate::eyre!($err));
         }
     };
     ($cond:expr, $fmt:expr, $($arg:tt)*) => {
         if !$cond {
-            return $crate::private::Err($crate::anyhow!($fmt, $($arg)*));
+            return $crate::private::Err($crate::eyre!($fmt, $($arg)*));
         }
     };
 }
@@ -134,11 +134,11 @@ macro_rules! ensure {
 /// ```
 /// # type V = ();
 /// #
-/// use anyhow::{anyhow, Result};
+/// use eyre::{eyre, Result};
 ///
 /// fn lookup(key: &str) -> Result<V> {
 ///     if key.len() != 16 {
-///         return Err(anyhow!("key length must be 16 characters, got {:?}", key));
+///         return Err(eyre!("key length must be 16 characters, got {:?}", key));
 ///     }
 ///
 ///     // ...
@@ -146,7 +146,7 @@ macro_rules! ensure {
 /// }
 /// ```
 #[macro_export]
-macro_rules! anyhow {
+macro_rules! eyre {
     ($msg:literal $(,)?) => {
         // Handle $:literal as a special case to make cargo-expanded code more
         // concise in the common case.
@@ -155,7 +155,7 @@ macro_rules! anyhow {
     ($err:expr $(,)?) => ({
         use $crate::private::kind::*;
         let error = $err;
-        (&error).anyhow_kind().new(error)
+        (&error).eyre_kind().new(error)
     });
     ($fmt:expr, $($arg:tt)*) => {
         $crate::private::new_adhoc(format!($fmt, $($arg)*))

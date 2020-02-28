@@ -1,17 +1,14 @@
 [package]
-name = "anyhow"
-version = "1.0.26" # remember to update html_root_url
-authors = ["David Tolnay <dtolnay@gmail.com>"]
+name = "eyre"
+version = "0.2.0" # remember to update html_root_url
+authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
-description = "Flexible concrete Error type built on std::error::Error"
-repository = "https://github.com/dtolnay/anyhow"
-documentation = "https://docs.rs/anyhow"
+description = "Flexible concrete Error Handling and Reporting type built on std::error::Error"
+repository = "https://github.com/yaahc/eyre"
+documentation = "https://docs.rs/eyre"
 readme = "README.md"
 categories = ["rust-patterns"]
-
-[badges]
-travis-ci = { repository = "dtolnay/anyhow" }
 
 [features]
 default = ["std"]

@@ -5,7 +5,7 @@ use std::process::{Command, ExitStatus};
 
 // This code exercises the surface area that we expect of the std Backtrace
 // type. If the current toolchain is able to compile it, we go ahead and use
-// backtrace in anyhow.
+// backtrace in eyre.
 const PROBE: &str = r#"
     #![feature(backtrace)]
     #![allow(dead_code)]
@@ -51,7 +51,7 @@ fn compile_probe() -> Option<ExitStatus> {
     fs::write(&probefile, PROBE).ok()?;
     Command::new(rustc)
         .arg("--edition=2018")
-        .arg("--crate-name=anyhow_build")
+        .arg("--crate-name=eyre_build")
         .arg("--crate-type=lib")
         .arg("--emit=metadata")
         .arg("--out-dir")

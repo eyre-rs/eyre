@@ -1,15 +1,15 @@
 mod drop;
 
 use crate::drop::{DetectDrop, Flag};
-use anyhow::{Context, Error, Result};
+use eyre::{ErrReport, Result, WrapErr};
 use std::fmt::{self, Display};
 use thiserror::Error;
 
-// https://github.com/dtolnay/anyhow/issues/18
+// https://github.com/dtolnay/eyre/issues/18
 #[test]
 fn test_inference() -> Result<()> {
     let x = "1";
-    let y: u32 = x.parse().context("...")?;
+    let y: u32 = x.parse().wrap_err("...")?;
     assert_eq!(y, 1);
     Ok(())
 }
@@ -56,7 +56,7 @@ impl Dropped {
     }
 }
 
-fn make_chain() -> (Error, Dropped) {
+fn make_chain() -> (ErrReport, Dropped) {
     let dropped = Dropped {
         low: Flag::new(),
         mid: Flag::new(),
@@ -68,17 +68,17 @@ fn make_chain() -> (Error, Dropped) {
         drop: DetectDrop::new(&dropped.low),
     };
 
-    // impl Context for Result<T, E>
+    // impl Report for Result<T, E>
     let mid = Err::<(), LowLevel>(low)
-        .context(MidLevel {
+        .wrap_err(MidLevel {
             message: "failed to load config",
             drop: DetectDrop::new(&dropped.mid),
         })
         .unwrap_err();
 
-    // impl Context for Result<T, Error>
-    let high = Err::<(), Error>(mid)
-        .context(HighLevel {
+    // impl Report for Result<T, Error>
+    let high = Err::<(), ErrReport>(mid)
+        .wrap_err(HighLevel {
             message: "failed to start server",
             drop: DetectDrop::new(&dropped.high),
         })

@@ -1,63 +1,63 @@
-// Tagged dispatch mechanism for resolving the behavior of `anyhow!($expr)`.
+// Tagged dispatch mechanism for resolving the behavior of `eyre!($expr)`.
 //
-// When anyhow! is given a single expr argument to turn into anyhow::Error, we
-// want the resulting Error to pick up the input's implementation of source()
+// When eyre! is given a single expr argument to turn into eyre::ErrReport, we
+// want the resulting ErrReport to pick up the input's implementation of source()
 // and backtrace() if it has a std::error::Error impl, otherwise require nothing
 // more than Display and Debug.
 //
 // Expressed in terms of specialization, we want something like:
 //
-//     trait AnyhowNew {
-//         fn new(self) -> Error;
+//     trait EyreNew {
+//         fn new(self) -> ErrReport;
 //     }
 //
-//     impl<T> AnyhowNew for T
+//     impl<T> EyreNew for T
 //     where
 //         T: Display + Debug + Send + Sync + 'static,
 //     {
-//         default fn new(self) -> Error {
+//         default fn new(self) -> ErrReport {
 //             /* no std error impl */
 //         }
 //     }
 //
-//     impl<T> AnyhowNew for T
+//     impl<T> EyreNew for T
 //     where
 //         T: std::error::Error + Send + Sync + 'static,
 //     {
-//         fn new(self) -> Error {
+//         fn new(self) -> ErrReport {
 //             /* use std error's source() and backtrace() */
 //         }
 //     }
 //
 // Since specialization is not stable yet, instead we rely on autoref behavior
 // of method resolution to perform tagged dispatch. Here we have two traits
-// AdhocKind and TraitKind that both have an anyhow_kind() method. AdhocKind is
+// AdhocKind and TraitKind that both have an eyre_kind() method. AdhocKind is
 // implemented whether or not the caller's type has a std error impl, while
 // TraitKind is implemented only when a std error impl does exist. The ambiguity
 // is resolved by AdhocKind requiring an extra autoref so that it has lower
 // precedence.
 //
-// The anyhow! macro will set up the call in this form:
+// The eyre! macro will set up the call in this form:
 //
 //     #[allow(unused_imports)]
 //     use $crate::private::{AdhocKind, TraitKind};
 //     let error = $msg;
-//     (&error).anyhow_kind().new(error)
+//     (&error).eyre_kind().new(error)
 
-use crate::Error;
+use crate::{ErrReport, EyreContext};
 use core::fmt::{Debug, Display};
 
 #[cfg(feature = "std")]
 use crate::StdError;
 
-#[cfg(backtrace)]
-use std::backtrace::Backtrace;
+// #[cfg(backtrace)]
+// use std::backtrace::Backtrace;
 
 pub struct Adhoc;
 
 pub trait AdhocKind: Sized {
     #[inline]
-    fn anyhow_kind(&self) -> Adhoc {
+    fn eyre_kind(&self) -> Adhoc {
         Adhoc
     }
 }
@@ -65,11 +65,11 @@ pub trait AdhocKind: Sized {
 impl<T> AdhocKind for &T where T: ?Sized + Display + Debug + Send + Sync + 'static {}
 
 impl Adhoc {
-    pub fn new<M>(self, message: M) -> Error
+    pub fn new<M, C: EyreContext>(self, message: M) -> ErrReport<C>
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        Error::from_adhoc(message, backtrace!())
+        ErrReport::from_adhoc(message)
     }
 }
 
@@ -77,17 +77,17 @@ pub struct Trait;
 
 pub trait TraitKind: Sized {
     #[inline]
-    fn anyhow_kind(&self) -> Trait {
+    fn eyre_kind(&self) -> Trait {
         Trait
     }
 }
 
-impl<E> TraitKind for E where E: Into<Error> {}
+impl<E> TraitKind for E where E: Into<ErrReport> {}
 
 impl Trait {
-    pub fn new<E>(self, error: E) -> Error
+    pub fn new<E>(self, error: E) -> ErrReport
     where
-        E: Into<Error>,
+        E: Into<ErrReport>,
     {
         error.into()
     }
@@ -99,7 +99,7 @@ pub struct Boxed;
 #[cfg(feature = "std")]
 pub trait BoxedKind: Sized {
     #[inline]
-    fn anyhow_kind(&self) -> Boxed {
+    fn eyre_kind(&self) -> Boxed {
         Boxed
     }
 }
@@ -109,8 +109,7 @@ impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 
 #[cfg(feature = "std")]
 impl Boxed {
-    pub fn new(self, error: Box<dyn StdError + Send + Sync>) -> Error {
-        let backtrace = backtrace_if_absent!(error);
-        Error::from_boxed(error, backtrace)
+    pub fn new<C: EyreContext>(self, error: Box<dyn StdError + Send + Sync>) -> ErrReport<C> {
+        ErrReport::from_boxed(error)
     }
 }

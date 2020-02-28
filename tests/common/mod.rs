@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use eyre::{bail, Result};
 use std::io;
 
 pub fn bail_literal() -> Result<()> {
