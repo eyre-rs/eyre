@@ -57,7 +57,7 @@ let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value))
 ```
 [ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
 [actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
-[actions-url]:https://github.com/yaahc/eyre/actions?query=workflow%3A"Continuous+Integration"
+[actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
 
 ## Customization
 
