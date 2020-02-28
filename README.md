@@ -43,6 +43,7 @@ rendering custom defined runtime context.
 the following is valid.
 
 ```rust
+// Works
 let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value)).unwrap();
 ```
 
@@ -52,7 +53,10 @@ is to give the compiler a hint for what type it should be resolving to, either
 via your return type or a type annotation.
 
 ```rust
-// Will work fine
+// Broken
+let val = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
+
+// Works
 let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 ```
 [ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
