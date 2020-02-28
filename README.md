@@ -1,7 +1,7 @@
 Eyre&ensp;¯\\\_(ツ)\_/¯
 =========================
 
-[![Build Status](https://api.travis-ci.com/dtolnay/eyre.svg?branch=master)](https://travis-ci.com/dtolnay/eyre)
+[![Build Status][actions-badge]][actions-url]
 [![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/eyre)
 
@@ -9,11 +9,134 @@ This library provides [`eyre::ErrReport`][ErrReport], a trait object based
 error handling type for easy idiomatic error handling and reporting in Rust
 applications.
 
+First and foremost, this crate is a fork of `anyhow` by @dtolnay. My goal in
+writing this crate is to explore new directions of handling context and to
+explore new ways to communicate the intended usage of this crate via changes to
+the API.
+
+The main changes this crate brings to anyhow are
+
+* Addition of the [`eyre::EyreContext`] trait and a type parameter on the core error
+  handling type which users can use to insert custom forms of context into
+  their general error type.
+* Rebranding the type as principally for error reporting, rather than
+  describing it as an error type in its own right. This type is not an error,
+  it contains errors that it masqerades as, and provides helpers for creating
+  new errors to wrap those errors and for displaying those chains of errors,
+  and the included context, to the end user. The goal is to make it obvious
+  that this type is meant to be used when the only way you expect to handle
+  errors is to print them.
+* Changing the [`anyhow::Context`] trait to [`eyre::WrapErr`] to make it clear
+  that it is unrelated to the [`eyre::EyreContext`] and the context member, and
+  is only for inserting new errors into the chain of errors.
+* Addition of a new `context` function on [`eyre::ErrReport`] to assist with
+  extracting members from the inner Context, which is used by
+  [`eyre::ErrReport`] to extract [`std::backtrace::Backtrace`]'s from generic
+  contexts types.
+
+These changes were made in order to facilitate the usage of
+[`tracing::SpanTrace`] with anyhow, which is a Backtrace-like type for
+rendering custom defined runtime context.
+
+**Note**: The way the `eyre!` macro works in practice differs from how
+`anyhow!` works due to the addition of the generic type parameter. In anyhow
+the following is valid.
+
+```rust
+let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value)).unwrap();
+```
+
+Where as with `eyre!` this will fail due to being unable to infer the type for
+the Context parameter. The solution to this problem, should you encounter it,
+is to give the compiler a hint for what type it should be resolving to, either
+via your return type or a type annotation.
+
+```rust
+// Will work fine
+let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
+```
+
 [ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
+[actions-badge]: https://github.com/yaahc/eyre/workflows/ci/badge.svg
+[actions-url]:https://github.com/yaahc/eyre/actions?query=workflow%3Aci
+
+## Customization
+
+In order to insert your own custom context type you must first implement the
+`eyre::EyreContext` trait for said type, which has four required methods.
+
+* `fn default(error: &Error) -> Self` - For constructing default context while
+allowing special case handling depending on the content of the error you're
+wrapping.
+
+This is essentially `Default::default` but more flexible, for example, the
+`eyre::DefaultContext` type provide by this crate uses this to only capture a
+`Backtrace` if the inner `Error` does not already have one.
+
+```rust
+fn default(error: &(dyn StdError + 'static)) -> Self {
+    let backtrace = backtrace_if_absent!(error);
+
+    Self { backtrace }
+}
+```
+
+* `fn context_raw(&self, typeid TypeID) -> Option<&dyn Any>` - For extracting
+  arbitrary members from a context based on their type.
+
+This method is like a flexible version of the `fn backtrace(&self)` method on
+the `Error` trait. In the future we will likely support extracting `Backtrace`s
+and `SpanTrace`s by default by relying on the implementation of `context_raw`
+provided by the user.
+
+
+Here is how the `eyre::DefaultContext` type uses this to return `Backtrace`s.
+
+```rust
+fn context_raw(&self, typeid: TypeId) -> Option<&dyn Any> {
+    if typeid == TypeId::of::<Backtrace>() {
+        self.backtrace.as_ref().map(|b| b as &dyn Any)
+    } else {
+        None
+    }
+}
+```
+
+* `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>) -> fmt Result`
+  it's companion `display` version. - For formatting the entire error chain and
+  the user provided context.
+
+When overriding the context it no longer makes sense for `eyre::ErrReport` to
+provide the `Display` and `Debug` implementations for the user, becase we
+cannot predict what forms of context you will need to display along side your
+chain of errors. Instead we forward the implementations of `Display` and
+`Debug` to these methods on the inner `EyreContext` type.
+
+This crate does provide a few helpers to assist in writing display
+implementations, specifically the `Chain` type, for treating an error and its
+sources like an iterator, and the `Indented` type, for indenting multi line
+errors consistently without using heap allocations.
+
+**Note**: best practices for printing errors suggest that `{}` should only
+print the current error and none of its sources, and that the primary method of
+displaying an error, its sources, and its context should be handled by the
+`Debug` implementation, which is what is used to print errors that are returned
+from `main`. For examples on how to implement this please refer to the
+implementations of `display` and `debug` on `eyre::DefaultContext`
+
+Once you've defined a custom Context type you can use it throughout your
+application by defining a type alias.
+
+```rust
+type ErrReport = eyre::ErrReport<MyContext>;
+
+// And optionally...
+type Result<T, E = eyre::ErrReport<MyContext>> = core::result::Result<T, E>;
+```
 
 ```toml
 [dependencies]
-eyre = "1.0"
+eyre = "0.2"
 ```
 
 *Compiler support: requires rustc 1.34+*
@@ -110,13 +233,17 @@ eyre = "1.0"
 
 ## No-std support
 
+**NOTE**: tests are currently broken for `no_std` so I cannot guaruntee that
+everything works still. I'm waiting for upstream fixes to be merged rather than
+fixing them myself, so bear with me.
+
 In no_std mode, the same API is almost all available and works the same way. To
 depend on Eyre in no_std mode, disable our default enabled "std" feature in
 Cargo.toml. A global allocator is required.
 
 ```toml
 [dependencies]
-eyre = { version = "1.0", default-features = false }
+eyre = { version = "0.2", default-features = false }
 ```
 
 Since the `?`-based error conversions would normally rely on the
