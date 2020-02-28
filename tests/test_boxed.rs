@@ -34,7 +34,7 @@ fn test_boxed_thiserror() {
 
 #[test]
 fn test_boxed_eyre() {
-    let error = eyre!("oh no!").context("it failed");
+    let error = eyre!("oh no!").wrap_err("it failed");
     let error = eyre!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }

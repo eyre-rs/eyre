@@ -10,7 +10,7 @@ mod ext {
     use super::*;
 
     pub trait StdError {
-        fn ext_context<D>(self, context: D) -> ErrReport<DefaultContext>
+        fn ext_report<D>(self, msg: D) -> ErrReport<DefaultContext>
         where
             D: Display + Send + Sync + 'static;
     }
@@ -20,20 +20,20 @@ mod ext {
     where
         E: std::error::Error + Send + Sync + 'static,
     {
-        fn ext_context<D>(self, context: D) -> ErrReport<DefaultContext>
+        fn ext_report<D>(self, msg: D) -> ErrReport<DefaultContext>
         where
             D: Display + Send + Sync + 'static,
         {
-            ErrReport::from_context(context, self)
+            ErrReport::from_msg(msg, self)
         }
     }
 
     impl StdError for ErrReport<DefaultContext> {
-        fn ext_context<D>(self, context: D) -> ErrReport<DefaultContext>
+        fn ext_report<D>(self, msg: D) -> ErrReport<DefaultContext>
         where
             D: Display + Send + Sync + 'static,
         {
-            self.context(context)
+            self.wrap_err(msg)
         }
     }
 }
@@ -42,19 +42,19 @@ impl<T, E> Report<T, E> for Result<T, E>
 where
     E: ext::StdError + Send + Sync + 'static,
 {
-    fn context<D>(self, context: D) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<DefaultContext>>
     where
         D: Display + Send + Sync + 'static,
     {
-        self.map_err(|error| error.ext_context(context))
+        self.map_err(|error| error.ext_report(msg))
     }
 
-    fn with_context<D, F>(self, context: F) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, ErrReport<DefaultContext>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.map_err(|error| error.ext_context(context()))
+        self.map_err(|error| error.ext_report(msg()))
     }
 }
 
@@ -71,7 +71,7 @@ where
 /// }
 ///
 /// fn demo() -> Result<()> {
-///     let t = maybe_get().context("there is no T")?;
+///     let t = maybe_get().wrap_err("there is no T")?;
 ///     # const IGNORE: &str = stringify! {
 ///     ...
 ///     # };
@@ -79,19 +79,19 @@ where
 /// }
 /// ```
 impl<T> Report<T, Infallible> for Option<T> {
-    fn context<D>(self, context: D) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<DefaultContext>>
     where
         D: Display + Send + Sync + 'static,
     {
-        self.ok_or_else(|| ErrReport::from_display(context))
+        self.ok_or_else(|| ErrReport::from_display(msg))
     }
 
-    fn with_context<D, F>(self, context: F) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, ErrReport<DefaultContext>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.ok_or_else(|| ErrReport::from_display(context()))
+        self.ok_or_else(|| ErrReport::from_display(msg()))
     }
 }
 

@@ -1,4 +1,4 @@
-Anyhow&ensp;¯\\\_(ツ)\_/¯
+Eyre&ensp;¯\\\_(ツ)\_/¯
 =========================
 
 [![Build Status](https://api.travis-ci.com/dtolnay/eyre.svg?branch=master)](https://travis-ci.com/dtolnay/eyre)
@@ -78,7 +78,7 @@ eyre = "1.0"
   type does not already provide its own. In order to see backtraces, the
   `RUST_LIB_BACKTRACE=1` environment variable must be defined.
 
-- Anyhow works with any error type that has an impl of `std::error::Error`,
+- Eyre works with any error type that has an impl of `std::error::Error`,
   including ones defined in your crate. We do not bundle a `derive(Error)` macro
   but you can write the impls yourself or use a standalone macro like
   [thiserror].
@@ -110,7 +110,7 @@ eyre = "1.0"
 ## No-std support
 
 In no_std mode, the same API is almost all available and works the same way. To
-depend on Anyhow in no_std mode, disable our default enabled "std" feature in
+depend on Eyre in no_std mode, disable our default enabled "std" feature in
 Cargo.toml. A global allocator is required.
 
 ```toml
@@ -120,8 +120,8 @@ eyre = { version = "1.0", default-features = false }
 
 Since the `?`-based error conversions would normally rely on the
 `std::error::Error` trait which is only available through std, no_std mode will
-require an explicit `.map_err(Error::msg)` when working with a non-Anyhow error
-type inside a function that returns Anyhow's error type.
+require an explicit `.map_err(Error::msg)` when working with a non-Eyre error
+type inside a function that returns Eyre's error type.
 
 <br>
 
@@ -138,7 +138,7 @@ the necessary improvements for this to be possible as part of [RFC 2504].
 
 ## Comparison to thiserror
 
-Use Anyhow if you don't care what error type your functions return, you just
+Use Eyre if you don't care what error type your functions return, you just
 want it to be easy. This is common in application code. Use [thiserror] if you
 are a library that wants to design your own dedicated error type(s) so that on
 failures the caller gets exactly the information that you choose.

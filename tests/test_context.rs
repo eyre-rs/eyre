@@ -9,7 +9,7 @@ use thiserror::Error;
 #[test]
 fn test_inference() -> Result<()> {
     let x = "1";
-    let y: u32 = x.parse().context("...")?;
+    let y: u32 = x.parse().wrap_err("...")?;
     assert_eq!(y, 1);
     Ok(())
 }
@@ -70,7 +70,7 @@ fn make_chain() -> (ErrReport, Dropped) {
 
     // impl Report for Result<T, E>
     let mid = Err::<(), LowLevel>(low)
-        .context(MidLevel {
+        .wrap_err(MidLevel {
             message: "failed to load config",
             drop: DetectDrop::new(&dropped.mid),
         })
@@ -78,7 +78,7 @@ fn make_chain() -> (ErrReport, Dropped) {
 
     // impl Report for Result<T, Error>
     let high = Err::<(), ErrReport>(mid)
-        .context(HighLevel {
+        .wrap_err(HighLevel {
             message: "failed to start server",
             drop: DetectDrop::new(&dropped.high),
         })

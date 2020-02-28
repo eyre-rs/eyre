@@ -56,7 +56,7 @@ fn test_io_source() {
 
 #[test]
 fn test_eyre_from_eyre() {
-    let error: ErrReport = eyre!("oh no!").context("context");
+    let error: ErrReport = eyre!("oh no!").wrap_err("context");
     let error = eyre!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }

@@ -137,7 +137,7 @@ where
     }
 
     #[cfg(feature = "std")]
-    pub(crate) fn from_context<D, E>(msg: D, error: E) -> Self
+    pub(crate) fn from_msg<D, E>(msg: D, error: E) -> Self
     where
         D: Display + Send + Sync + 'static,
         E: StdError + Send + Sync + 'static,
@@ -258,11 +258,11 @@ where
     ///             "only the first {} lines of {} are valid",
     ///             error.line, path.as_ref().display(),
     ///         );
-    ///         eyre::ErrReport::new(error).context(context)
+    ///         eyre::ErrReport::new(error).wrap_err(context)
     ///     })
     /// }
     /// ```
-    pub fn context<D>(self, msg: D) -> Self
+    pub fn wrap_err<D>(self, msg: D) -> Self
     where
         D: Display + Send + Sync + 'static,
     {

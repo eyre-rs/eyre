@@ -6,11 +6,11 @@ fn f() -> Result<()> {
 }
 
 fn g() -> Result<()> {
-    f().context("f failed")
+    f().wrap_err("f failed")
 }
 
 fn h() -> Result<()> {
-    g().context("g failed")
+    g().wrap_err("g failed")
 }
 
 const EXPECTED_ALTDISPLAY_F: &str = "oh no!";
