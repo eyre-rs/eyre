@@ -1,6 +1,5 @@
 use crate::error::ContextError;
-use crate::{Report, DefaultContext, ErrReport, StdError, EyreContext};
-use core::convert::Infallible;
+use crate::{WrapErr, ErrReport, StdError, EyreContext};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]
@@ -9,18 +8,22 @@ use std::backtrace::Backtrace;
 mod ext {
     use super::*;
 
-    pub trait StdError {
-        fn ext_report<D>(self, msg: D) -> ErrReport<DefaultContext>
+    pub trait StdError<C>
+    where
+        C: EyreContext,
+    {
+        fn ext_report<D>(self, msg: D) -> ErrReport<C>
         where
             D: Display + Send + Sync + 'static;
     }
 
     #[cfg(feature = "std")]
-    impl<E> StdError for E
+    impl<E, C> StdError<C> for E
     where
+        C: EyreContext,
         E: std::error::Error + Send + Sync + 'static,
     {
-        fn ext_report<D>(self, msg: D) -> ErrReport<DefaultContext>
+        fn ext_report<D>(self, msg: D) -> ErrReport<C>
         where
             D: Display + Send + Sync + 'static,
         {
@@ -28,8 +31,11 @@ mod ext {
         }
     }
 
-    impl StdError for ErrReport<DefaultContext> {
-        fn ext_report<D>(self, msg: D) -> ErrReport<DefaultContext>
+    impl<C> StdError<C> for ErrReport<C>
+    where
+        C: EyreContext,
+    {
+        fn ext_report<D>(self, msg: D) -> ErrReport<C>
         where
             D: Display + Send + Sync + 'static,
         {
@@ -38,60 +44,24 @@ mod ext {
     }
 }
 
-impl<T, E> Report<T, E> for Result<T, E>
+impl<T, E, C> WrapErr<T, E, C> for Result<T, E>
 where
-    E: ext::StdError + Send + Sync + 'static,
+    C: EyreContext,
+    E: ext::StdError<C> + Send + Sync + 'static,
 {
-    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<C>>
     where
         D: Display + Send + Sync + 'static,
     {
         self.map_err(|error| error.ext_report(msg))
     }
 
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, ErrReport<C>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
         self.map_err(|error| error.ext_report(msg()))
-    }
-}
-
-/// ```
-/// # type T = ();
-/// #
-/// use eyre::{Report, Result};
-///
-/// fn maybe_get() -> Option<T> {
-///     # const IGNORE: &str = stringify! {
-///     ...
-///     # };
-///     # unimplemented!()
-/// }
-///
-/// fn demo() -> Result<()> {
-///     let t = maybe_get().wrap_err("there is no T")?;
-///     # const IGNORE: &str = stringify! {
-///     ...
-///     # };
-///     # unimplemented!()
-/// }
-/// ```
-impl<T> Report<T, Infallible> for Option<T> {
-    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<DefaultContext>>
-    where
-        D: Display + Send + Sync + 'static,
-    {
-        self.ok_or_else(|| ErrReport::from_display(msg))
-    }
-
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, ErrReport<DefaultContext>>
-    where
-        D: Display + Send + Sync + 'static,
-        F: FnOnce() -> D,
-    {
-        self.ok_or_else(|| ErrReport::from_display(msg()))
     }
 }
 
@@ -170,8 +140,7 @@ impl Write for Quoted<&mut fmt::Formatter<'_>> {
 pub(crate) mod private {
     use super::*;
 
-    pub trait Sealed {}
+    pub trait Sealed<C: EyreContext> {}
 
-    impl<T, E> Sealed for Result<T, E> where E: ext::StdError {}
-    impl<T> Sealed for Option<T> {}
+    impl<T, E, C: EyreContext> Sealed<C> for Result<T, E> where E: ext::StdError<C> {}
 }

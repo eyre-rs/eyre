@@ -1,4 +1,4 @@
-use eyre::{bail, Report, Result};
+use eyre::{bail, WrapErr, Result};
 use std::io;
 
 fn f() -> Result<()> {

@@ -52,7 +52,7 @@
 //!   #     }
 //!   # }
 //!   #
-//!   use eyre::{Report, Result};
+//!   use eyre::{WrapErr, Result};
 //!
 //!   fn main() -> Result<()> {
 //!       # return Ok(());
@@ -276,7 +276,7 @@ pub use eyre as format_err;
 ///              at /git/eyre/src/backtrace.rs:26
 ///    1: core::result::Result<T,E>::map_err
 ///              at /git/rustc/src/libcore/result.rs:596
-///    2: eyre::context::<impl eyre::Report<T,E> for core::result::Result<T,E>>::wrap_err_with
+///    2: eyre::context::<impl eyre::WrapErr<T,E,C> for core::result::Result<T,E>>::wrap_err_with
 ///              at /git/eyre/src/context.rs:58
 ///    3: testing::main
 ///              at src/main.rs:5
@@ -305,7 +305,7 @@ pub use eyre as format_err;
 /// like this:
 ///
 /// ```
-/// use eyre::{Report, Result};
+/// use eyre::{WrapErr, Result};
 ///
 /// fn main() {
 ///     if let Err(err) = try_main() {
@@ -383,9 +383,8 @@ pub struct Chain<'a> {
 
 /// `Result<T, Error>`
 ///
-/// This is a reasonable return type to use throughout your application but also
-/// for `fn main`; if you do, failures will be printed along with any
-/// [context][Report] and a backtrace if one was captured.
+/// This is a reasonable return type to use throughout your application but also for `fn main`; if
+/// you do, failures will be printed along with a backtrace if one was captured.
 ///
 /// `eyre::Result` may be used with one *or* two type parameters.
 ///
@@ -442,7 +441,7 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 /// # Example
 ///
 /// ```
-/// use eyre::{Report, Result};
+/// use eyre::{WrapErr, Result};
 /// use std::fs;
 /// use std::path::PathBuf;
 ///
@@ -512,7 +511,7 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 ///     #     bail!(SuspiciousError);
 ///     # }
 ///     #
-///     use eyre::{Report, Result};
+///     use eyre::{WrapErr, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().wrap_err("Failed to complete the work")?;
@@ -552,7 +551,7 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 ///     #     bail!("no such file or directory");
 ///     # }
 ///     #
-///     use eyre::{Report, Result};
+///     use eyre::{WrapErr, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().wrap_err(HelperFailed)?;
@@ -573,15 +572,18 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 ///         # panic!("expected downcast to succeed");
 ///     }
 ///     ```
-pub trait Report<T, E>: context::private::Sealed {
+pub trait WrapErr<T, E, C>: context::private::Sealed<C>
+where
+    C: EyreContext,
+{
     /// Wrap the error value with a new adhoc error
-    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<C>>
     where
         D: Display + Send + Sync + 'static;
 
     /// Wrap the error value with a new adhoc error that is evaluated lazily
     /// only once an error does occur.
-    fn wrap_err_with<D, F>(self, f: F) -> Result<T, ErrReport<DefaultContext>>
+    fn wrap_err_with<D, F>(self, f: F) -> Result<T, ErrReport<C>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;

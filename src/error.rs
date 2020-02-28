@@ -115,27 +115,6 @@ where
         unsafe { ErrReport::construct(error, vtable) }
     }
 
-    pub(crate) fn from_display<M>(message: M) -> Self
-    where
-        M: Display + Send + Sync + 'static,
-    {
-        use crate::wrapper::DisplayError;
-        let error: DisplayError<M> = DisplayError(message);
-        let vtable = &ErrorVTable {
-            object_drop: object_drop::<DisplayError<M>, C>,
-            object_ref: object_ref::<DisplayError<M>, C>,
-            #[cfg(feature = "std")]
-            object_mut: object_mut::<DisplayError<M>, C>,
-            object_boxed: object_boxed::<DisplayError<M>, C>,
-            object_downcast: object_downcast::<M, C>,
-            object_drop_rest: object_drop_front::<M, C>,
-        };
-
-        // Safety: DisplayError is repr(transparent) so it is okay for the
-        // vtable to allow casting the DisplayError<M> to M.
-        unsafe { ErrReport::construct(error, vtable) }
-    }
-
     #[cfg(feature = "std")]
     pub(crate) fn from_msg<D, E>(msg: D, error: E) -> Self
     where
@@ -211,11 +190,11 @@ where
     /// Wrap the error value with additional context.
     ///
     /// For attaching context to a `Result` as it is propagated, the
-    /// [`Report`][crate::Report] extension trait may be more convenient than
+    /// [`WrapErr`][crate::WrapErr] extension trait may be more convenient than
     /// this function.
     ///
     /// The primary reason to use `error.context(...)` instead of
-    /// `result.context(...)` via the `Report` trait would be if the context
+    /// `result.context(...)` via the `WrapErr` trait would be if the context
     /// needs to depend on some data held by the underlying error:
     ///
     /// ```
@@ -349,7 +328,7 @@ where
     /// context has been attached. For details about the interaction between
     /// context and downcasting, [see here].
     ///
-    /// [see here]: trait.Report.html#effect-on-downcasting
+    /// [see here]: trait.WrapErr.html#effect-on-downcasting
     pub fn is<E>(&self) -> bool
     where
         E: Display + Debug + Send + Sync + 'static,
