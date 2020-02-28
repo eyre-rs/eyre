@@ -38,6 +38,11 @@ These changes were made in order to facilitate the usage of
 [`tracing::SpanTrace`] with anyhow, which is a Backtrace-like type for
 rendering custom defined runtime context.
 
+```toml
+[dependencies]
+eyre = "0.2"
+```
+
 **Note**: The way the `eyre!` macro works in practice differs from how
 `anyhow!` works due to the addition of the generic type parameter. In anyhow
 the following is valid.
@@ -62,6 +67,8 @@ let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value))
 [ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
 [actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
 [actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
+
+<br>
 
 ## Customization
 
@@ -135,11 +142,6 @@ type ErrReport = eyre::ErrReport<MyContext>;
 
 // And optionally...
 type Result<T, E = eyre::ErrReport<MyContext>> = core::result::Result<T, E>;
-```
-
-```toml
-[dependencies]
-eyre = "0.2"
 ```
 
 <br>
