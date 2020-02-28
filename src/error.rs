@@ -674,7 +674,7 @@ where
     C: EyreContext,
 {
     vtable: &'static ErrorVTable<C>,
-    context: C,
+    pub(crate) context: C,
     // NOTE: Don't use directly. Use only through vtable. Erased type may have
     // different alignment.
     _object: E,

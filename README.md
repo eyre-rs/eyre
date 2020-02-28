@@ -5,10 +5,11 @@ Eyre&ensp;¯\\\_(ツ)\_/¯
 [![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/eyre)
 
-This library provides [`eyre::Error`][Error], a trait object based error type
-for easy idiomatic error handling in Rust applications.
+This library provides [`eyre::ErrReport`][ErrReport], a trait object based
+error handling type for easy idiomatic error handling and reporting in Rust
+applications.
 
-[Error]: https://docs.rs/eyre/1.0/eyre/struct.Error.html
+[ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
 
 ```toml
 [dependencies]
@@ -21,7 +22,7 @@ eyre = "1.0"
 
 ## Details
 
-- Use `Result<T, eyre::Error>`, or equivalently `eyre::Result<T>`, as the
+- Use `Result<T, eyre::ErrReport>`, or equivalently `eyre::Result<T>`, as the
   return type of any fallible function.
 
   Within the function, use `?` to easily propagate any error that implements the
@@ -99,7 +100,7 @@ eyre = "1.0"
   ```
 
 - One-off error messages can be constructed using the `eyre!` macro, which
-  supports string interpolation and produces an `eyre::Error`.
+  supports string interpolation and produces an `eyre::ErrReport`.
 
   ```rust
   return Err(eyre!("Missing attribute: {}", missing));
@@ -120,14 +121,14 @@ eyre = { version = "1.0", default-features = false }
 
 Since the `?`-based error conversions would normally rely on the
 `std::error::Error` trait which is only available through std, no_std mode will
-require an explicit `.map_err(Error::msg)` when working with a non-Eyre error
+require an explicit `.map_err(ErrReport::msg)` when working with a non-Eyre error
 type inside a function that returns Eyre's error type.
 
 <br>
 
 ## Comparison to failure
 
-The `eyre::Error` type works something like `failure::Error`, but unlike
+The `eyre::ErrReport` type works something like `failure::Error`, but unlike
 failure ours is built around the standard library's `std::error::Error` trait
 rather than a separate trait `failure::Fail`. The standard library has adopted
 the necessary improvements for this to be possible as part of [RFC 2504].
