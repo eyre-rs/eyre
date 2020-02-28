@@ -1,5 +1,5 @@
 Jane-Eyre
-=========================
+=========
 
 [![Build Status][actions-badge]][actions-url]
 [![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
@@ -9,16 +9,16 @@ This library provides [`eyre::ErrReport`][ErrReport], a trait object based
 error handling type for easy idiomatic error handling and reporting in Rust
 applications.
 
-First and foremost, this crate is a fork of `anyhow` by @dtolnay. My goal in
-writing this crate is to explore new directions of handling context and to
-explore new ways to communicate the intended usage of this crate via changes to
-the API.
+This crate is a fork of `anyhow` by @dtolnay. My goal in writing this crate is
+to explore new ways to associate context with errors, to cleanly separate the
+concept of an error and context about an error, and to more clearly communicate
+the intended usage of this crate via changes to the API.
 
 The main changes this crate brings to anyhow are
 
 * Addition of the [`eyre::EyreContext`] trait and a type parameter on the core error
   handling type which users can use to insert custom forms of context into
-  their general error type.
+  their catch all error handling type.
 * Rebranding the type as principally for error reporting, rather than
   describing it as an error type in its own right. This type is not an error,
   it contains errors that it masqerades as, and provides helpers for creating
@@ -141,8 +141,6 @@ type Result<T, E = eyre::ErrReport<MyContext>> = core::result::Result<T, E>;
 [dependencies]
 eyre = "0.2"
 ```
-
-*Compiler support: requires rustc 1.34+*
 
 <br>
 
