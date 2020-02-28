@@ -494,6 +494,7 @@ where
     object_ref: unsafe fn(&ErrorImpl<(), C>) -> &(dyn StdError + Send + Sync + 'static),
     #[cfg(feature = "std")]
     object_mut: unsafe fn(&mut ErrorImpl<(), C>) -> &mut (dyn StdError + Send + Sync + 'static),
+    #[allow(clippy::type_complexity)]
     object_boxed: unsafe fn(Box<ErrorImpl<(), C>>) -> Box<dyn StdError + Send + Sync + 'static>,
     object_downcast: unsafe fn(&ErrorImpl<(), C>, TypeId) -> Option<NonNull<()>>,
     object_drop_rest: unsafe fn(Box<ErrorImpl<(), C>>, TypeId),
