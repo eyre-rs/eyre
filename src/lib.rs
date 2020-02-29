@@ -169,7 +169,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = { version = "0.2", default-features = false }
+//! eyre = { version = "0.3", default-features = false }
 //! ```
 //!
 //! Since the `?`-based error conversions would normally rely on the
@@ -177,7 +177,7 @@
 //! will require an explicit `.map_err(ErrReport::msg)` when working with a
 //! non-Eyre error type inside a function that returns Eyre's error type.
 
-#![doc(html_root_url = "https://docs.rs/eyre/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.3.0")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
