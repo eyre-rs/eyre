@@ -53,32 +53,6 @@ rendering custom defined runtime context.
 [dependencies]
 eyre = "0.3"
 ```
-
-**Note**: The way the `eyre!` macro works in practice differs from how
-`anyhow!` works due to the addition of the generic type parameter. In anyhow
-the following is valid.
-
-```rust
-// Works
-let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value)).unwrap();
-```
-
-Where as with `eyre!` this will fail due to being unable to infer the type for
-the Context parameter. The solution to this problem, should you encounter it,
-is to give the compiler a hint for what type it should be resolving to, either
-via your return type or a type annotation.
-
-```rust
-// Broken
-let val = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
-
-// Works
-let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
-```
-[ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
-[actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
-[actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
-
 <br>
 
 ## Customization
@@ -300,6 +274,34 @@ failures the caller gets exactly the information that you choose.
 [thiserror]: https://github.com/dtolnay/thiserror
 
 <br>
+
+## Incompatibilities with anyhow
+
+Beyond the fact that eyre renames many of the core APIs in anyhow the addition
+of the type parameter makes the `eyre!` macro not work in certain places where
+`anyhow!` does work. In anyhow the following is valid.
+
+```rust
+// Works
+let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value)).unwrap();
+```
+
+Where as with `eyre!` this will fail due to being unable to infer the type for
+the Context parameter. The solution to this problem, should you encounter it,
+is to give the compiler a hint for what type it should be resolving to, either
+via your return type or a type annotation.
+
+```rust
+// Broken
+let val = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
+
+// Works
+let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
+```
+[ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
+[actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
+[actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
+
 
 #### License
 
