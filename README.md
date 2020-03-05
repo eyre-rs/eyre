@@ -9,10 +9,10 @@ This library provides [`eyre::ErrReport`][ErrReport], a trait object based
 error handling type for easy idiomatic error handling and reporting in Rust
 applications.
 
-This crate is a fork of `anyhow` by @dtolnay. By default this crate does not
-add any new features that `anyhow` doesn't already support. If you're not
-already familiar with `anyhow` and you're just looking for a catch all error
-type you should probably just stick with `anyhow`. The magic of this crate is
+This crate is a fork of [`anyhow`] by @dtolnay. By default this crate does not
+add any new features that anyhow doesn't already support. If you're not
+already familiar with anyhow and you're just looking for a catch all error
+type you should probably just stick with anyhow. The magic of this crate is
 when you need to add extra information to anyhow beyond what you can insert
 into the error chain. For an example of a customized version of eyre check out
 [`jane-eyre`](https://github.com/yaahc/jane-eyre).
@@ -300,9 +300,10 @@ let val = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 ```
 [ErrReport]: https://docs.rs/eyre/*/eyre/struct.ErrReport.html
-[`eyre::Context`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
+[`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
 [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
+[`anyhow`]: https://github.com/dtolnay/anyhow
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing-error/struct.SpanTrace.html
 [actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
 [actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
