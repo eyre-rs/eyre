@@ -1,5 +1,5 @@
-Jane-Eyre
-=========
+Eyre
+====
 
 [![Build Status][actions-badge]][actions-url]
 [![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)

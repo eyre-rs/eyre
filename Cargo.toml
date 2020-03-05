@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.3.0" # remember to update html_root_url
+version = "0.3.1" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -21,4 +21,4 @@ thiserror = "1.0"
 trybuild = { version = "1.0.19", features = ["diff"] }
 
 [dependencies]
-indenter = "0.1.1"
+indenter = "^0.1.1"
