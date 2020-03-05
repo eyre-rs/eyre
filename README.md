@@ -279,7 +279,8 @@ failures the caller gets exactly the information that you choose.
 
 Beyond the fact that eyre renames many of the core APIs in anyhow the addition
 of the type parameter makes the `eyre!` macro not work in certain places where
-`anyhow!` does work. In anyhow the following is valid.
+`anyhow!` does work. In
+anyhow the following is valid.
 
 ```rust
 // Works
@@ -298,7 +299,11 @@ let val = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 // Works
 let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 ```
-[ErrReport]: https://docs.rs/eyre/1.0/eyre/struct.ErrReport.html
+[ErrReport]: https://docs.rs/eyre/*/eyre/struct.ErrReport.html
+[`eyre::Context`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
+[`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
+[`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
+[`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing-error/struct.SpanTrace.html
 [actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
 [actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
 
