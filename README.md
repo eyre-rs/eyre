@@ -46,7 +46,7 @@ The main changes this crate brings to anyhow are
   the type of the custom context.
 
 These changes were made in order to facilitate the usage of
-[`tracing::SpanTrace`] with anyhow, which is a Backtrace-like type for
+[`tracing_error::SpanTrace`] with anyhow, which is a Backtrace-like type for
 rendering custom defined runtime context.
 
 ```toml
