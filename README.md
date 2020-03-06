@@ -161,20 +161,21 @@ type Result<T, E = eyre::ErrReport<MyContext>> = core::result::Result<T, E>;
   }
   ```
 
-- Attach context to help the person troubleshooting the error understand where
-  things went wrong. A low-level error like "No such file or directory" can be
-  annoying to debug without more context about what higher level step the
-  application was in the middle of.
+- Wrap a lower level error with a new error created from a message to help the
+  person troubleshooting understand what the chain of failures that occured. A
+  low-level error like "No such file or directory" can be annoying to debug
+  without more information about what higher level step the application was in
+  the middle of.
 
   ```rust
   use eyre::{WrapErr, Result};
 
   fn main() -> Result<()> {
       ...
-      it.detach().context("Failed to detach the important thing")?;
+      it.detach().wrap_err("Failed to detach the important thing")?;
 
       let content = std::fs::read(path)
-          .with_context(|| format!("Failed to read instrs from {}", path))?;
+          .wrap_err_with(|| format!("Failed to read instrs from {}", path))?;
       ...
   }
   ```
