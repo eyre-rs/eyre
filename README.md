@@ -10,11 +10,11 @@ error handling type for easy idiomatic error handling and reporting in Rust
 applications.
 
 This crate is a fork of [`anyhow`] by @dtolnay. By default this crate does not
-add any new features that anyhow doesn't already support. If you're not
-already familiar with anyhow and you're just looking for a catch all error
-type you should probably just stick with anyhow. The magic of this crate is
-when you need to add extra information to anyhow beyond what you can insert
-into the error chain. For an example of a customized version of eyre check out
+add any new features that anyhow doesn't already support, though it does rename
+a number of the APIs to try to make the proper usage more obvious. The magic of
+this crate is when you need to add extra context to a chain of errors beyond
+what you can or should insert into the error chain. For an example of a
+customized version of eyre check out
 [`jane-eyre`](https://github.com/yaahc/jane-eyre).
 
 My goal in writing this crate is to explore new ways to associate context with
