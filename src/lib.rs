@@ -71,9 +71,9 @@
 //! }
 //! ```
 //!
-//! * `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>) -> fmt Result`
-//!   it's companion `display` version. - For formatting the entire error chain and
-//!   the user provided context.
+//! * `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>)
+//!   -> fmt Result` and it's companion fn `display`. - For formatting the entire
+//!   error chain and the user provided context.
 //!
 //! When overriding the context it no longer makes sense for `eyre::ErrReport` to
 //! provide the `Display` and `Debug` implementations for the user, becase we
@@ -306,6 +306,13 @@
 //! `std::error::ErrReport` trait which is only available through std, no_std mode
 //! will require an explicit `.map_err(ErrReport::msg)` when working with a
 //! non-Eyre error type inside a function that returns Eyre's error type.
+//!
+//! [ErrReport]: https://docs.rs/eyre/*/eyre/struct.ErrReport.html
+//! [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
+//! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
+//! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
+//! [`anyhow`]: https://github.com/dtolnay/anyhow
+//! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing-error/struct.SpanTrace.html
 
 #![doc(html_root_url = "https://docs.rs/eyre/0.3.5")]
 #![cfg_attr(backtrace, feature(backtrace))]

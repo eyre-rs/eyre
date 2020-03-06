@@ -79,9 +79,9 @@ fn default(error: &(dyn StdError + 'static)) -> Self {
 }
 ```
 
-* `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>) -> fmt Result`
-  it's companion `display` version. - For formatting the entire error chain and
-  the user provided context.
+* `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>)
+  -> fmt Result` and it's companion fn `display`. - For formatting the entire
+  error chain and the user provided context.
 
 When overriding the context it no longer makes sense for `eyre::ErrReport` to
 provide the `Display` and `Debug` implementations for the user, becase we
