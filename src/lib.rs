@@ -557,7 +557,7 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 /// }
 /// ```
 ///
-/// When printed, the outermost context would be printed first and the lower
+/// When printed, the outermost error would be printed first and the lower
 /// level underlying causes would be enumerated below.
 ///
 /// ```console
@@ -571,21 +571,20 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 ///
 /// # Effect on downcasting
 ///
-/// After attaching context of type `C` onto an error of type `E`, the resulting
-/// `eyre::Error` may be downcast to `C` **or** to `E`.
+/// After attaching a message of type `D` onto an error of type `E`, the resulting
+/// `eyre::Error` may be downcast to `D` **or** to `E`.
 ///
-/// That is, in codebases that rely on downcasting, Eyre's context supports
+/// That is, in codebases that rely on downcasting, Eyre's wrap_err supports
 /// both of the following use cases:
 ///
-///   - **Attaching context whose type is insignificant onto errors whose type
+///   - **Attaching messages whose type is insignificant onto errors whose type
 ///     is used in downcasts.**
 ///
-///     In other error libraries whose context is not designed this way, it can
-///     be risky to introduce context to existing code because new context might
+///     In other error libraries whose wrap_err is not designed this way, it can
+///     be risky to introduce messages to existing code because new message might
 ///     break existing working downcasts. In Eyre, any downcast that worked
-///     before adding context will continue to work after you add a context, so
-///     you should freely add human-readable context to errors wherever it would
-///     be helpful.
+///     before adding the message will continue to work after you add a message, so
+///     you should freely wrap errors wherever it would be helpful.
 ///
 ///     ```
 ///     # use eyre::bail;
@@ -620,10 +619,10 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 ///     }
 ///     ```
 ///
-///   - **Attaching context whose type is used in downcasts onto errors whose
+///   - **Attaching message whose type is used in downcasts onto errors whose
 ///     type is insignificant.**
 ///
-///     Some codebases prefer to use machine-readable context to categorize
+///     Some codebases prefer to use machine-readable messages to categorize
 ///     lower level errors in a way that will be actionable to higher levels of
 ///     the application.
 ///
