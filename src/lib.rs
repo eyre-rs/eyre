@@ -38,10 +38,9 @@
 //!   # fn main() {}
 //!   ```
 //!
-//! - Attach context to help the person troubleshooting the error understand
-//!   where things went wrong. A low-level error like "No such file or
-//!   directory" can be annoying to debug without more context about what higher
-//!   level step the application was in the middle of.
+//! - Create new errors from messages to help the person troubleshooting the error understand where
+//! things went wrong. A low-level error like "No such file or directory" can be annoying to
+//! directly and often benefit from being wrapped with higher level error messages.
 //!
 //!   ```
 //!   # struct It;
@@ -250,10 +249,9 @@ pub use eyre as format_err;
 ///
 /// # Display representations
 ///
-/// When you print an error object using "{}" or to_string(), only the outermost
-/// underlying error or context is printed, not any of the lower level causes.
-/// This is exactly as if you had called the Display impl of the error from
-/// which you constructed your eyre::ErrReport.
+/// When you print an error object using "{}" or to_string(), only the outermost underlying error
+/// is printed, not any of the lower level causes. This is exactly as if you had called the Display
+/// impl of the error from which you constructed your eyre::ErrReport.
 ///
 /// ```console
 /// Failed to read instrs from ./path/to/instrs.json
@@ -612,7 +610,7 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 ///         let err = do_it().unwrap_err();
 ///         if let Some(e) = err.downcast_ref::<SuspiciousError>() {
 ///             // If helper() returned SuspiciousError, this downcast will
-///             // correctly succeed even with the context in between.
+///             // correctly succeed even with the message in between.
 ///             # return;
 ///         }
 ///         # panic!("expected downcast to succeed");
@@ -652,7 +650,7 @@ pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
 ///         let err = do_it().unwrap_err();
 ///         if let Some(e) = err.downcast_ref::<HelperFailed>() {
 ///             // If helper failed, this downcast will succeed because
-///             // HelperFailed is the context that has been attached to
+///             // HelperFailed is the message that has been attached to
 ///             // that error.
 ///             # return;
 ///         }

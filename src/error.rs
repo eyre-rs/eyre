@@ -184,15 +184,14 @@ where
         ErrReport { inner }
     }
 
-    /// Wrap the error value with additional context.
+    /// Create a new error from an error message to wrap the existing error.
     ///
-    /// For attaching context to a `Result` as it is propagated, the
-    /// [`WrapErr`][crate::WrapErr] extension trait may be more convenient than
-    /// this function.
+    /// For attaching a higher level error message to a `Result` as it is propagated, the
+    /// [`WrapErr`][crate::WrapErr] extension trait may be more convenient than this function.
     ///
-    /// The primary reason to use `error.context(...)` instead of
-    /// `result.context(...)` via the `WrapErr` trait would be if the context
-    /// needs to depend on some data held by the underlying error:
+    /// The primary reason to use `error.wrap_err(...)` instead of `result.wrap_err(...)` via the
+    /// `WrapErr` trait would be if the message needs to depend on some data held by the underlying
+    /// error:
     ///
     /// ```
     /// # use std::fmt::{self, Debug, Display};
@@ -230,11 +229,11 @@ where
     /// pub fn parse(path: impl AsRef<Path>) -> Result<T> {
     ///     let file = File::open(&path)?;
     ///     parse_impl(file).map_err(|error| {
-    ///         let context = format!(
+    ///         let message = format!(
     ///             "only the first {} lines of {} are valid",
     ///             error.line, path.as_ref().display(),
     ///         );
-    ///         eyre::ErrReport::new(error).wrap_err(context)
+    ///         eyre::ErrReport::new(error).wrap_err(message)
     ///     })
     /// }
     /// ```
@@ -317,10 +316,9 @@ where
 
     /// Returns true if `E` is the type held by this error object.
     ///
-    /// For errors with context, this method returns true if `E` matches the
-    /// type of the context `D` **or** the type of the error on which the
-    /// context has been attached. For details about the interaction between
-    /// context and downcasting, [see here].
+    /// For errors constructed from messages, this method returns true if `E` matches the type of
+    /// the message `D` **or** the type of the error on which the message has been attached. For
+    /// details about the interaction between message and downcasting, [see here].
     ///
     /// [see here]: trait.WrapErr.html#effect-on-downcasting
     pub fn is<E>(&self) -> bool
