@@ -176,7 +176,7 @@
 //! will require an explicit `.map_err(ErrReport::msg)` when working with a
 //! non-Eyre error type inside a function that returns Eyre's error type.
 
-#![doc(html_root_url = "https://docs.rs/eyre/0.3.3")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.3.4")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
