@@ -11,8 +11,8 @@ applications.
 
 This crate is a fork of [`anyhow`] by @dtolnay. By default this crate does not
 add any new features that anyhow doesn't already support, though it does rename
-a number of the APIs to try to make the proper usage more obvious. The magic of
-this crate is when you need to add extra context to a chain of errors beyond
+a number of the APIs to try to make the intended usage more obvious. The magic
+of this crate is when you need to add extra context to a chain of errors beyond
 what you can or should insert into the error chain. For an example of a
 customized version of eyre check out
 [`jane-eyre`](https://github.com/yaahc/jane-eyre).
@@ -40,14 +40,14 @@ The main changes this crate brings to anyhow are
 * Changing the [`anyhow::Context`] trait to [`eyre::WrapErr`] to make it clear
   that it is unrelated to the [`eyre::EyreContext`] trait and member, and is
   only for inserting new errors into the chain of errors.
-* Addition of new context helpers on `EyreContext` (`member_ref`/`member_mut`)
+* Addition of new context helpers `member_ref`/`member_mut` on `EyreContext`
   and `context`/`context_mut` on `ErrReport` for working with the custom
   context and extracting forms of context based on their type independent of
   the type of the custom context.
 
 These changes were made in order to facilitate the usage of
 [`tracing_error::SpanTrace`] with anyhow, which is a Backtrace-like type for
-rendering custom defined runtime context.
+rendering custom defined runtime context setup via tracing spans.
 
 ```toml
 [dependencies]
