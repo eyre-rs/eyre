@@ -305,7 +305,7 @@ let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value))
 [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
 [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 [`anyhow`]: https://github.com/dtolnay/anyhow
-[`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing-error/struct.SpanTrace.html
+[`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 [actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
 [actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
 
