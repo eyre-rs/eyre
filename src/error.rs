@@ -93,7 +93,8 @@ where
         };
 
         // Safety: passing vtable that operates on the right type E.
-        unsafe { ErrReport::construct(error, vtable) }
+        let context = Some(C::default(&error));
+        unsafe { ErrReport::construct(error, vtable, context) }
     }
 
     pub(crate) fn from_adhoc<M>(message: M) -> Self
@@ -114,7 +115,8 @@ where
 
         // Safety: MessageError is repr(transparent) so it is okay for the
         // vtable to allow casting the MessageError<M> to M.
-        unsafe { ErrReport::construct(error, vtable) }
+        let context = Some(C::default(&error));
+        unsafe { ErrReport::construct(error, vtable, context) }
     }
 
     #[cfg(feature = "std")]
@@ -136,13 +138,15 @@ where
         };
 
         // Safety: passing vtable that operates on the right type.
-        unsafe { ErrReport::construct(error, vtable) }
+        let context = Some(C::default(&error));
+        unsafe { ErrReport::construct(error, vtable, context) }
     }
 
     #[cfg(feature = "std")]
     pub(crate) fn from_boxed(error: Box<dyn StdError + Send + Sync>) -> Self {
         use crate::wrapper::BoxedError;
         let error = BoxedError(error);
+        let context = Some(C::default(&error));
         let vtable = &ErrorVTable {
             object_drop: object_drop::<BoxedError, C>,
             object_ref: object_ref::<BoxedError, C>,
@@ -155,7 +159,7 @@ where
 
         // Safety: BoxedError is repr(transparent) so it is okay for the vtable
         // to allow casting to Box<dyn StdError + Send + Sync>.
-        unsafe { ErrReport::construct(error, vtable) }
+        unsafe { ErrReport::construct(error, vtable, context) }
     }
 
     // Takes backtrace as argument rather than capturing it here so that the
@@ -163,11 +167,10 @@ where
     //
     // Unsafe because the given vtable must have sensible behavior on the error
     // value of type E.
-    unsafe fn construct<E>(error: E, vtable: &'static ErrorVTable<C>) -> Self
+    unsafe fn construct<E>(error: E, vtable: &'static ErrorVTable<C>, context: Option<C>) -> Self
     where
         E: StdError + Send + Sync + 'static,
     {
-        let context = C::default(&error);
         let inner = Box::new(ErrorImpl {
             vtable,
             context,
@@ -237,10 +240,11 @@ where
     ///     })
     /// }
     /// ```
-    pub fn wrap_err<D>(self, msg: D) -> Self
+    pub fn wrap_err<D>(mut self, msg: D) -> Self
     where
         D: Display + Send + Sync + 'static,
     {
+        let context = self.inner.context.take();
         let error: ContextError<D, ErrReport<C>> = ContextError { msg, error: self };
 
         let vtable = &ErrorVTable {
@@ -254,7 +258,7 @@ where
         };
 
         // Safety: passing vtable that operates on the right type.
-        unsafe { ErrReport::construct(error, vtable) }
+        unsafe { ErrReport::construct(error, vtable, context) }
     }
 
     /// Get the backtrace for this ErrReport.
@@ -433,11 +437,11 @@ where
     }
 
     pub fn context(&self) -> &C {
-        &self.inner.context
+        self.inner.context.as_ref().unwrap()
     }
 
     pub fn context_mut(&mut self) -> &mut C {
-        &mut self.inner.context
+        self.inner.context.as_mut().unwrap()
     }
 }
 
@@ -685,7 +689,7 @@ where
     C: EyreContext,
 {
     vtable: &'static ErrorVTable<C>,
-    pub(crate) context: C,
+    pub(crate) context: Option<C>,
     // NOTE: Don't use directly. Use only through vtable. Erased type may have
     // different alignment.
     _object: E,
@@ -730,12 +734,16 @@ where
 
     pub fn member_ref<T: Any>(&self) -> Option<&T> {
         self.context
+            .as_ref()
+            .unwrap()
             .member_ref(TypeId::of::<T>())?
             .downcast_ref::<T>()
     }
 
     pub fn member_mut<T: Any>(&mut self) -> Option<&mut T> {
         self.context
+            .as_mut()
+            .unwrap()
             .member_mut(TypeId::of::<T>())?
             .downcast_mut::<T>()
     }
