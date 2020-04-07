@@ -58,8 +58,8 @@ eyre = "0.3"
 ## Customization
 
 In order to insert your own custom context type you must first implement the
-`eyre::EyreContext` trait for said type, which has three required methods and
-two optional methods.
+`eyre::EyreContext` trait for said type, which has two required methods and
+three optional methods.
 
 ### Required Methods
 
@@ -80,8 +80,8 @@ fn default(error: &(dyn StdError + 'static)) -> Self {
 ```
 
 * `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>)
-  -> fmt Result` and it's companion fn `display`. - For formatting the entire
-  error chain and the user provided context.
+  -> fmt Result` and optionally `display` - For formatting the entire error
+  chain and the user provided context.
 
 When overriding the context it no longer makes sense for `eyre::ErrReport` to
 provide the `Display` and `Debug` implementations for the user, becase we

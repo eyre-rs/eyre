@@ -50,8 +50,8 @@
 //! ## Customization
 //!
 //! In order to insert your own custom context type you must first implement the
-//! `eyre::EyreContext` trait for said type, which has three required methods and
-//! two optional methods.
+//! `eyre::EyreContext` trait for said type, which has two required methods and
+//! three optional methods.
 //!
 //! ### Required Methods
 //!
@@ -72,7 +72,7 @@
 //! ```
 //!
 //! * `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>)
-//!   -> fmt Result` and it's companion fn `display`. - For formatting the entire
+//!   -> fmt Result` and optionally `display`. - For formatting the entire
 //!   error chain and the user provided context.
 //!
 //! When overriding the context it no longer makes sense for `eyre::ErrReport` to
@@ -314,7 +314,7 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing-error/struct.SpanTrace.html
 
-#![doc(html_root_url = "https://docs.rs/eyre/0.3.5")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.3.6")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
@@ -485,7 +485,17 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
         &self,
         error: &(dyn StdError + 'static),
         f: &mut core::fmt::Formatter<'_>,
-    ) -> core::fmt::Result;
+    ) -> core::fmt::Result {
+        write!(f, "{}", error)?;
+
+        if f.alternate() {
+            for cause in crate::chain::Chain::new(error).skip(1) {
+                write!(f, ": {}", cause)?;
+            }
+        }
+
+        Ok(())
+    }
 
     fn debug(
         &self,
@@ -512,22 +522,6 @@ impl EyreContext for DefaultContext {
         } else {
             None
         }
-    }
-
-    fn display(
-        &self,
-        error: &(dyn StdError + 'static),
-        f: &mut core::fmt::Formatter<'_>,
-    ) -> core::fmt::Result {
-        write!(f, "{}", error)?;
-
-        if f.alternate() {
-            for cause in crate::chain::Chain::new(error).skip(1) {
-                write!(f, ": {}", cause)?;
-            }
-        }
-
-        Ok(())
     }
 
     fn debug(
