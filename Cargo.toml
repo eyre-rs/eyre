@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.3.6" # remember to update html_root_url
+version = "0.3.7" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
