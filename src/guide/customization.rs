@@ -20,8 +20,8 @@
 //! ```
 //!
 //! Now this context doesn't add much context, but it does have the advantage of removing context,
-//! aka the backtrace, that may be unnecessary. To use this backtrace we need to implement
-//! `EyreContext` which provides the necessary interface for eyre construct and use your context.
+//! aka the backtrace, that may be unnecessary. To use this context we need to implement
+//! `EyreContext`. This provides the necessary interface for eyre to construct and use your context.
 //!
 //! First, we have to impl `default` so eyre knows how to construct your context when it creates
 //! your `Report from a `std::error::Error`:
