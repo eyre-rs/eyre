@@ -1,6 +1,6 @@
-use eyre::{eyre, ErrReport};
+use eyre::{eyre, Report};
 
-fn error() -> ErrReport {
+fn error() -> Report {
     eyre!(0).wrap_err(1).wrap_err(2).wrap_err(3)
 }
 

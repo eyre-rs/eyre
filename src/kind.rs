@@ -1,21 +1,21 @@
 // Tagged dispatch mechanism for resolving the behavior of `eyre!($expr)`.
 //
-// When eyre! is given a single expr argument to turn into eyre::ErrReport, we
-// want the resulting ErrReport to pick up the input's implementation of source()
+// When eyre! is given a single expr argument to turn into eyre::Report, we
+// want the resulting Report to pick up the input's implementation of source()
 // and backtrace() if it has a std::error::Error impl, otherwise require nothing
 // more than Display and Debug.
 //
 // Expressed in terms of specialization, we want something like:
 //
 //     trait EyreNew {
-//         fn new(self) -> ErrReport;
+//         fn new(self) -> Report;
 //     }
 //
 //     impl<T> EyreNew for T
 //     where
 //         T: Display + Debug + Send + Sync + 'static,
 //     {
-//         default fn new(self) -> ErrReport {
+//         default fn new(self) -> Report {
 //             /* no std error impl */
 //         }
 //     }
@@ -24,7 +24,7 @@
 //     where
 //         T: std::error::Error + Send + Sync + 'static,
 //     {
-//         fn new(self) -> ErrReport {
+//         fn new(self) -> Report {
 //             /* use std error's source() and backtrace() */
 //         }
 //     }
@@ -44,7 +44,7 @@
 //     let error = $msg;
 //     (&error).eyre_kind().new(error)
 
-use crate::{ErrReport, EyreContext};
+use crate::{EyreContext, Report};
 use core::fmt::{Debug, Display};
 
 #[cfg(feature = "std")]
@@ -65,11 +65,11 @@ pub trait AdhocKind: Sized {
 impl<T> AdhocKind for &T where T: ?Sized + Display + Debug + Send + Sync + 'static {}
 
 impl Adhoc {
-    pub fn new<M, C: EyreContext>(self, message: M) -> ErrReport<C>
+    pub fn new<M, C: EyreContext>(self, message: M) -> Report<C>
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        ErrReport::from_adhoc(message)
+        Report::from_adhoc(message)
     }
 }
 
@@ -82,12 +82,12 @@ pub trait TraitKind: Sized {
     }
 }
 
-impl<E> TraitKind for E where E: Into<ErrReport> {}
+impl<E> TraitKind for E where E: Into<Report> {}
 
 impl Trait {
-    pub fn new<E>(self, error: E) -> ErrReport
+    pub fn new<E>(self, error: E) -> Report
     where
-        E: Into<ErrReport>,
+        E: Into<Report>,
     {
         error.into()
     }
@@ -109,7 +109,7 @@ impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 
 #[cfg(feature = "std")]
 impl Boxed {
-    pub fn new<C: EyreContext>(self, error: Box<dyn StdError + Send + Sync>) -> ErrReport<C> {
-        ErrReport::from_boxed(error)
+    pub fn new<C: EyreContext>(self, error: Box<dyn StdError + Send + Sync>) -> Report<C> {
+        Report::from_boxed(error)
     }
 }

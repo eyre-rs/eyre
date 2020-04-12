@@ -1,4 +1,4 @@
-//! This library provides [`eyre::ErrReport`][ErrReport], a trait object based error
+//! This library provides [`eyre::Report`][Report], a trait object based error
 //! type for easy idiomatic error handling in Rust applications.
 //!
 //! This crate is a fork of [`anyhow`] by @dtolnay. By default this crate does not
@@ -23,7 +23,7 @@
 //!   describing it as an error type in its own right. What is and isn't an error
 //!   is a fuzzy concept, for the purposes of this crate though errors are types
 //!   that implement `std::error::Error`, and you'll notice that this trait
-//!   implementation is conspicuously absent on `ErrReport`. Instead it contains
+//!   implementation is conspicuously absent on `Report`. Instead it contains
 //!   errors that it masqerades as, and provides helpers for creating new errors to
 //!   wrap those errors and for displaying those chains of errors, and the included
 //!   context, to the end user. The goal is to make it obvious that this type is
@@ -33,7 +33,7 @@
 //!   that it is unrelated to the [`eyre::EyreContext`] trait and member, and is
 //!   only for inserting new errors into the chain of errors.
 //! * Addition of new context helpers on `EyreContext` (`member_ref`/`member_mut`)
-//!   and `context`/`context_mut` on `ErrReport` for working with the custom
+//!   and `context`/`context_mut` on `Report` for working with the custom
 //!   context and extracting forms of context based on their type independent of
 //!   the type of the custom context.
 //!
@@ -75,7 +75,7 @@
 //!   -> fmt Result` and optionally `display`. - For formatting the entire
 //!   error chain and the user provided context.
 //!
-//! When overriding the context it no longer makes sense for `eyre::ErrReport` to
+//! When overriding the context it no longer makes sense for `eyre::Report` to
 //! provide the `Display` and `Debug` implementations for the user, becase we
 //! cannot predict what forms of context you will need to display along side your
 //! chain of errors. Instead we forward the implementations of `Display` and
@@ -100,11 +100,11 @@
 //!   getting a mutable reference in the same way.
 //!
 //! This method is like a flexible version of the `fn backtrace(&self)` method on
-//! the `Error` trait. The main `ErrReport` type provides versions of these methods
+//! the `Error` trait. The main `Report` type provides versions of these methods
 //! that use type inference to get the typeID that should be used by inner trait fn
 //! to pick a member to return.
 //!
-//! **Note**: The `backtrace()` fn on `ErrReport` relies on the implementation of
+//! **Note**: The `backtrace()` fn on `Report` relies on the implementation of
 //! this function to get the backtrace from the user provided context if one
 //! exists. If you wish your type to guaruntee that it captures a backtrace for any
 //! error it wraps you **must** implement `member_ref` and provide a path to return
@@ -127,20 +127,20 @@
 //!
 //!
 //! ```rust,compile_fail
-//! type ErrReport = eyre::ErrReport<MyContext>;
+//! type Report = eyre::Report<MyContext>;
 //!
 //! // And optionally...
-//! type Result<T, E = eyre::ErrReport<MyContext>> = core::result::Result<T, E>;
+//! type Result<T, E = eyre::Report<MyContext>> = core::result::Result<T, E>;
 //! ```
 //! <br>
 //!
 //! # Details
 //!
-//! - Use `Result<T, eyre::ErrReport>`, or equivalently `eyre::Result<T>`, as
+//! - Use `Result<T, eyre::Report>`, or equivalently `eyre::Result<T>`, as
 //!   the return type of any fallible function.
 //!
 //!   Within the function, use `?` to easily propagate any error that implements
-//!   the `std::error::ErrReport` trait.
+//!   the `std::error::Report` trait.
 //!
 //!   ```
 //!   # pub trait Deserialize {}
@@ -218,7 +218,7 @@
 //!   mutable reference as needed.
 //!
 //!   ```
-//!   # use eyre::{ErrReport, eyre};
+//!   # use eyre::{Report, eyre};
 //!   # use std::fmt::{self, Display};
 //!   # use std::task::Poll;
 //!   #
@@ -237,7 +237,7 @@
 //!   #
 //!   # const REDACTED_CONTENT: () = ();
 //!   #
-//!   # let error: ErrReport = eyre!("...");
+//!   # let error: Report = eyre!("...");
 //!   # let root_cause = &error;
 //!   #
 //!   # let ret =
@@ -277,7 +277,7 @@
 //!   ```
 //!
 //! - One-off error messages can be constructed using the `eyre!` macro, which
-//!   supports string interpolation and produces an `eyre::ErrReport`.
+//!   supports string interpolation and produces an `eyre::Report`.
 //!
 //!   ```
 //!   # use eyre::{eyre, Result};
@@ -303,11 +303,11 @@
 //! ```
 //!
 //! Since the `?`-based error conversions would normally rely on the
-//! `std::error::ErrReport` trait which is only available through std, no_std mode
-//! will require an explicit `.map_err(ErrReport::msg)` when working with a
+//! `std::error::Report` trait which is only available through std, no_std mode
+//! will require an explicit `.map_err(Report::msg)` when working with a
 //! non-Eyre error type inside a function that returns Eyre's error type.
 //!
-//! [ErrReport]: https://docs.rs/eyre/*/eyre/struct.ErrReport.html
+//! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 //! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
 //! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
@@ -371,16 +371,18 @@ pub trait StdError: Debug + Display {
 }
 
 pub use eyre as format_err;
+#[doc(hidden)]
+pub use Report as ErrReport;
 
-/// The `ErrReport` type, a wrapper around a dynamic error type.
+/// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
 ///
-/// `ErrReport` works a lot like `Box<dyn std::error::Error>`, but with these
+/// `Report` works a lot like `Box<dyn std::error::Error>`, but with these
 /// differences:
 ///
-/// - `ErrReport` requires that the error is `Send`, `Sync`, and `'static`.
-/// - `ErrReport` guarantees that a backtrace is available, even if the underlying
+/// - `Report` requires that the error is `Send`, `Sync`, and `'static`.
+/// - `Report` guarantees that a backtrace is available, even if the underlying
 ///   error type does not provide one.
-/// - `ErrReport` is represented as a narrow pointer &mdash; exactly one word in
+/// - `Report` is represented as a narrow pointer &mdash; exactly one word in
 ///   size instead of two.
 ///
 /// <br>
@@ -389,7 +391,7 @@ pub use eyre as format_err;
 ///
 /// When you print an error object using "{}" or to_string(), only the outermost underlying error
 /// is printed, not any of the lower level causes. This is exactly as if you had called the Display
-/// impl of the error from which you constructed your eyre::ErrReport.
+/// impl of the error from which you constructed your eyre::Report.
 ///
 /// ```console
 /// Failed to read instrs from ./path/to/instrs.json
@@ -463,7 +465,7 @@ pub use eyre as format_err;
 ///     # Ok(())
 /// }
 /// ```
-pub struct ErrReport<C = DefaultContext>
+pub struct Report<C = DefaultContext>
 where
     C: EyreContext,
 {
@@ -576,15 +578,15 @@ impl EyreContext for DefaultContext {
 
 /// Iterator of a chain of source errors.
 ///
-/// This type is the iterator returned by [`ErrReport::chain`].
+/// This type is the iterator returned by [`Report::chain`].
 ///
 /// # Example
 ///
 /// ```
-/// use eyre::ErrReport;
+/// use eyre::Report;
 /// use std::io;
 ///
-/// pub fn underlying_io_error_kind(error: &ErrReport) -> Option<io::ErrorKind> {
+/// pub fn underlying_io_error_kind(error: &Report) -> Option<io::ErrorKind> {
 ///     for cause in error.chain() {
 ///         if let Some(io_error) = cause.downcast_ref::<io::Error>() {
 ///             return Some(io_error.kind());
@@ -647,7 +649,7 @@ pub struct Chain<'a> {
 ///     Ok(())
 /// }
 /// ```
-pub type Result<T, E = ErrReport<DefaultContext>> = core::result::Result<T, E>;
+pub type Result<T, E = Report<DefaultContext>> = core::result::Result<T, E>;
 
 /// Provides the `wrap_err` method for `Result`.
 ///
@@ -794,13 +796,13 @@ where
     C: EyreContext,
 {
     /// Wrap the error value with a new adhoc error
-    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<C>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report<C>>
     where
         D: Display + Send + Sync + 'static;
 
     /// Wrap the error value with a new adhoc error that is evaluated lazily
     /// only once an error does occur.
-    fn wrap_err_with<D, F>(self, f: F) -> Result<T, ErrReport<C>>
+    fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report<C>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
@@ -809,7 +811,7 @@ where
 // Not public API. Referenced by macro-generated code.
 #[doc(hidden)]
 pub mod private {
-    use crate::{ErrReport, EyreContext};
+    use crate::{EyreContext, Report};
     use core::fmt::{Debug, Display};
 
     //     #[cfg(backtrace)]
@@ -825,11 +827,11 @@ pub mod private {
         pub use crate::kind::BoxedKind;
     }
 
-    pub fn new_adhoc<M, C>(message: M) -> ErrReport<C>
+    pub fn new_adhoc<M, C>(message: M) -> Report<C>
     where
         C: EyreContext,
         M: Display + Debug + Send + Sync + 'static,
     {
-        ErrReport::from_adhoc(message)
+        Report::from_adhoc(message)
     }
 }
