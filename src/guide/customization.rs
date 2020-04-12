@@ -24,7 +24,7 @@
 //! `EyreContext`. This provides the necessary interface for eyre to construct and use your context.
 //!
 //! First, we have to impl `default` so eyre knows how to construct your context when it creates
-//! your `Report from a `std::error::Error`:
+//! your `Report` from a `std::error::Error`:
 //!
 //!
 //! ```rust
