@@ -346,6 +346,7 @@ mod chain;
 mod context;
 mod error;
 mod fmt;
+pub mod guide;
 mod kind;
 mod macros;
 mod wrapper;
