@@ -314,7 +314,7 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing-error/struct.SpanTrace.html
 
-#![doc(html_root_url = "https://docs.rs/eyre/0.3.7")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.3.8")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
