@@ -26,6 +26,7 @@ where
     /// If the error type does not provide a backtrace, a backtrace will be
     /// created here to ensure that a backtrace exists.
     #[cfg(feature = "std")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "std")))]
     pub fn new<E>(error: E) -> Self
     where
         E: StdError + Send + Sync + 'static,
@@ -266,10 +267,18 @@ where
     /// Backtraces are only available on the nightly channel. Tracking issue:
     /// [rust-lang/rust#53487][tracking].
     ///
-    /// In order for the backtrace to be meaningful, the environment variable
-    /// `RUST_LIB_BACKTRACE=1` must be defined. Backtraces are somewhat
+    /// In order for the backtrace to be meaningful, one of the two environment
+    /// variables `RUST_LIB_BACKTRACE=1` or `RUST_BACKTRACE=1` must be defined
+    /// and `RUST_LIB_BACKTRACE` must not be `0`. Backtraces are somewhat
     /// expensive to capture in Rust, so we don't necessarily want to be
     /// capturing them all over the place all the time.
+    ///
+    /// - If you want panics and errors to both have backtraces, set
+    ///   `RUST_BACKTRACE=1`;
+    /// - If you want only errors to have backtraces, set
+    ///   `RUST_LIB_BACKTRACE=1`;
+    /// - If you want only panics to have backtraces, set `RUST_BACKTRACE=1` and
+    ///   `RUST_LIB_BACKTRACE=0`.
     ///
     /// [tracking]: https://github.com/rust-lang/rust/issues/53487
     #[cfg(backtrace)]
