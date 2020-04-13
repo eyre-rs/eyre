@@ -3,7 +3,7 @@ mod drop;
 
 use self::common::*;
 use self::drop::{DetectDrop, Flag};
-use eyre::{DefaultContext, ErrReport};
+use eyre::{DefaultContext, Report};
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;
@@ -71,7 +71,7 @@ fn test_downcast_mut() {
 #[test]
 fn test_drop() {
     let has_dropped = Flag::new();
-    let error: ErrReport = ErrReport::new(DetectDrop::new(&has_dropped));
+    let error: Report = Report::new(DetectDrop::new(&has_dropped));
     drop(error.downcast::<DetectDrop>().unwrap());
     assert!(has_dropped.get());
 }
@@ -90,7 +90,7 @@ fn test_large_alignment() {
 
     impl StdError for LargeAlignedError {}
 
-    let error: ErrReport<DefaultContext> = ErrReport::new(LargeAlignedError("oh no!"));
+    let error: Report<DefaultContext> = Report::new(LargeAlignedError("oh no!"));
     assert_eq!(
         "oh no!",
         error.downcast_ref::<LargeAlignedError>().unwrap().0

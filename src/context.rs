@@ -1,5 +1,5 @@
 use crate::error::ContextError;
-use crate::{ErrReport, EyreContext, StdError, WrapErr};
+use crate::{EyreContext, Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]
@@ -12,7 +12,7 @@ mod ext {
     where
         C: EyreContext,
     {
-        fn ext_report<D>(self, msg: D) -> ErrReport<C>
+        fn ext_report<D>(self, msg: D) -> Report<C>
         where
             D: Display + Send + Sync + 'static;
     }
@@ -23,19 +23,19 @@ mod ext {
         C: EyreContext,
         E: std::error::Error + Send + Sync + 'static,
     {
-        fn ext_report<D>(self, msg: D) -> ErrReport<C>
+        fn ext_report<D>(self, msg: D) -> Report<C>
         where
             D: Display + Send + Sync + 'static,
         {
-            ErrReport::from_msg(msg, self)
+            Report::from_msg(msg, self)
         }
     }
 
-    impl<C> StdError<C> for ErrReport<C>
+    impl<C> StdError<C> for Report<C>
     where
         C: EyreContext,
     {
-        fn ext_report<D>(self, msg: D) -> ErrReport<C>
+        fn ext_report<D>(self, msg: D) -> Report<C>
         where
             D: Display + Send + Sync + 'static,
         {
@@ -49,14 +49,14 @@ where
     C: EyreContext,
     E: ext::StdError<C> + Send + Sync + 'static,
 {
-    fn wrap_err<D>(self, msg: D) -> Result<T, ErrReport<C>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report<C>>
     where
         D: Display + Send + Sync + 'static,
     {
         self.map_err(|error| error.ext_report(msg))
     }
 
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, ErrReport<C>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<C>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -102,7 +102,7 @@ where
     }
 }
 
-impl<D, C> StdError for ContextError<D, ErrReport<C>>
+impl<D, C> StdError for ContextError<D, Report<C>>
 where
     C: EyreContext,
     D: Display,

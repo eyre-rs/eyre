@@ -1,4 +1,4 @@
-use eyre::{eyre, ErrReport};
+use eyre::{eyre, Report};
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;
@@ -26,37 +26,37 @@ impl StdError for TestError {
 
 #[test]
 fn test_literal_source() {
-    let error: ErrReport = eyre!("oh no!");
+    let error: Report = eyre!("oh no!");
     assert!(error.source().is_none());
 }
 
 #[test]
 fn test_variable_source() {
     let msg = "oh no!";
-    let error: ErrReport = eyre!(msg);
+    let error: Report = eyre!(msg);
     assert!(error.source().is_none());
 
     let msg = msg.to_owned();
-    let error: ErrReport = eyre!(msg);
+    let error: Report = eyre!(msg);
     assert!(error.source().is_none());
 }
 
 #[test]
 fn test_fmt_source() {
-    let error: ErrReport = eyre!("{} {}!", "oh", "no");
+    let error: Report = eyre!("{} {}!", "oh", "no");
     assert!(error.source().is_none());
 }
 
 #[test]
 fn test_io_source() {
     let io = io::Error::new(io::ErrorKind::Other, "oh no!");
-    let error: ErrReport = eyre!(TestError::Io(io));
+    let error: Report = eyre!(TestError::Io(io));
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }
 
 #[test]
 fn test_eyre_from_eyre() {
-    let error: ErrReport = eyre!("oh no!").wrap_err("context");
+    let error: Report = eyre!("oh no!").wrap_err("context");
     let error = eyre!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }

@@ -5,7 +5,7 @@ Eyre
 [![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/eyre)
 
-This library provides [`eyre::ErrReport`][ErrReport], a trait object based
+This library provides [`eyre::Report`][Report], a trait object based
 error handling type for easy idiomatic error handling and reporting in Rust
 applications.
 
@@ -31,7 +31,7 @@ The main changes this crate brings to anyhow are
   describing it as an error type in its own right. What is and isn't an error
   is a fuzzy concept, for the purposes of this crate though errors are types
   that implement `std::error::Error`, and you'll notice that this trait
-  implementation is conspicuously absent on `ErrReport`. Instead it contains
+  implementation is conspicuously absent on `Report`. Instead it contains
   errors that it masqerades as, and provides helpers for creating new errors to
   wrap those errors and for displaying those chains of errors, and the included
   context, to the end user. The goal is to make it obvious that this type is
@@ -41,7 +41,7 @@ The main changes this crate brings to anyhow are
   that it is unrelated to the [`eyre::EyreContext`] trait and member, and is
   only for inserting new errors into the chain of errors.
 * Addition of new context helpers `member_ref`/`member_mut` on `EyreContext`
-  and `context`/`context_mut` on `ErrReport` for working with the custom
+  and `context`/`context_mut` on `Report` for working with the custom
   context and extracting forms of context based on their type independent of
   the type of the custom context.
 
@@ -83,7 +83,7 @@ fn default(error: &(dyn StdError + 'static)) -> Self {
   -> fmt Result` and optionally `display` - For formatting the entire error
   chain and the user provided context.
 
-When overriding the context it no longer makes sense for `eyre::ErrReport` to
+When overriding the context it no longer makes sense for `eyre::Report` to
 provide the `Display` and `Debug` implementations for the user, becase we
 cannot predict what forms of context you will need to display along side your
 chain of errors. Instead we forward the implementations of `Display` and
@@ -108,11 +108,11 @@ implementations of `display` and `debug` on `eyre::DefaultContext`
   getting a mutable reference in the same way.
 
 This method is like a flexible version of the `fn backtrace(&self)` method on
-the `Error` trait. The main `ErrReport` type provides versions of these methods
+the `Error` trait. The main `Report` type provides versions of these methods
 that use type inference to get the typeID that should be used by inner trait fn
 to pick a member to return.
 
-**Note**: The `backtrace()` fn on `ErrReport` relies on the implementation of
+**Note**: The `backtrace()` fn on `Report` relies on the implementation of
 this function to get the backtrace from the user provided context if one
 exists. If you wish your type to guaruntee that it captures a backtrace for any
 error it wraps you **must** implement `member_ref` and provide a path to return
@@ -135,17 +135,17 @@ application by defining a type alias.
 
 
 ```rust
-type ErrReport = eyre::ErrReport<MyContext>;
+type Report = eyre::Report<MyContext>;
 
 // And optionally...
-type Result<T, E = eyre::ErrReport<MyContext>> = core::result::Result<T, E>;
+type Result<T, E = eyre::Report<MyContext>> = core::result::Result<T, E>;
 ```
 
 <br>
 
 ## Details
 
-- Use `Result<T, eyre::ErrReport>`, or equivalently `eyre::Result<T>`, as the
+- Use `Result<T, eyre::Report>`, or equivalently `eyre::Result<T>`, as the
   return type of any fallible function.
 
   Within the function, use `?` to easily propagate any error that implements the
@@ -224,7 +224,7 @@ type Result<T, E = eyre::ErrReport<MyContext>> = core::result::Result<T, E>;
   ```
 
 - One-off error messages can be constructed using the `eyre!` macro, which
-  supports string interpolation and produces an `eyre::ErrReport`.
+  supports string interpolation and produces an `eyre::Report`.
 
   ```rust
   return Err(eyre!("Missing attribute: {}", missing));
@@ -249,14 +249,14 @@ eyre = { version = "0.3", default-features = false }
 
 Since the `?`-based error conversions would normally rely on the
 `std::error::Error` trait which is only available through std, no_std mode will
-require an explicit `.map_err(ErrReport::msg)` when working with a non-Eyre error
+require an explicit `.map_err(Report::msg)` when working with a non-Eyre error
 type inside a function that returns Eyre's error type.
 
 <br>
 
 ## Comparison to failure
 
-The `eyre::ErrReport` type works something like `failure::Error`, but unlike
+The `eyre::Report` type works something like `failure::Error`, but unlike
 failure ours is built around the standard library's `std::error::Error` trait
 rather than a separate trait `failure::Fail`. The standard library has adopted
 the necessary improvements for this to be possible as part of [RFC 2504].
@@ -298,9 +298,9 @@ via your return type or a type annotation.
 let val = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 
 // Works
-let val: ErrReport = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
+let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
 ```
-[ErrReport]: https://docs.rs/eyre/*/eyre/struct.ErrReport.html
+[Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
 [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html

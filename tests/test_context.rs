@@ -1,7 +1,7 @@
 mod drop;
 
 use crate::drop::{DetectDrop, Flag};
-use eyre::{ErrReport, Result, WrapErr};
+use eyre::{Report, Result, WrapErr};
 use std::fmt::{self, Display};
 use thiserror::Error;
 
@@ -56,7 +56,7 @@ impl Dropped {
     }
 }
 
-fn make_chain() -> (ErrReport, Dropped) {
+fn make_chain() -> (Report, Dropped) {
     let dropped = Dropped {
         low: Flag::new(),
         mid: Flag::new(),
@@ -77,7 +77,7 @@ fn make_chain() -> (ErrReport, Dropped) {
         .unwrap_err();
 
     // impl Report for Result<T, Error>
-    let high = Err::<(), ErrReport>(mid)
+    let high = Err::<(), Report>(mid)
         .wrap_err(HighLevel {
             message: "failed to start server",
             drop: DetectDrop::new(&dropped.high),
