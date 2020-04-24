@@ -1,4 +1,5 @@
 use crate::{Report, Result};
+use console::style;
 use std::fmt::{self, Display};
 
 /// A helper trait for attaching help text to errors to be displayed after the chain of errors
@@ -185,7 +186,7 @@ impl Display for HelpInfo {
         match self {
             Self::Note(context) => write!(f, "Note: {}", context),
             Self::Warning(context) => write!(f, "Warning: {}", context),
-            Self::Suggestion(context) => write!(f, "Suggestion: {}", context),
+            Self::Suggestion(context) => write!(f, "{}: {}", style("Suggestion").cyan(), context),
         }
     }
 }

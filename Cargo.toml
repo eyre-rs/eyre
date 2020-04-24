@@ -12,6 +12,12 @@ tracing-error = "0.1.2"
 color-backtrace = "0.3.0"
 backtrace = "0.3"
 indenter = "0.1.3"
+console = "0.10.0"
+color-spantrace = { git = "https://github.com/yaahc/color-spantrace.git" }
 
 [patch.crates-io]
-color-backtrace = { path = "/home/jlusby/git/rust/color-backtrace" }
+color-backtrace = { git = "https://github.com/yaahc/color-backtrace.git", branch = "filter-custom" }
+
+[dev-dependencies]
+tracing-subscriber = "0.2.5"
+tracing = "0.1.13"
