@@ -7,3 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+eyre = "0.3.8"
+tracing-error = "0.1.2"
+color-backtrace = "0.3.0"
+backtrace = "0.3"
+indenter = "0.1.3"
+
+[patch.crates-io]
+color-backtrace = { path = "/home/jlusby/git/rust/color-backtrace" }
