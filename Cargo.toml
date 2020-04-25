@@ -1,5 +1,5 @@
 [package]
-name = "human-eyre"
+name = "color-eyre"
 version = "0.2.0"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"

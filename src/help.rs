@@ -10,7 +10,7 @@ pub trait Help<T>: private::Sealed {
     ///
     /// ```rust
     /// # use std::{error::Error, fmt::{self, Display}};
-    /// # use jane_eyre::Result;
+    /// # use color_eyre::Result;
     /// # #[derive(Debug)]
     /// # struct FakeErr;
     /// # impl Display for FakeErr {
@@ -23,7 +23,7 @@ pub trait Help<T>: private::Sealed {
     /// # fn fallible_fn() -> Result<(), FakeErr> {
     /// #       Ok(())
     /// # }
-    /// use jane_eyre::Help as _;
+    /// use color_eyre::Help as _;
     ///
     /// fallible_fn().note("This might have failed due to ...")?;
     /// # Ok(())
@@ -40,7 +40,7 @@ pub trait Help<T>: private::Sealed {
     ///
     /// ```rust
     /// # use std::{error::Error, fmt::{self, Display}};
-    /// # use jane_eyre::Result;
+    /// # use color_eyre::Result;
     /// # #[derive(Debug)]
     /// # struct FakeErr;
     /// # impl Display for FakeErr {
@@ -53,7 +53,7 @@ pub trait Help<T>: private::Sealed {
     /// # fn fallible_fn() -> Result<(), FakeErr> {
     /// #       Ok(())
     /// # }
-    /// use jane_eyre::Help as _;
+    /// use color_eyre::Help as _;
     ///
     /// fallible_fn().with_note(|| {
     ///         format!("This might have failed due to ... It has failed {} times", 100)

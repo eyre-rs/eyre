@@ -1,4 +1,5 @@
-use human_eyre::{Help, Report, WrapErr};
+use color_eyre::{Help, Report};
+use eyre::WrapErr;
 use tracing::{info, instrument};
 use tracing_error::ErrorLayer;
 use tracing_subscriber::prelude::*;
