@@ -54,7 +54,7 @@ fn example(&self) -> color_eyre::Result<()> {
 
 # Example
 
-```should_panic
+```rust
 use color_eyre::{Help, Report};
 use eyre::WrapErr;
 use tracing::{info, instrument};
