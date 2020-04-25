@@ -37,7 +37,7 @@ Add the following to your toml file:
 ```toml
 [dependencies]
 eyre = "0.3.8"
-color-eyre = "0.2.0"
+color-eyre = { git = "https://github.com/yaahc/color-eyre.git" }
 ```
 
 And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
