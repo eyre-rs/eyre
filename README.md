@@ -1,11 +1,11 @@
 color-eyre
 ----------
 
-A custom context for the `eyre` crate for colorful error reports, suggestions,
-and `tracing_error` support.
+A custom context for the [`eyre`] crate for colorful error reports, suggestions,
+and [`tracing-error`] support.
 
 This crate is currently pre-release while I try to upstream changes I made to
-`color-backtrace` to support this crate. Until then I cannot publish this to
+[`color-backtrace`] to support this crate. Until then I cannot publish this to
 crates.io, the documentation is filled out however so simply run `cargo doc
 --open` for an explanation of usage.
 
@@ -42,3 +42,7 @@ fn example(&self) -> color_eyre::Result<()> {
 ## Full Report Format (with `RUST_LIB_BACKTRACE=full`)
 
 ![full report format](./pictures/full.png)
+
+[`eyre`]: https://docs.rs/eyre
+[`tracing-error`]: https://docs.rs/tracing-error
+[`color-backtrace`]: https://docs.rs/color-backtrace

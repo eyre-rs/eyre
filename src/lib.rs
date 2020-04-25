@@ -6,6 +6,7 @@
 //! - captures a [`backtrace::Backtrace`] and prints using [`color-backtrace`]
 //! - captures a [`tracing_error::SpanTrace`] and prints using
 //! [`color-spantrace`]
+//! - Only capture SpanTrace by default for better performance.
 //! - display source lines when `RUST_LIB_BACKTRACE=full` is set from both of
 //!   the above libraries
 //! - store help text via [`Help`] trait and display after final report
@@ -49,6 +50,31 @@
 //!         .suggestion("try using a file that exists next time")
 //! }
 //! ```
+//!
+//! # Report Formats
+//!
+//! The following report formats are available via setting the `RUST_LIB_BACKTRACE` variable.
+//!
+//! ## Minimal Report Format
+//!
+//! ![minimal report format](https://github.com/yaahc/color-eyre/blob/master/pictures/minimal.png)
+//!
+//! ## Short Report Format (with `RUST_LIB_BACKTRACE=1`)
+//!
+//! ![short report format](https://github.com/yaahc/color-eyre/blob/master/pictures/short.png)
+//!
+//! ## Full Report Format (with `RUST_LIB_BACKTRACE=full`)
+//!
+//! ![full report format](https://github.com/yaahc/color-eyre/blob/master/pictures/full.png)
+//!
+//! [`eyre::EyreContext`]: https://docs.rs/eyre/0.3.8/eyre/trait.EyreContext.html
+//! [`backtrace::Backtrace`]: https://docs.rs/backtrace/0.3.46/backtrace/struct.Backtrace.html
+//! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/0.1.2/tracing_error/struct.SpanTrace.html
+//! [`color-backtrace`]: https://docs.rs/color-backtrace
+//! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
+//! [`Help`]: trait.Help.html
+//! [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
+//! [`tracing-error`]: https://docs.rs/tracing-error
 use backtrace::Backtrace;
 use console::style;
 use eyre::*;
@@ -62,10 +88,15 @@ use tracing_error::{ExtractSpanTrace, SpanTrace, SpanTraceStatus};
 mod help;
 
 /// A Custom Context type for [`eyre::Report`] which provides colorful error
-/// reports and [`tracing_error`] support.
+/// reports and [`tracing-error`] support.
 ///
 /// This type is not intended to be used directly, prefer using it via the
 /// [`color_eyre::Report`] and [`color_eyre::Result`] type aliases.
+///
+/// [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
+/// [`tracing-error`]: https://docs.rs/tracing-error
+/// [`color_eyre::Report`]: type.Report.html
+/// [`color_eyre::Result`]: type.Result.html
 pub struct Context {
     backtrace: Option<Backtrace>,
     span_trace: Option<SpanTrace>,
