@@ -74,7 +74,11 @@ pub struct Context {
 
 impl EyreContext for Context {
     fn default(error: &(dyn std::error::Error + 'static)) -> Self {
-        let backtrace = if true { Some(Backtrace::new()) } else { None };
+        let backtrace = if std::env::var("RUST_LIB_BACKTRACE").is_ok() {
+            Some(Backtrace::new())
+        } else {
+            None
+        };
 
         let span_trace = if get_deepest_spantrace(error).is_none() {
             Some(SpanTrace::capture())
@@ -131,6 +135,8 @@ impl EyreContext for Context {
                 "{}",
                 color_backtrace::print_backtrace(&backtrace, &settings)
             )?;
+        } else if !self.help.is_empty() {
+            writeln!(f)?;
         }
 
         for help in &self.help {

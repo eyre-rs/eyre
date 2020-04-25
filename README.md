@@ -31,7 +31,11 @@ fn example(&self) -> color_eyre::Result<()> {
 }
 ```
 
-## Short Report Format
+## Minimal Report Format
+
+![minimal report format](./pictures/minimal.png)
+
+## Short Report Format (with `RUST_LIB_BACKTRACE=1`)
 
 ![short report format](./pictures/short.png)
 
