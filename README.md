@@ -33,8 +33,8 @@ fn example(&self) -> color_eyre::Result<()> {
 
 ## Short Report Format
 
-[short report format](./pictures/short.png)
+![short report format](./pictures/short.png)
 
 ## Full Report Format (with `RUST_LIB_BACKTRACE=full`)
 
-[full report format](./pictures/full.png)
+![full report format](./pictures/full.png)
