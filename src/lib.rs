@@ -1,6 +1,10 @@
 //! This library provides a custom [`eyre::EyreContext`] type for colorful error
 //! reports with custom help text for the [`eyre`] crate.
 //!
+//! **Disclaimer**: This library is currently in pre-release while I work on upstreaming changes I
+//! made to [`color-backtrace`], until then this depends on unreleased versions on github and so it
+//! cannot be published to crates.io
+//!
 //! # Features
 //!
 //! - captures a [`backtrace::Backtrace`] and prints using [`color-backtrace`]
@@ -68,6 +72,7 @@
 //! ![full report format](https://github.com/yaahc/color-eyre/blob/master/pictures/full.png)
 //!
 //! [`eyre::EyreContext`]: https://docs.rs/eyre/0.3.8/eyre/trait.EyreContext.html
+//! [`eyre`]: https://docs.rs/eyre
 //! [`backtrace::Backtrace`]: https://docs.rs/backtrace/0.3.46/backtrace/struct.Backtrace.html
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/0.1.2/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://docs.rs/color-backtrace

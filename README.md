@@ -4,10 +4,19 @@ color-eyre
 A custom context for the [`eyre`] crate for colorful error reports, suggestions,
 and [`tracing-error`] support.
 
-This crate is currently pre-release while I try to upstream changes I made to
-[`color-backtrace`] to support this crate. Until then I cannot publish this to
-crates.io, the documentation is filled out however so simply run `cargo doc
---open` for an explanation of usage.
+This crate works by defining a `Context` type which implements `EyreContext`
+and a pair of type aliases for setting this context object as the parameter of
+`eyre::Report`.
+
+```rust
+pub type Report = eyre::Report<Context>;
+pub type Result<T, E = Report> = core::result::Result<T, E>;
+```
+
+**Disclaimer**: This crate is currently pre-release while I try to upstream
+changes I made to [`color-backtrace`] to support this crate. Until then I
+cannot publish this to crates.io, the documentation is filled out however so
+simply run `cargo doc --open` for an explanation of usage.
 
 ## Setup
 
