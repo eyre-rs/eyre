@@ -12,7 +12,7 @@ simply run `cargo doc --open` for an explanation of usage.
 ## Explanation
 
 This crate works by defining a `Context` type which implements `EyreContext`
-and a pair of type aliases for setting this context object as the parameter of
+and a pair of type aliases for setting this context type as the parameter of
 `eyre::Report`.
 
 ```rust
