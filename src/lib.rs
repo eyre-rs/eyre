@@ -1,13 +1,12 @@
 mod help;
 
-pub use eyre::*;
-
 pub use help::Help;
 pub type Report = eyre::Report<Context>;
 pub type Result<T, E = Report> = core::result::Result<T, E>;
 
 use backtrace::Backtrace;
 use console::style;
+use eyre::*;
 use help::HelpInfo;
 use indenter::Indented;
 use std::error::Error;
