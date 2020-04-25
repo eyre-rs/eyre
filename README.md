@@ -11,9 +11,9 @@ simply run `cargo doc --open` for an explanation of usage.
 
 ## Explanation
 
-This crate works by defining a `Context` type which implements `EyreContext`
+This crate works by defining a `Context` type which implements [`eyre::EyreContext`]
 and a pair of type aliases for setting this context type as the parameter of
-`eyre::Report`.
+[`eyre::Report`].
 
 ```rust
 pub type Report = eyre::Report<Context>;
@@ -40,7 +40,7 @@ eyre = "0.3.8"
 color-eyre = "0.2.0"
 ```
 
-And then import the type alias from color-eyre for `Report` or `Result`.
+And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
 
 ```rust
 use color_eyre::Report;
@@ -73,3 +73,4 @@ fn example(&self) -> color_eyre::Result<()> {
 [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 [`Help`]: trait.Help.html
 [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
+[`eyre::Result`]: https://docs.rs/eyre/0.3.8/eyre/type.Result.html
