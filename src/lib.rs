@@ -155,9 +155,10 @@ fn get_deepest_spantrace<'a>(error: &'a (dyn Error + 'static)) -> Option<&'a Spa
 /// ```rust
 /// use color_eyre::Report;
 ///
-/// fn try_thing(&self) -> Result<ThingRef, Report> {
+/// # struct Config;
+/// fn try_thing(path: &str) -> Result<Config, Report> {
 ///     // ...
-/// # Ok(())
+/// # Ok(Config)
 /// }
 /// ```
 pub type Report = eyre::Report<Context>;
