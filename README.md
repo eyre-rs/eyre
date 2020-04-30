@@ -297,7 +297,7 @@ anyhow the following is valid.
 
 ```rust
 // Works
-let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value)).unwrap();
+let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value")).unwrap();
 ```
 
 Where as with `eyre!` this will fail due to being unable to infer the type for
@@ -307,10 +307,10 @@ via your return type or a type annotation.
 
 ```rust
 // Broken
-let val = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
+let val = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
 
 // Works
-let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value)).unwrap();
+let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
 ```
 [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
