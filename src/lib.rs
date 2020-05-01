@@ -84,7 +84,7 @@ use console::style;
 use eyre::*;
 pub use help::Help;
 use help::HelpInfo;
-use indenter::Indented;
+use indenter::{indented, Format, Indented};
 use std::error::Error;
 use std::fmt::Write as _;
 use tracing_error::{ExtractSpanTrace, SpanTrace, SpanTraceStatus};
@@ -143,7 +143,7 @@ impl EyreContext for Context {
 
         for (n, error) in errors {
             writeln!(f)?;
-            write!(Indented::numbered(f, n), "{}", style(error).red().dim())?;
+            write!(Indented::numbered(f, n), "{}", style(error).red())?;
         }
 
         let span_trace = self
@@ -153,22 +153,46 @@ impl EyreContext for Context {
             .expect("SpanTrace capture failed");
 
         match span_trace.status() {
-            SpanTraceStatus::CAPTURED => write!(f, "\n\n{}", color_spantrace::colorize(span_trace))?,
+            SpanTraceStatus::CAPTURED => {
+                write!(f, "\n\n")?;
+                write!(indented(f).with_format(Format::Uniform { indentation: "  " }), "{}", color_spantrace::colorize(span_trace))?
+            },
             SpanTraceStatus::UNSUPPORTED => write!(f, "\n\nWarning: SpanTrace capture is Unsupported.\nEnsure that you've setup an error layer and the versions match")?,
             _ => (),
         }
 
         if let Some(backtrace) = self.backtrace.as_ref() {
             write!(f, "\n\n")?;
-            let settings = color_backtrace::Settings::default().add_post_panic_frames(&[
-                "<color_eyre::Context as eyre::EyreContext>::default",
-                "eyre::",
-            ]);
+            // let settings = color_backtrace::PanicPrinter::default();
 
+            let bt_str = color_backtrace::BacktracePrinter::new()
+                .add_frame_filter(Box::new(|frames| {
+                    let filters = &[
+                        "<color_eyre::Context as eyre::EyreContext>::default",
+                        "eyre::",
+                    ];
+
+                    frames
+                        .into_iter()
+                        .filter(|frame| {
+                            !filters.iter().any(|f| {
+                                let name = if let Some(name) = frame.name.as_ref() {
+                                    name.as_str()
+                                } else {
+                                    return true;
+                                };
+
+                                name.starts_with(f)
+                            })
+                        })
+                        .collect()
+                }))
+                .format_trace_to_string(&backtrace)
+                .unwrap();
             write!(
-                f,
+                indented(f).with_format(Format::Uniform { indentation: "  " }),
                 "{}",
-                color_backtrace::print_backtrace(&backtrace, &settings)
+                bt_str
             )?;
         } else if !self.help.is_empty() {
             writeln!(f)?;

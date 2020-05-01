@@ -16,7 +16,8 @@ console = "0.10.0"
 color-spantrace = { git = "https://github.com/yaahc/color-spantrace.git" }
 
 [patch.crates-io]
-color-backtrace = { git = "https://github.com/yaahc/color-backtrace.git", branch = "filter-custom" }
+color-backtrace = { git = "https://github.com/yaahc/color-backtrace.git", branch = "filter" }
+indenter = { git = "https://github.com/yaahc/indenter.git", }
 
 [dev-dependencies]
 tracing-subscriber = "0.2.5"
