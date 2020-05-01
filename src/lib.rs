@@ -1,7 +1,9 @@
 use console::style;
+use std::env;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader, ErrorKind};
+use std::sync::atomic::{AtomicUsize, Ordering::SeqCst};
 use tracing_error::SpanTrace;
 
 pub fn colorize(span_trace: &SpanTrace) -> impl fmt::Display + '_ {
@@ -29,26 +31,25 @@ struct Frame<'a> {
     fields: &'a str,
 }
 
-/// Defines how verbose the backtrace is supposed to be.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum Verbosity {
-    /// Print a small message including the panic payload and the panic location.
-    Minimal,
-    /// Everything in `Minimal` and additionally print a backtrace.
-    Medium,
-    /// Everything in `Medium` plus source snippets for all backtrace locations.
-    Full,
-}
-
-impl Verbosity {
-    /// Get the verbosity level from the `RUST_LIB_BACKTRACE` env variable.
-    fn from_env() -> Self {
-        match std::env::var("RUST_LIB_BACKTRACE") {
-            Ok(ref x) if x == "full" => Verbosity::Full,
-            Ok(_) => Verbosity::Medium,
-            Err(_) => Verbosity::Minimal,
-        }
+fn enabled() -> bool {
+    // Cache the result of reading the environment variables to make
+    // backtrace captures speedy, because otherwise reading environment
+    // variables every time can be somewhat slow.
+    static ENABLED: AtomicUsize = AtomicUsize::new(0);
+    match ENABLED.load(SeqCst) {
+        0 => {}
+        1 => return false,
+        _ => return true,
     }
+    let enabled = match env::var("RUST_LIB_BACKTRACE") {
+        Ok(s) => s != "0",
+        Err(_) => match env::var("RUST_BACKTRACE") {
+            Ok(s) => s != "0",
+            Err(_) => false,
+        },
+    };
+    ENABLED.store(enabled as usize + 1, SeqCst);
+    return enabled;
 }
 
 impl Frame<'_> {
@@ -62,7 +63,7 @@ impl Frame<'_> {
     fn print_header(&self, i: u32, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:>4}: {}",
+            "{:>2}: {}",
             i,
             style(format_args!(
                 "{}::{}",
@@ -70,13 +71,12 @@ impl Frame<'_> {
                 self.metadata.name()
             ))
             .red()
-            .dim()
         )
     }
 
     fn print_fields(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if !self.fields.is_empty() {
-            write!(f, " with {}", style(self.fields).bold())?;
+            write!(f, " with {}", style(self.fields).cyan())?;
         }
 
         Ok(())
@@ -88,9 +88,9 @@ impl Frame<'_> {
                 .metadata
                 .line()
                 .map_or("<unknown line>".to_owned(), |x| x.to_string());
-            write!(f, "\n      at {}:{}", file, lineno)?;
+            write!(f, "\n    at {}:{}", file, lineno)?;
         } else {
-            write!(f, "\n      at <unknown source file>")?;
+            write!(f, "\n    at <unknown source file>")?;
         }
 
         Ok(())
@@ -118,10 +118,10 @@ impl Frame<'_> {
                 write!(
                     f,
                     "\n{}",
-                    style(format_args!("{:>10} > {}", cur_line_no, line.unwrap())).bold()
+                    style(format_args!("{:>8} > {}", cur_line_no, line.unwrap())).bold()
                 )?;
             } else {
-                write!(f, "\n{:>10} │ {}", cur_line_no, line.unwrap())?;
+                write!(f, "\n{:>8} │ {}", cur_line_no, line.unwrap())?;
             }
         }
 
@@ -134,9 +134,7 @@ impl fmt::Display for ColorSpanTrace<'_> {
         let mut err = Ok(());
         let mut span = 0;
 
-        let verbosity = Verbosity::from_env();
-
-        writeln!(f, "{:━^80}", " SPANTRACE ")?;
+        writeln!(f, "{:━^80}\n", " SPANTRACE ")?;
         self.span_trace.with_spans(|metadata, fields| {
             let frame = Frame { metadata, fields };
 
@@ -146,10 +144,8 @@ impl fmt::Display for ColorSpanTrace<'_> {
 
             try_bool!(frame.print(span, f), err);
 
-            match verbosity {
-                Verbosity::Full => try_bool!(frame.print_source_if_avail(f), err),
-                Verbosity::Medium => {}
-                Verbosity::Minimal => {}
+            if enabled() {
+                try_bool!(frame.print_source_if_avail(f), err);
             }
 
             span += 1;
