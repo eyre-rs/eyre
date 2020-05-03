@@ -1,136 +1,14 @@
 //! This library provides [`eyre::Report`][Report], a trait object based error
 //! type for easy idiomatic error handling in Rust applications.
 //!
-//! This crate is a fork of [`anyhow`] by @dtolnay. By default this crate does not
-//! add any new features that anyhow doesn't already support, though it does rename
-//! a number of the APIs to try to make the proper usage more obvious. The magic of
-//! this crate is when you need to add extra context to a chain of errors beyond
-//! what you can or should insert into the error chain. For an example of a
-//! customized version of eyre check out
-//! [`jane-eyre`](https://github.com/yaahc/jane-eyre).
-//!
-//! My goal in writing this crate is to explore new ways to associate context with
-//! errors, to cleanly separate the concept of an error and context about an error,
-//! and to more clearly communicate the intended usage of this crate via changes to
-//! the API.
-//!
-//! The main changes this crate brings to anyhow are
-//!
-//! * Addition of the [`eyre::EyreContext`] trait and a type parameter on the core
-//!   error handling type which users can use to insert custom forms of context
-//!   into their catch-all error handling type.
-//! * Rebranding the type as principally for error reporting, rather than
-//!   describing it as an error type in its own right. What is and isn't an error
-//!   is a fuzzy concept, for the purposes of this crate though errors are types
-//!   that implement `std::error::Error`, and you'll notice that this trait
-//!   implementation is conspicuously absent on `Report`. Instead it contains
-//!   errors that it masqerades as, and provides helpers for creating new errors to
-//!   wrap those errors and for displaying those chains of errors, and the included
-//!   context, to the end user. The goal is to make it obvious that this type is
-//!   meant to be used when the only way you expect to handle errors is to print
-//!   them.
-//! * Changing the [`anyhow::Context`] trait to [`eyre::WrapErr`] to make it clear
-//!   that it is unrelated to the [`eyre::EyreContext`] trait and member, and is
-//!   only for inserting new errors into the chain of errors.
-//! * Addition of new context helpers on `EyreContext` (`member_ref`/`member_mut`)
-//!   and `context`/`context_mut` on `Report` for working with the custom
-//!   context and extracting forms of context based on their type independent of
-//!   the type of the custom context.
-//!
-//! These changes were made in order to facilitate the usage of
-//! [`tracing_error::SpanTrace`] with anyhow, which is a Backtrace-like type for
-//! rendering custom defined runtime context.
+//! This crate is a fork of [`anyhow`] by @dtolnay with a support for customized `Reports`. For
+//! more details on customization checkout the docs on [`eyre::EyreContext`]. For an example on how
+//! to implement a custom context check out [`stable-eyre`] which implements a minimal custom
+//! context for capturing backtraces on stable.
 //!
 //! ```toml
 //! [dependencies]
 //! eyre = "0.3"
-//! ```
-//! <br>
-//!
-//! ## Customization
-//!
-//! In order to insert your own custom context type you must first implement the
-//! `eyre::EyreContext` trait for said type, which has two required methods and
-//! three optional methods.
-//!
-//! ### Required Methods
-//!
-//! * `fn default(error: &Error) -> Self` - For constructing default context while
-//! allowing special case handling depending on the content of the error you're
-//! wrapping.
-//!
-//! This is essentially `Default::default` but more flexible, for example, the
-//! `eyre::DefaultContext` type provide by this crate uses this to only capture a
-//! `Backtrace` if the inner `Error` does not already have one.
-//!
-//! ```rust,compile_fail
-//! fn default(error: &(dyn StdError + 'static)) -> Self {
-//!     let backtrace = backtrace_if_absent!(error);
-//!
-//!     Self { backtrace }
-//! }
-//! ```
-//!
-//! * `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>)
-//!   -> fmt Result` and optionally `display`. - For formatting the entire
-//!   error chain and the user provided context.
-//!
-//! When overriding the context it no longer makes sense for `eyre::Report` to
-//! provide the `Display` and `Debug` implementations for the user, becase we
-//! cannot predict what forms of context you will need to display along side your
-//! chain of errors. Instead we forward the implementations of `Display` and
-//! `Debug` to these methods on the inner `EyreContext` type.
-//!
-//! This crate does provide a few helpers to assist in writing display
-//! implementations, specifically the `Chain` type, for treating an error and its
-//! sources like an iterator, and the `Indented` type, for indenting multi line
-//! errors consistently without using heap allocations.
-//!
-//! **Note**: best practices for printing errors suggest that `{}` should only
-//! print the current error and none of its sources, and that the primary method of
-//! displaying an error, its sources, and its context should be handled by the
-//! `Debug` implementation, which is what is used to print errors that are returned
-//! from `main`. For examples on how to implement this please refer to the
-//! implementations of `display` and `debug` on `eyre::DefaultContext`
-//!
-//! ### Optional Methods
-//!
-//! * `fn member_ref(&self, typeid TypeID) -> Option<&dyn Any>` - For extracting
-//!   arbitrary members from a context based on their type and `member_mut` for
-//!   getting a mutable reference in the same way.
-//!
-//! This method is like a flexible version of the `fn backtrace(&self)` method on
-//! the `Error` trait. The main `Report` type provides versions of these methods
-//! that use type inference to get the typeID that should be used by inner trait fn
-//! to pick a member to return.
-//!
-//! **Note**: The `backtrace()` fn on `Report` relies on the implementation of
-//! this function to get the backtrace from the user provided context if one
-//! exists. If you wish your type to guaruntee that it captures a backtrace for any
-//! error it wraps you **must** implement `member_ref` and provide a path to return
-//! a `Backtrace` type like below.
-//!
-//! Here is how the `eyre::DefaultContext` type uses this to return `Backtrace`s.
-//!
-//! ```rust,compile_fail
-//! fn member_ref(&self, typeid: TypeId) -> Option<&dyn Any> {
-//!     if typeid == TypeId::of::<Backtrace>() {
-//!         self.backtrace.as_ref().map(|b| b as &dyn Any)
-//!     } else {
-//!         None
-//!     }
-//! }
-//! ```
-//!
-//! Once you've defined a custom Context type you can use it throughout your
-//! application by defining a type alias.
-//!
-//!
-//! ```rust,compile_fail
-//! type Report = eyre::Report<MyContext>;
-//!
-//! // And optionally...
-//! type Result<T, E = eyre::Report<MyContext>> = core::result::Result<T, E>;
 //! ```
 //! <br>
 //!
@@ -319,12 +197,40 @@
 //! will require an explicit `.map_err(Report::msg)` when working with a
 //! non-Eyre error type inside a function that returns Eyre's error type.
 //!
+//! # Compatibility with `anyhow`
+//!
+//! This crate does its best to be usable as a drop in replacement of `anyhow` and
+//! vice-versa by `re-exporting` all of the renamed APIs with the names used in
+//! `anyhow`.
+//!
+//! It is not 100% compatible because there are some cases where `eyre` encounters
+//! type inference errors but it should mostly work as a drop in replacement.
+//! Specifically, the following works in anyhow:
+//!
+//! ```rust
+//! // Works
+//! let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value")).unwrap();
+//! ```
+//!
+//! Where as with `eyre!` this will fail due to being unable to infer the type for
+//! the Context parameter. The solution to this problem, should you encounter it,
+//! is to give the compiler a hint for what type it should be resolving to, either
+//! via your return type or a type annotation.
+//!
+//! ```rust
+//! // Broken
+//! let val = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+//!
+//! // Works
+//! let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+//! ```
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 //! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
 //! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
+//! [`stable_eyre`]: https://docs.rs/stable-eyre
 #![doc(html_root_url = "https://docs.rs/eyre/0.3.8")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
@@ -383,8 +289,14 @@ pub trait StdError: Debug + Display {
 }
 
 pub use eyre as format_err;
+/// Compatibility re-export of `eyre` for interopt with `anyhow`
+pub use eyre as anyhow;
 #[doc(hidden)]
 pub use Report as ErrReport;
+/// Compatibility re-export of `Report` for interopt with `anyhow`
+pub use Report as Error;
+/// Compatibility re-export of `WrapErr` for interopt with `anyhow`
+pub use WrapErr as Context;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
 ///
@@ -484,6 +396,88 @@ where
     inner: ManuallyDrop<Box<ErrorImpl<(), C>>>,
 }
 
+/// Context trait for customizing `eyre::Report`
+///
+/// ## Customization
+///
+/// In order to insert your own custom context type you must first implement the
+/// `eyre::EyreContext` trait.
+///
+/// ### Required Methods
+///
+/// * `fn default(error: &Error) -> Self` - For constructing default context while
+/// allowing special case handling depending on the content of the error you're
+/// wrapping.
+///
+/// This is essentially `Default::default` but more flexible, for example, the
+/// `eyre::DefaultContext` type provide by this crate uses this to only capture a
+/// `Backtrace` if the inner `Error` does not already have one.
+///
+/// ```rust,compile_fail
+/// fn default(error: &(dyn StdError + 'static)) -> Self {
+///     let backtrace = backtrace_if_absent!(error);
+///
+///     Self { backtrace }
+/// }
+/// ```
+///
+/// * `fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>)
+///   -> fmt Result` and optionally `display`. - For formatting the entire
+///   error chain and the user provided context.
+///
+/// When overriding the context it no longer makes sense for `eyre::Report` to provide a `Debug`
+/// implementation for the user, because we cannot predict what forms of context you will need to
+/// display along side your chain of errors. Instead we forward the implementations of `Display`
+/// and `Debug` to these methods on the inner `EyreContext` type.
+///
+/// **Note**: best practices for printing errors suggest that `{}` should only
+/// print the current error and none of its sources, and that the primary method of
+/// displaying an error, its sources, and its context should be handled by the
+/// `Debug` implementation, which is what is used to print errors that are returned
+/// from `main`. For examples on how to implement this please refer to the
+/// implementations of `display` and `debug` on `eyre::DefaultContext`
+///
+/// ### Optional Methods
+///
+/// * `fn member_ref(&self, typeid TypeID) -> Option<&dyn Any>` - For extracting
+///   arbitrary members from a context based on their type and `member_mut` for
+///   getting a mutable reference in the same way.
+///
+/// This method is like a flexible version of the `fn backtrace(&self)` method on
+/// the `Error` trait. The main `Report` type provides versions of these methods
+/// that use type inference to get the typeID that should be used by inner trait fn
+/// to pick a member to return.
+///
+/// **Note**: The `backtrace()` fn on `Report` relies on the implementation of
+/// this function to get the backtrace from the user provided context if one
+/// exists. If you wish your type to guaruntee that it captures a backtrace for any
+/// error it wraps you **must** implement `member_ref` and provide a path to return
+/// a `Backtrace` type like below.
+///
+/// Here is how the `eyre::DefaultContext` type uses this to return `Backtrace`s.
+///
+/// ```rust,compile_fail
+/// fn member_ref(&self, typeid: TypeId) -> Option<&dyn Any> {
+///     if typeid == TypeId::of::<Backtrace>() {
+///         self.backtrace.as_ref().map(|b| b as &dyn Any)
+///     } else {
+///         None
+///     }
+/// }
+/// ```
+///
+/// Once you've defined a custom Context type you can use it throughout your
+/// application by defining a type alias.
+///
+///
+/// ```rust,compile_fail
+/// type Report = eyre::Report<MyContext>;
+///
+/// // And optionally...
+/// type Result<T, E = eyre::Report<MyContext>> = core::result::Result<T, E>;
+/// ```
+/// <br>
+///
 pub trait EyreContext: Sized + Send + Sync + 'static {
     fn default(err: &(dyn StdError + 'static)) -> Self;
 
@@ -815,6 +809,17 @@ where
     /// Wrap the error value with a new adhoc error that is evaluated lazily
     /// only once an error does occur.
     fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D;
+
+    /// Compatibility re-export of wrap_err for interopt with `anyhow`
+    fn context<D>(self, msg: D) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static;
+
+    /// Compatibility re-export of wrap_err_with for interopt with `anyhow`
+    fn with_context<D, F>(self, f: F) -> Result<T, Report<C>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
