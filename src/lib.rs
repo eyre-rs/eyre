@@ -10,8 +10,6 @@
 //! [dependencies]
 //! eyre = "0.3"
 //! ```
-//! <br>
-//!
 //! # Details
 //!
 //! - Use `Result<T, eyre::Report>`, or equivalently `eyre::Result<T>`, as
@@ -179,8 +177,6 @@
 //!   # }
 //!   ```
 //!
-//! <br>
-//!
 //! # No-std support
 //!
 //! In no_std mode, the same API is almost all available and works the same way.
@@ -231,7 +227,7 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`stable_eyre`]: https://docs.rs/stable-eyre
-#![doc(html_root_url = "https://docs.rs/eyre/0.3.8")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.3.10")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -308,8 +304,6 @@ pub use WrapErr as Context;
 ///   error type does not provide one.
 /// - `Report` is represented as a narrow pointer &mdash; exactly one word in
 ///   size instead of two.
-///
-/// <br>
 ///
 /// # Display representations
 ///
@@ -406,11 +400,53 @@ where
 /// Once you've defined a custom Context type you can use it throughout your
 /// application by defining a type alias.
 ///
-/// ```rust,compile_fail
-/// type Report = eyre::Report<MyContext>;
+/// ```rust
+/// use backtrace::Backtrace;
+/// use eyre::EyreContext;
+/// # use eyre::Chain;
+/// # use std::error::Error;
 ///
-/// // And optionally...
-/// type Result<T, E = eyre::Report<MyContext>> = core::result::Result<T, E>;
+/// pub struct Context {
+///     backtrace: Backtrace,
+/// }
+///
+/// impl EyreContext for Context {
+///     // ...
+/// #     #[allow(unused_variables)]
+/// #     fn default(error: &(dyn Error + 'static)) -> Self {
+/// #         let backtrace = Backtrace::new();
+/// #         Self { backtrace }
+/// #     }
+/// #     fn debug(
+/// #         &self,
+/// #         error: &(dyn Error + 'static),
+/// #         f: &mut core::fmt::Formatter<'_>,
+/// #     ) -> core::fmt::Result {
+/// #         use core::fmt::Write as _;
+/// #         if f.alternate() {
+/// #             return core::fmt::Debug::fmt(error, f);
+/// #         }
+/// #         write!(f, "{}", error)?;
+/// #         if let Some(cause) = error.source() {
+/// #             write!(f, "\n\nCaused by:")?;
+/// #             let multiple = cause.source().is_some();
+/// #             for (n, error) in Chain::new(cause).enumerate() {
+/// #                 writeln!(f)?;
+/// #                 if multiple {
+/// #                     write!(indenter::Indented::numbered(f, n), "{}", error)?;
+/// #                 } else {
+/// #                     write!(indenter::Indented::new(f), "{}", error)?;
+/// #                 }
+/// #             }
+/// #         }
+/// #         let backtrace = &self.backtrace;
+/// #         write!(f, "\n\nStack backtrace:\n{:?}", backtrace)?;
+/// #         Ok(())
+/// #     }
+/// }
+///
+/// type Report = eyre::Report<Context>;
+/// type Result<T, E = eyre::Report<Context>> = core::result::Result<T, E>;
 /// ```
 pub trait EyreContext: Sized + Send + Sync + 'static {
     /// Default construct a `Context` when constructing a `Report`.
@@ -421,29 +457,52 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     ///
     /// # Example
     ///
-    /// ```rust,compile_fail
-    /// use std::backtrace::Backtrace;
+    /// ```rust
+    /// use backtrace::Backtrace;
+    /// use eyre::EyreContext;
+    /// # use eyre::Chain;
+    /// use std::error::Error;
     ///
-    /// #[derive(Debug)]
     /// pub struct Context {
-    ///     backtrace: Option<Backtrace>,
+    ///     backtrace: Backtrace,
     /// }
     ///
     /// impl EyreContext for Context {
-    ///     #[allow(unused_variables)]
+    /// #     #[allow(unused_variables)]
     ///     fn default(error: &(dyn Error + 'static)) -> Self {
-    ///         let backtrace = if error.backtrace().is_some() {
-    ///             None
-    ///         } else {
-    ///             Some(Backtrace::capture())
-    ///         };
+    ///         let backtrace = Backtrace::new();
     ///
     ///         Self { backtrace }
     ///     }
     ///
     ///     // ...
+    /// #     fn debug(
+    /// #         &self,
+    /// #         error: &(dyn Error + 'static),
+    /// #         f: &mut core::fmt::Formatter<'_>,
+    /// #     ) -> core::fmt::Result {
+    /// #         use core::fmt::Write as _;
+    /// #         if f.alternate() {
+    /// #             return core::fmt::Debug::fmt(error, f);
+    /// #         }
+    /// #         write!(f, "{}", error)?;
+    /// #         if let Some(cause) = error.source() {
+    /// #             write!(f, "\n\nCaused by:")?;
+    /// #             let multiple = cause.source().is_some();
+    /// #             for (n, error) in Chain::new(cause).enumerate() {
+    /// #                 writeln!(f)?;
+    /// #                 if multiple {
+    /// #                     write!(indenter::Indented::numbered(f, n), "{}", error)?;
+    /// #                 } else {
+    /// #                     write!(indenter::Indented::new(f), "{}", error)?;
+    /// #                 }
+    /// #             }
+    /// #         }
+    /// #         let backtrace = &self.backtrace;
+    /// #         write!(f, "\n\nStack backtrace:\n{:?}", backtrace)?;
+    /// #         Ok(())
+    /// #     }
     /// }
-    ///
     /// ```
     fn default(err: &(dyn StdError + 'static)) -> Self;
 
@@ -453,8 +512,22 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     ///
     /// # Example
     ///
-    /// ```rust,compile_fail
+    /// ```rust
+    /// use backtrace::Backtrace;
+    /// use eyre::EyreContext;
+    /// use eyre::Chain;
+    /// use std::error::Error;
+    ///
+    /// pub struct Context {
+    ///     backtrace: Backtrace,
+    /// }
+    ///
     /// impl EyreContext for Context {
+    /// #     #[allow(unused_variables)]
+    /// #     fn default(error: &(dyn Error + 'static)) -> Self {
+    /// #         let backtrace = Backtrace::new();
+    /// #         Self { backtrace }
+    /// #     }
     ///     // ...
     ///
     ///     fn debug(
@@ -473,6 +546,7 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     ///         if let Some(cause) = error.source() {
     ///             write!(f, "\n\nCaused by:")?;
     ///             let multiple = cause.source().is_some();
+    ///
     ///             for (n, error) in Chain::new(cause).enumerate() {
     ///                 writeln!(f)?;
     ///                 if multiple {
@@ -503,15 +577,6 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     /// `std::backtrace::Backtrace`
     ///
     /// # Example
-    /// ```rust,compile_fail
-    /// fn member_ref(&self, typeid: TypeId) -> Option<&dyn Any> {
-    ///     if typeid == TypeId::of::<Backtrace>() {
-    ///         self.backtrace.as_ref().map(|b| b as &dyn Any)
-    ///     } else {
-    ///         None
-    ///     }
-    /// }
-    /// ```
     fn member_ref(&self, _typeid: TypeId) -> Option<&dyn Any> {
         None
     }
@@ -539,6 +604,10 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     }
 }
 
+/// The default provided context for `eyre::Report`.
+///
+/// On nightly this supports conditionally capturing a `std::backtrace::Backtrace` if the source
+/// error did not already capture one.
 pub struct DefaultContext {
     backtrace: Option<Backtrace>,
 }
@@ -595,13 +664,7 @@ impl EyreContext for DefaultContext {
                 .or_else(|| error.backtrace())
                 .expect("backtrace capture failed");
             if let BacktraceStatus::Captured = backtrace.status() {
-                let mut backtrace = backtrace.to_string();
-                if backtrace.starts_with("stack backtrace:") {
-                    // Capitalize to match "Caused by:"
-                    backtrace.replace_range(0..1, "S");
-                }
-                backtrace.truncate(backtrace.trim_end().len());
-                write!(f, "\n\n{}", backtrace)?;
+                write!(f, "\n\nStack backtrace:\n{}", backtrace)?;
             }
         }
 
@@ -689,8 +752,6 @@ pub type Result<T, E = Report<DefaultContext>> = core::result::Result<T, E>;
 /// This trait is sealed and cannot be implemented for types outside of
 /// `eyre`.
 ///
-/// <br>
-///
 /// # Example
 ///
 /// ```
@@ -731,8 +792,6 @@ pub type Result<T, E = Report<DefaultContext>> = core::result::Result<T, E>;
 /// Caused by:
 ///     No such file or directory (os error 2)
 /// ```
-///
-/// <br>
 ///
 /// # Effect on downcasting
 ///

@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.3.9" # remember to update html_root_url
+version = "0.3.10" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -19,6 +19,7 @@ futures = { version = "0.3", default-features = false }
 rustversion = "1.0"
 thiserror = "1.0"
 trybuild = { version = "1.0.19", features = ["diff"] }
+backtrace = "0.3.46"
 
 [dependencies]
 indenter = "^0.1.1"
