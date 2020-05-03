@@ -63,6 +63,21 @@ where
     {
         self.map_err(|error| error.ext_report(msg()))
     }
+
+    fn context<D>(self, msg: D) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.wrap_err(msg)
+    }
+
+    fn with_context<D, F>(self, msg: F) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
+    {
+        self.wrap_err_with(msg)
+    }
 }
 
 impl<D, E> Debug for ContextError<D, E>
