@@ -126,7 +126,7 @@ Cargo.toml. A global allocator is required.
 
 ```toml
 [dependencies]
-eyre = { version = "0.3", default-features = false }
+eyre = { version = "0.4", default-features = false }
 ```
 
 Since the `?`-based error conversions would normally rely on the

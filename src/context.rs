@@ -122,11 +122,6 @@ where
     C: EyreContext,
     D: Display,
 {
-    #[cfg(backtrace)]
-    fn backtrace(&self) -> Option<&Backtrace> {
-        Some(self.error.backtrace())
-    }
-
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         Some(self.error.inner.error())
     }
