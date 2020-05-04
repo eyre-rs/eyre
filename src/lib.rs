@@ -8,7 +8,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = "0.3"
+//! eyre = "0.4"
 //! ```
 //! # Details
 //!
@@ -185,7 +185,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = { version = "0.3", default-features = false }
+//! eyre = { version = "0.4", default-features = false }
 //! ```
 //!
 //! Since the `?`-based error conversions would normally rely on the
@@ -227,7 +227,7 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`stable_eyre`]: https://docs.rs/stable-eyre
-#![doc(html_root_url = "https://docs.rs/eyre/0.3.10")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.4.0")]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -267,7 +267,6 @@ mod wrapper;
 use crate::alloc::Box;
 use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
-use core::any::{Any, TypeId};
 use core::fmt::Display;
 use core::mem::ManuallyDrop;
 
@@ -570,23 +569,7 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
         f: &mut core::fmt::Formatter<'_>,
     ) -> core::fmt::Result;
 
-    /// Member access function
-    ///
-    /// The main reason to implement this fn is to provide support for `eyre::Report::backtrace`
-    /// which will call this fn on `nightly` when attempting access the captured
-    /// `std::backtrace::Backtrace`
-    ///
-    /// # Example
-    fn member_ref(&self, _typeid: TypeId) -> Option<&dyn Any> {
-        None
-    }
-
-    #[doc(hidden)]
-    fn member_mut(&mut self, _typeid: TypeId) -> Option<&mut dyn Any> {
-        None
-    }
-
-    #[doc(hidden)]
+    /// Override for the `Display` format
     fn display(
         &self,
         error: &(dyn StdError + 'static),
@@ -608,6 +591,7 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
 ///
 /// On nightly this supports conditionally capturing a `std::backtrace::Backtrace` if the source
 /// error did not already capture one.
+#[allow(dead_code)]
 pub struct DefaultContext {
     backtrace: Option<Backtrace>,
 }
@@ -618,14 +602,6 @@ impl EyreContext for DefaultContext {
         let backtrace = backtrace_if_absent!(error);
 
         Self { backtrace }
-    }
-
-    fn member_ref(&self, typeid: TypeId) -> Option<&dyn Any> {
-        if typeid == TypeId::of::<Backtrace>() {
-            self.backtrace.as_ref().map(|b| b as &dyn Any)
-        } else {
-            None
-        }
     }
 
     fn debug(

@@ -2,7 +2,6 @@ use crate::alloc::Box;
 use crate::chain::Chain;
 use crate::EyreContext;
 use crate::{Report, StdError};
-use core::any::Any;
 use core::any::TypeId;
 use core::fmt::{self, Debug, Display};
 use core::mem::{self, ManuallyDrop};
@@ -437,14 +436,6 @@ where
         }
     }
 
-    pub fn member_ref<T: Any>(&self) -> Option<&T> {
-        self.inner.member_ref()
-    }
-
-    pub fn member_mut<T: Any>(&mut self) -> Option<&mut T> {
-        self.inner.member_mut()
-    }
-
     pub fn context(&self) -> &C {
         self.inner.context.as_ref().unwrap()
     }
@@ -739,32 +730,6 @@ where
         // Use vtable to attach E's native StdError vtable for the right
         // original type E.
         unsafe { &mut *(self.vtable.object_mut)(self) }
-    }
-
-    pub fn member_ref<T: Any>(&self) -> Option<&T> {
-        self.context
-            .as_ref()
-            .unwrap()
-            .member_ref(TypeId::of::<T>())?
-            .downcast_ref::<T>()
-    }
-
-    pub fn member_mut<T: Any>(&mut self) -> Option<&mut T> {
-        self.context
-            .as_mut()
-            .unwrap()
-            .member_mut(TypeId::of::<T>())?
-            .downcast_mut::<T>()
-    }
-
-    #[cfg(backtrace)]
-    pub(crate) fn backtrace(&self) -> &Backtrace {
-        // This unwrap can only panic if the underlying error's backtrace method
-        // is nondeterministic, which would only happen in maliciously
-        // constructed code.
-        self.member_ref()
-            .or_else(|| self.error().backtrace())
-            .expect("backtrace capture failed")
     }
 
     pub(crate) fn chain(&self) -> Chain {
