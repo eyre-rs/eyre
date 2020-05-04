@@ -7,9 +7,6 @@ use core::fmt::{self, Debug, Display};
 use core::mem::{self, ManuallyDrop};
 use core::ptr::{self, NonNull};
 
-#[cfg(backtrace)]
-use crate::backtrace::Backtrace;
-
 #[cfg(feature = "std")]
 use core::ops::{Deref, DerefMut};
 
@@ -261,30 +258,6 @@ where
         unsafe { Report::construct(error, vtable, context) }
     }
 
-    /// Get the backtrace for this Report.
-    ///
-    /// Backtraces are only available on the nightly channel. Tracking issue:
-    /// [rust-lang/rust#53487][tracking].
-    ///
-    /// In order for the backtrace to be meaningful, one of the two environment
-    /// variables `RUST_LIB_BACKTRACE=1` or `RUST_BACKTRACE=1` must be defined
-    /// and `RUST_LIB_BACKTRACE` must not be `0`. Backtraces are somewhat
-    /// expensive to capture in Rust, so we don't necessarily want to be
-    /// capturing them all over the place all the time.
-    ///
-    /// - If you want panics and errors to both have backtraces, set
-    ///   `RUST_BACKTRACE=1`;
-    /// - If you want only errors to have backtraces, set
-    ///   `RUST_LIB_BACKTRACE=1`;
-    /// - If you want only panics to have backtraces, set `RUST_BACKTRACE=1` and
-    ///   `RUST_LIB_BACKTRACE=0`.
-    ///
-    /// [tracking]: https://github.com/rust-lang/rust/issues/53487
-    #[cfg(backtrace)]
-    pub fn backtrace(&self) -> &Backtrace {
-        self.inner.backtrace()
-    }
-
     /// An iterator of the chain of source errors contained by this Report.
     ///
     /// This iterator will visit every error in the cause chain of this error
@@ -436,10 +409,12 @@ where
         }
     }
 
+    /// Get a reference to the Context for this Report.
     pub fn context(&self) -> &C {
         self.inner.context.as_ref().unwrap()
     }
 
+    /// Get a mutable reference to the Context for this Report.
     pub fn context_mut(&mut self) -> &mut C {
         self.inner.context.as_mut().unwrap()
     }
@@ -742,11 +717,6 @@ where
     C: EyreContext,
     E: StdError,
 {
-    #[cfg(backtrace)]
-    fn backtrace(&self) -> Option<&Backtrace> {
-        Some(self.erase().backtrace())
-    }
-
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         self.erase().error().source()
     }
