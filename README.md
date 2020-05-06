@@ -15,7 +15,7 @@ of [`color-backtrace`].
 
 Add the following to your `Cargo.toml`:
 
-```
+```toml
 [dependencies]
 color-spantrace = "0.1"
 tracing = "0.1.13"
@@ -47,6 +47,9 @@ fn foo() -> SpanTrace {
 And finally colorize the `SpanTrace`:
 
 ```rust
+use tracing_error::SpanTrace;
+
+let span_trace = SpanTrace::capture();
 println!("{}", color_spantrace::colorize(&span_trace));
 ```
 

@@ -1,3 +1,50 @@
+//! A rust library for colorizing [`tracing_error::SpanTrace`] objects in the style
+//! of [`color-backtrace`].
+//!
+//! ## Setup
+//!
+//! Add the following to your `Cargo.toml`:
+//!
+//! ```toml
+//! [dependencies]
+//! color-spantrace = "0.1"
+//! tracing = "0.1.13"
+//! tracing-error = "0.1.2"
+//! tracing-subscriber = "0.2.5"
+//! ```
+//!
+//! Setup a tracing subscriber with an `ErrorLayer`:
+//!
+//! ```rust
+//! use tracing_error::ErrorLayer;
+//! use tracing_subscriber::{prelude::*, registry::Registry};
+//!
+//! Registry::default().with(ErrorLayer::default()).init();
+//! ```
+//!
+//! Create spans and enter them:
+//!
+//! ```rust
+//! use tracing::instrument;
+//! use tracing_error::SpanTrace;
+//!
+//! #[instrument]
+//! fn foo() -> SpanTrace {
+//!     SpanTrace::capture()
+//! }
+//! ```
+//!
+//! And finally colorize the `SpanTrace`:
+//!
+//! ```rust
+//! use tracing_error::SpanTrace;
+//!
+//! let span_trace = SpanTrace::capture();
+//! println!("{}", color_spantrace::colorize(&span_trace));
+//! ```
+//!
+//! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
+//! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.0")]
 use ansi_term::{Color::*, Style};
 use std::env;
@@ -7,6 +54,21 @@ use std::io::{BufRead, BufReader, ErrorKind};
 use std::sync::atomic::{AtomicUsize, Ordering::SeqCst};
 use tracing_error::SpanTrace;
 
+/// Display a [`SpanTrace`] with colors and source
+///
+/// This function returns an `impl Display` type which can be then used in place of the original
+/// SpanTrace when writing it too the screen or buffer.
+///
+/// # Example
+///
+/// ```rust
+/// use tracing_error::SpanTrace;
+///
+/// let span_trace = SpanTrace::capture();
+/// println!("{}", color_spantrace::colorize(&span_trace));
+/// ```
+///
+/// [`SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 pub fn colorize(span_trace: &SpanTrace) -> impl fmt::Display + '_ {
     ColorSpanTrace { span_trace }
 }
