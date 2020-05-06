@@ -1,5 +1,5 @@
 use tracing::instrument;
-use tracing_error::{prelude::*, ErrorLayer, SpanTrace};
+use tracing_error::{ErrorLayer, SpanTrace};
 use tracing_subscriber::{prelude::*, registry::Registry};
 
 #[instrument]
