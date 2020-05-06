@@ -104,4 +104,4 @@ be dual licensed as above, without any additional terms or conditions.
 </sub>
 
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
-[`color-spantrace`]: https://github.com/athre0z/color-backtrace
+[`color-backtrace`]: https://github.com/athre0z/color-backtrace
