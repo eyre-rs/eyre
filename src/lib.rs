@@ -1,4 +1,4 @@
-use console::style;
+use ansi_term::{Color::*, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
@@ -63,20 +63,17 @@ impl Frame<'_> {
     fn print_header(&self, i: u32, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:>2}: {}",
+            "{:>2}: {}{}{}",
             i,
-            style(format_args!(
-                "{}::{}",
-                self.metadata.target(),
-                self.metadata.name()
-            ))
-            .red()
+            Red.paint(self.metadata.target()),
+            Red.paint("::"),
+            Red.paint(self.metadata.name()),
         )
     }
 
     fn print_fields(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if !self.fields.is_empty() {
-            write!(f, " with {}", style(self.fields).cyan())?;
+            write!(f, " with {}", Cyan.paint(self.fields))?;
         }
 
         Ok(())
@@ -113,12 +110,15 @@ impl Frame<'_> {
         let reader = BufReader::new(file);
         let start_line = lineno - 2.min(lineno - 1);
         let surrounding_src = reader.lines().skip(start_line as usize - 1).take(5);
+        let bold = Style::new().bold();
         for (line, cur_line_no) in surrounding_src.zip(start_line..) {
             if cur_line_no == lineno {
                 write!(
                     f,
-                    "\n{}",
-                    style(format_args!("{:>8} > {}", cur_line_no, line.unwrap())).bold()
+                    "\n{:>8}{}{}",
+                    bold.paint(cur_line_no.to_string()),
+                    bold.paint(" > "),
+                    bold.paint(line.unwrap())
                 )?;
             } else {
                 write!(f, "\n{:>8} │ {}", cur_line_no, line.unwrap())?;
