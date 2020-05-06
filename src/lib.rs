@@ -1,3 +1,4 @@
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.0")]
 use ansi_term::{Color::*, Style};
 use std::env;
 use std::fmt;
@@ -49,7 +50,8 @@ fn enabled() -> bool {
         },
     };
     ENABLED.store(enabled as usize + 1, SeqCst);
-    return enabled;
+
+    enabled
 }
 
 impl Frame<'_> {
