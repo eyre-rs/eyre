@@ -35,28 +35,6 @@
 //! color-eyre = { version = "0.1", default-features = false }
 //! ```
 //!
-//! ## Explanation
-//!
-//! This crate works by defining a `Context` type which implements [`eyre::EyreContext`]
-//! and a pair of type aliases for setting this context type as the parameter of
-//! [`eyre::Report`].
-//!
-//! ```rust
-//! use color_eyre::Context;
-//!
-//! pub type Report = eyre::Report<Context>;
-//! pub type Result<T, E = Report> = core::result::Result<T, E>;
-//! ```
-//!
-//! ## Features
-//!
-//! - captures a [`backtrace::Backtrace`] and prints using [`color-backtrace`]
-//! - captures a [`tracing_error::SpanTrace`] and prints using
-//! [`color-spantrace`]
-//! - Only capture SpanTrace by default for better performance.
-//! - display source lines when `RUST_LIB_BACKTRACE=full` is set
-//! - store help text via [`Help`] trait and display after final report
-//!
 //! ## Example
 //!
 //! ```rust,should_panic
@@ -107,6 +85,29 @@
 //! ## Full Report Format (with `RUST_LIB_BACKTRACE=full`)
 //!
 //! ![full report format](./pictures/full.png)
+//!
+//! ## Explanation
+//!
+//! This crate works by defining a `Context` type which implements [`eyre::EyreContext`]
+//! and a pair of type aliases for setting this context type as the parameter of
+//! [`eyre::Report`].
+//!
+//! ```rust
+//! use color_eyre::Context;
+//!
+//! pub type Report = eyre::Report<Context>;
+//! pub type Result<T, E = Report> = core::result::Result<T, E>;
+//! ```
+//!
+//! ## Features
+//!
+//! - captures a [`backtrace::Backtrace`] and prints using [`color-backtrace`]
+//! - captures a [`tracing_error::SpanTrace`] and prints using
+//! [`color-spantrace`]
+//! - Only capture SpanTrace by default for better performance.
+//! - display source lines when `RUST_LIB_BACKTRACE=full` is set
+//! - store help text via [`Help`] trait and display after final report
+//!
 //!
 //! [`eyre`]: https://docs.rs/eyre
 //! [`tracing-error`]: https://docs.rs/tracing-error

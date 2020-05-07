@@ -1,5 +1,16 @@
 ## color-eyre
 
+[![Build Status][actions-badge]][actions-url]
+[![Latest Version][version-badge]][version-url]
+[![Rust Documentation][docs-badge]][docs-url]
+
+[actions-badge]: https://github.com/yaahc/color-eyre/workflows/Continuous%20integration/badge.svg
+[actions-url]: https://github.com/yaahc/color-eyre/actions?query=workflow%3A%22Continuous+integration%22
+[version-badge]: https://img.shields.io/crates/v/color-eyre.svg
+[version-url]: https://crates.io/crates/color-eyre
+[docs-badge]: https://img.shields.io/badge/docs-latest-blue.svg
+[docs-url]: https://docs.rs/color-eyre
+
 A custom context for the [`eyre`] crate for colorful error reports, suggestions,
 and [`tracing-error`] support.
 
@@ -36,28 +47,6 @@ tracing integration to cut down on unused dependencies:
 eyre = "0.3.8"
 color-eyre = { version = "0.1", default-features = false }
 ```
-
-## Explanation
-
-This crate works by defining a `Context` type which implements [`eyre::EyreContext`]
-and a pair of type aliases for setting this context type as the parameter of
-[`eyre::Report`].
-
-```rust
-use color_eyre::Context;
-
-pub type Report = eyre::Report<Context>;
-pub type Result<T, E = Report> = core::result::Result<T, E>;
-```
-
-## Features
-
-- captures a [`backtrace::Backtrace`] and prints using [`color-backtrace`]
-- captures a [`tracing_error::SpanTrace`] and prints using
-[`color-spantrace`]
-- Only capture SpanTrace by default for better performance.
-- display source lines when `RUST_LIB_BACKTRACE=full` is set
-- store help text via [`Help`] trait and display after final report
 
 ## Example
 
@@ -110,6 +99,29 @@ fn read_config() -> Result<(), Report> {
 
 ![full report format](./pictures/full.png)
 
+## Explanation
+
+This crate works by defining a `Context` type which implements [`eyre::EyreContext`]
+and a pair of type aliases for setting this context type as the parameter of
+[`eyre::Report`].
+
+```rust
+use color_eyre::Context;
+
+pub type Report = eyre::Report<Context>;
+pub type Result<T, E = Report> = core::result::Result<T, E>;
+```
+
+## Features
+
+- captures a [`backtrace::Backtrace`] and prints using [`color-backtrace`]
+- captures a [`tracing_error::SpanTrace`] and prints using
+[`color-spantrace`]
+- Only capture SpanTrace by default for better performance.
+- display source lines when `RUST_LIB_BACKTRACE=full` is set
+- store help text via [`Help`] trait and display after final report
+
+
 [`eyre`]: https://docs.rs/eyre
 [`tracing-error`]: https://docs.rs/tracing-error
 [`color-backtrace`]: https://docs.rs/color-backtrace
@@ -120,3 +132,18 @@ fn read_config() -> Result<(), Report> {
 [`Help`]: trait.Help.html
 [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
 [`eyre::Result`]: https://docs.rs/eyre/0.3.8/eyre/type.Result.html
+
+#### License
+
+<sup>
+Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
+2.0</a> or <a href="LICENSE-MIT">MIT license</a> at your option.
+</sup>
+
+<br>
+
+<sub>
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
+</sub>
