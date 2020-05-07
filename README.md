@@ -20,7 +20,7 @@ Add the following to your toml file:
 
 ```toml
 [dependencies]
-eyre = "0.3.8"
+eyre = "0.4"
 color-eyre = "0.2"
 ```
 
@@ -44,7 +44,7 @@ tracing integration to cut down on unused dependencies:
 
 ```toml
 [dependencies]
-eyre = "0.3.8"
+eyre = "0.4"
 color-eyre = { version = "0.2", default-features = false }
 ```
 

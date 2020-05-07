@@ -1,6 +1,6 @@
 [package]
 name = "color-eyre"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -19,7 +19,7 @@ capture-spantrace = ["tracing-error", "color-spantrace"]
 default = ["capture-spantrace"]
 
 [dependencies]
-eyre = "0.3.8"
+eyre = "0.4"
 tracing-error = { version = "0.1.2", optional = true }
 color-backtrace = "0.4.0"
 backtrace = "0.3"

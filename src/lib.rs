@@ -7,7 +7,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = "0.3.8"
+//! eyre = "0.4"
 //! color-eyre = "0.2"
 //! ```
 //!
@@ -31,7 +31,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = "0.3.8"
+//! eyre = "0.4"
 //! color-eyre = { version = "0.2", default-features = false }
 //! ```
 //!
@@ -119,7 +119,7 @@
 //! [`Help`]: trait.Help.html
 //! [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/0.3.8/eyre/type.Result.html
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.2.2")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.2.3")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
