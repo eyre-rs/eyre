@@ -1,4 +1,4 @@
-Eyre
+eyre
 ====
 
 [![Build Status][actions-badge]][actions-url]
@@ -158,9 +158,16 @@ This crate does its best to be usable as a drop in replacement of `anyhow` and
 vice-versa by `re-exporting` all of the renamed APIs with the names used in
 `anyhow`.
 
-It is not 100% compatible because there are some cases where `eyre` encounters
-type inference errors but it should mostly work as a drop in replacement.
-Specifically, the following works in anyhow:
+There are two main incompatibilities that you might encounter when porting a
+codebase from `anyhow` to `eyre`:
+
+- type inference errors when using `eyre!`
+- `.context` not being implemented for `Option`
+
+#### Type Inference Errors
+
+The type inference issue is caused by the generic parameter, which isn't
+present in `anyhow::Error`. Specifically, the following works in anyhow:
 
 ```rust
 // Works
@@ -179,6 +186,39 @@ let val = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
 // Works
 let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
 ```
+
+#### `Context` and `Option`
+
+As part of renaming `Context` to `WrapErr` we also intentionally do not
+implement `WrapErr` for `Option`. This decision was made because `wrap_err`
+implies that you're creating a new error that saves the old error as its
+`source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
+being somewhat meaningless.
+
+Instead `eyre` intends for users to use the combinator functions provided by
+`std` for converting `Option`s to `Result`s. So where you would write this with
+anyhow:
+
+```rust
+use anyhow::Context;
+
+let opt: Option<()> = None;
+let result = opt.context("new error message");
+```
+
+With `eyre` we want users to write:
+
+```rust
+use eyre::eyre;
+
+let opt: Option<()> = None;
+let result = opt.ok_or_else(|| eyre!("new error message"));
+```
+
+However, to help with porting we do provide a `ContextCompat` trait which
+implements `context` for options which you can import to make existing
+`.context` calls compile.
+
 [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html

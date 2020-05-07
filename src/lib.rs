@@ -10,7 +10,7 @@
 //! [dependencies]
 //! eyre = "0.4"
 //! ```
-//! # Details
+//! ## Details
 //!
 //! - Use `Result<T, eyre::Report>`, or equivalently `eyre::Result<T>`, as
 //!   the return type of any fallible function.
@@ -177,7 +177,7 @@
 //!   # }
 //!   ```
 //!
-//! # No-std support
+//! ## No-std support
 //!
 //! In no_std mode, the same API is almost all available and works the same way.
 //! To depend on Eyre in no_std mode, disable our default enabled "std"
@@ -193,17 +193,24 @@
 //! will require an explicit `.map_err(Report::msg)` when working with a
 //! non-Eyre error type inside a function that returns Eyre's error type.
 //!
-//! # Compatibility with `anyhow`
+//! ## Compatibility with `anyhow`
 //!
 //! This crate does its best to be usable as a drop in replacement of `anyhow` and
 //! vice-versa by `re-exporting` all of the renamed APIs with the names used in
 //! `anyhow`.
 //!
-//! It is not 100% compatible because there are some cases where `eyre` encounters
-//! type inference errors but it should mostly work as a drop in replacement.
-//! Specifically, the following works in anyhow:
+//! There are two main incompatibilities that you might encounter when porting a
+//! codebase from `anyhow` to `eyre`:
 //!
-//! ```rust,compile_fail
+//! - type inference errors when using `eyre!`
+//! - `.context` not being implemented for `Option`
+//!
+//! #### Type Inference Errors
+//!
+//! The type inference issue is caused by the generic parameter, which isn't
+//! present in `anyhow::Error`. Specifically, the following works in anyhow:
+//!
+//! ```rust
 //! // Works
 //! let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value")).unwrap();
 //! ```
@@ -213,13 +220,45 @@
 //! is to give the compiler a hint for what type it should be resolving to, either
 //! via your return type or a type annotation.
 //!
-//! ```rust,compile_fail
+//! ```rust
 //! // Broken
 //! let val = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
 //!
 //! // Works
 //! let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
 //! ```
+//!
+//! #### `Context` and `Option`
+//!
+//! As part of renaming `Context` to `WrapErr` we also intentionally do not
+//! implement `WrapErr` for `Option`. This decision was made because `wrap_err`
+//! implies that you're creating a new error that saves the old error as its
+//! `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
+//! being somewhat meaningless.
+//!
+//! Instead `eyre` intends for users to use the combinator functions provided by
+//! `std` for converting `Option`s to `Result`s. So where you would write this with
+//! anyhow:
+//!
+//! ```rust
+//! use anyhow::Context;
+//!
+//! let opt: Option<()> = None;
+//! let result = opt.context("new error message");
+//! ```
+//!
+//! With `eyre` we want users to write:
+//!
+//! ```rust
+//! use eyre::eyre;
+//!
+//! let opt: Option<()> = None;
+//! let result = opt.ok_or_else(|| eyre!("new error message"));
+//! ```
+//!
+//! However, to help with porting we do provide a `ContextCompat` trait which
+//! implements `context` for options which you can import to make existing
+//! `.context` calls compile.
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 //! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
@@ -891,7 +930,7 @@ where
 #[doc(hidden)]
 pub mod private {
     use crate::{EyreContext, Report};
-    use core::fmt::{Debug, Display};
+    use core::fmt::Display;
 
     //     #[cfg(backtrace)]
     //     use std::backtrace::Backtrace;
@@ -909,7 +948,7 @@ pub mod private {
     pub fn new_adhoc<M, C>(message: M) -> Report<C>
     where
         C: EyreContext,
-        M: Display + Debug + Send + Sync + 'static,
+        M: Display + Send + Sync + 'static,
     {
         Report::from_adhoc(message)
     }
