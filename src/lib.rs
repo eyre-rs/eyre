@@ -45,13 +45,35 @@
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.1")]
+#![warn(
+    missing_debug_implementations,
+    missing_docs,
+    missing_doc_code_examples,
+    rust_2018_idioms,
+    unreachable_pub,
+    bad_style,
+    const_err,
+    dead_code,
+    improper_ctypes,
+    non_shorthand_field_patterns,
+    no_mangle_generic_items,
+    overflowing_literals,
+    path_statements,
+    patterns_in_fns_without_body,
+    private_in_public,
+    unconditional_recursion,
+    unused,
+    unused_allocation,
+    unused_comparisons,
+    unused_parens,
+    while_true
+)]
 use ansi_term::{Color::*, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader, ErrorKind};
-use std::sync::atomic::{AtomicUsize, Ordering::SeqCst};
 use tracing_error::SpanTrace;
 
 /// Display a [`SpanTrace`] with colors and source
@@ -94,26 +116,33 @@ struct Frame<'a> {
     fields: &'a str,
 }
 
-fn enabled() -> bool {
-    // Cache the result of reading the environment variables to make
-    // backtrace captures speedy, because otherwise reading environment
-    // variables every time can be somewhat slow.
-    static ENABLED: AtomicUsize = AtomicUsize::new(0);
-    match ENABLED.load(SeqCst) {
-        0 => {}
-        1 => return false,
-        _ => return true,
-    }
-    let enabled = match env::var("RUST_LIB_BACKTRACE") {
-        Ok(s) => s != "0",
-        Err(_) => match env::var("RUST_BACKTRACE") {
-            Ok(s) => s != "0",
-            Err(_) => false,
-        },
-    };
-    ENABLED.store(enabled as usize + 1, SeqCst);
+/// Defines how verbose the backtrace is supposed to be.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Verbosity {
+    /// Print a small message including the panic payload and the panic location.
+    Minimal,
+    /// Everything in `Minimal` and additionally print a backtrace.
+    Medium,
+    /// Everything in `Medium` plus source snippets for all backtrace locations.
+    Full,
+}
 
-    enabled
+impl Verbosity {
+    fn lib_from_env() -> Self {
+        Self::convert_env(
+            env::var("RUST_LIB_BACKTRACE")
+                .or_else(|_| env::var("RUST_BACKTRACE"))
+                .ok(),
+        )
+    }
+
+    fn convert_env(env: Option<String>) -> Self {
+        match env {
+            Some(ref x) if x == "full" => Verbosity::Full,
+            Some(_) => Verbosity::Medium,
+            None => Verbosity::Minimal,
+        }
+    }
 }
 
 impl Frame<'_> {
@@ -208,7 +237,7 @@ impl fmt::Display for ColorSpanTrace<'_> {
 
             try_bool!(frame.print(span, f), err);
 
-            if enabled() {
+            if Verbosity::lib_from_env() == Verbosity::Full {
                 try_bool!(frame.print_source_if_avail(f), err);
             }
 
