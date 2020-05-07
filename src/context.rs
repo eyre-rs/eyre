@@ -1,5 +1,5 @@
 use crate::error::ContextError;
-use crate::{EyreContext, Report, StdError, WrapErr};
+use crate::{ContextCompat, EyreContext, Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]
@@ -80,12 +80,47 @@ where
     }
 }
 
+impl<T, C> ContextCompat<T, C> for Option<T>
+where
+    C: EyreContext,
+{
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.context(msg)
+    }
+
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
+    {
+        self.with_context(msg)
+    }
+
+    fn context<D>(self, msg: D) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.ok_or_else(|| Report::from_display(msg))
+    }
+
+    fn with_context<D, F>(self, msg: F) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
+    {
+        self.ok_or_else(|| Report::from_display(msg()))
+    }
+}
+
 impl<D, E> Debug for ContextError<D, E>
 where
     D: Display,
     E: Debug,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Error")
             .field("msg", &Quoted(&self.msg))
             .field("source", &self.error)
@@ -97,7 +132,7 @@ impl<D, E> Display for ContextError<D, E>
 where
     D: Display,
 {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Display::fmt(&self.msg, f)
     }
 }
@@ -133,7 +168,7 @@ impl<D> Debug for Quoted<D>
 where
     D: Display,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_char('"')?;
         Quoted(&mut *formatter).write_fmt(format_args!("{}", self.0))?;
         formatter.write_char('"')?;
@@ -153,4 +188,5 @@ pub(crate) mod private {
     pub trait Sealed<C: EyreContext> {}
 
     impl<T, E, C: EyreContext> Sealed<C> for Result<T, E> where E: ext::StdError<C> {}
+    impl<T, C: EyreContext> Sealed<C> for Option<T> {}
 }

@@ -10,7 +10,7 @@
 //! [dependencies]
 //! eyre = "0.4"
 //! ```
-//! # Details
+//! ## Details
 //!
 //! - Use `Result<T, eyre::Report>`, or equivalently `eyre::Result<T>`, as
 //!   the return type of any fallible function.
@@ -177,7 +177,7 @@
 //!   # }
 //!   ```
 //!
-//! # No-std support
+//! ## No-std support
 //!
 //! In no_std mode, the same API is almost all available and works the same way.
 //! To depend on Eyre in no_std mode, disable our default enabled "std"
@@ -193,19 +193,29 @@
 //! will require an explicit `.map_err(Report::msg)` when working with a
 //! non-Eyre error type inside a function that returns Eyre's error type.
 //!
-//! # Compatibility with `anyhow`
+//! ## Compatibility with `anyhow`
 //!
 //! This crate does its best to be usable as a drop in replacement of `anyhow` and
 //! vice-versa by `re-exporting` all of the renamed APIs with the names used in
 //! `anyhow`.
 //!
-//! It is not 100% compatible because there are some cases where `eyre` encounters
-//! type inference errors but it should mostly work as a drop in replacement.
-//! Specifically, the following works in anyhow:
+//! There are two main incompatibilities that you might encounter when porting a
+//! codebase from `anyhow` to `eyre`:
 //!
-//! ```rust,compile_fail
+//! - type inference errors when using `eyre!`
+//! - `.context` not being implemented for `Option`
+//!
+//! #### Type Inference Errors
+//!
+//! The type inference issue is caused by the generic parameter, which isn't
+//! present in `anyhow::Error`. Specifically, the following works in anyhow:
+//!
+//! ```rust
+//! # fn get_optional_val() -> Option<()> { None };
+//! use anyhow::anyhow;
+//!
 //! // Works
-//! let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value")).unwrap();
+//! let val = get_optional_val().ok_or_else(|| anyhow!("failed to get value")).unwrap_err();
 //! ```
 //!
 //! Where as with `eyre!` this will fail due to being unable to infer the type for
@@ -214,12 +224,47 @@
 //! via your return type or a type annotation.
 //!
 //! ```rust,compile_fail
+//! use eyre::eyre;
+//!
+//! # fn get_optional_val() -> Option<()> { None };
 //! // Broken
-//! let val = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+//! let val = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
 //!
 //! // Works
-//! let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+//! let val: Report = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
 //! ```
+//!
+//! #### `Context` and `Option`
+//!
+//! As part of renaming `Context` to `WrapErr` we also intentionally do not
+//! implement `WrapErr` for `Option`. This decision was made because `wrap_err`
+//! implies that you're creating a new error that saves the old error as its
+//! `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
+//! being somewhat meaningless.
+//!
+//! Instead `eyre` intends for users to use the combinator functions provided by
+//! `std` for converting `Option`s to `Result`s. So where you would write this with
+//! anyhow:
+//!
+//! ```rust
+//! use anyhow::Context;
+//!
+//! let opt: Option<()> = None;
+//! let result = opt.context("new error message");
+//! ```
+//!
+//! With `eyre` we want users to write:
+//!
+//! ```rust
+//! use eyre::{eyre, Result};
+//!
+//! let opt: Option<()> = None;
+//! let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
+//! ```
+//!
+//! However, to help with porting we do provide a `ContextCompat` trait which
+//! implements `context` for options which you can import to make existing
+//! `.context` calls compile.
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 //! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
@@ -228,6 +273,29 @@
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`stable_eyre`]: https://docs.rs/stable-eyre
 #![doc(html_root_url = "https://docs.rs/eyre/0.4.0")]
+#![warn(
+    missing_debug_implementations,
+    missing_docs,
+    missing_doc_code_examples,
+    rust_2018_idioms,
+    unreachable_pub,
+    bad_style,
+    const_err,
+    dead_code,
+    improper_ctypes,
+    non_shorthand_field_patterns,
+    no_mangle_generic_items,
+    overflowing_literals,
+    path_statements,
+    patterns_in_fns_without_body,
+    private_in_public,
+    unconditional_recursion,
+    unused,
+    unused_allocation,
+    unused_comparisons,
+    unused_parens,
+    while_true
+)]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -242,16 +310,16 @@ mod alloc {
     extern crate alloc;
 
     #[cfg(not(feature = "std"))]
-    pub use alloc::boxed::Box;
+    pub(crate) use alloc::boxed::Box;
 
     #[cfg(feature = "std")]
-    pub use std::boxed::Box;
+    pub(crate) use std::boxed::Box;
 
     #[cfg(not(feature = "std"))]
-    pub use alloc::string::String;
+    pub(crate) use alloc::string::String;
 
-    #[cfg(feature = "std")]
-    pub use std::string::String;
+    // #[cfg(feature = "std")]
+    // pub(crate) use std::string::String;
 }
 
 #[macro_use]
@@ -404,6 +472,7 @@ where
 /// use eyre::EyreContext;
 /// # use eyre::Chain;
 /// # use std::error::Error;
+/// use indenter::indented;
 ///
 /// pub struct Context {
 ///     backtrace: Backtrace,
@@ -432,9 +501,9 @@ where
 /// #             for (n, error) in Chain::new(cause).enumerate() {
 /// #                 writeln!(f)?;
 /// #                 if multiple {
-/// #                     write!(indenter::Indented::numbered(f, n), "{}", error)?;
+/// #                     write!(indented(f).ind(n), "{}", error)?;
 /// #                 } else {
-/// #                     write!(indenter::Indented::new(f), "{}", error)?;
+/// #                     write!(indented(f), "{}", error)?;
 /// #                 }
 /// #             }
 /// #         }
@@ -491,9 +560,9 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     /// #             for (n, error) in Chain::new(cause).enumerate() {
     /// #                 writeln!(f)?;
     /// #                 if multiple {
-    /// #                     write!(indenter::Indented::numbered(f, n), "{}", error)?;
+    /// #                     write!(indenter::indented(f).ind(n), "{}", error)?;
     /// #                 } else {
-    /// #                     write!(indenter::Indented::new(f), "{}", error)?;
+    /// #                     write!(indenter::indented(f), "{}", error)?;
     /// #                 }
     /// #             }
     /// #         }
@@ -516,6 +585,7 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     /// use eyre::EyreContext;
     /// use eyre::Chain;
     /// use std::error::Error;
+    /// use indenter::indented;
     ///
     /// pub struct Context {
     ///     backtrace: Backtrace,
@@ -549,9 +619,9 @@ pub trait EyreContext: Sized + Send + Sync + 'static {
     ///             for (n, error) in Chain::new(cause).enumerate() {
     ///                 writeln!(f)?;
     ///                 if multiple {
-    ///                     write!(indenter::Indented::numbered(f, n), "{}", error)?;
+    ///                     write!(indented(f).ind(n), "{}", error)?;
     ///                 } else {
-    ///                     write!(indenter::Indented::new(f), "{}", error)?;
+    ///                     write!(indented(f), "{}", error)?;
     ///                 }
     ///             }
     ///         }
@@ -596,6 +666,20 @@ pub struct DefaultContext {
     backtrace: Option<Backtrace>,
 }
 
+impl core::fmt::Debug for DefaultContext {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("DefaultContext")
+            .field(
+                "backtrace",
+                match &self.backtrace {
+                    Some(_) => &"Some(Backtrace { ... })",
+                    None => &"None",
+                },
+            )
+            .finish()
+    }
+}
+
 impl EyreContext for DefaultContext {
     #[allow(unused_variables)]
     fn default(error: &(dyn StdError + 'static)) -> Self {
@@ -623,9 +707,9 @@ impl EyreContext for DefaultContext {
             for (n, error) in crate::chain::Chain::new(cause).enumerate() {
                 writeln!(f)?;
                 if multiple {
-                    write!(indenter::Indented::numbered(f, n), "{}", error)?;
+                    write!(indenter::indented(f).ind(n), "{}", error)?;
                 } else {
-                    write!(indenter::Indented::new(f), "{}", error)?;
+                    write!(indenter::indented(f), "{}", error)?;
                 }
             }
         }
@@ -669,6 +753,7 @@ impl EyreContext for DefaultContext {
 /// ```
 #[cfg(feature = "std")]
 #[derive(Clone)]
+#[allow(missing_debug_implementations)]
 pub struct Chain<'a> {
     state: crate::chain::ChainState<'a>,
 }
@@ -767,6 +852,35 @@ pub type Result<T, E = Report<DefaultContext>> = core::result::Result<T, E>;
 ///
 /// Caused by:
 ///     No such file or directory (os error 2)
+/// ```
+///
+/// # Wrapping Types That Don't impl `Error` (e.g. `&str` and `Box<dyn Error>`)
+///
+/// Due to restrictions for coherence `Report` cannot impl `From` for types that don't impl
+/// `Error`. Attempts to do so will give "this type might implement Error in the future" as an
+/// error. As such, `wrap_err`, which uses `From` under the hood, cannot be used to wrap these
+/// types. Instead we encourage you to use the combinators provided for `Result` in `std`/`core`.
+///
+/// For example, instead of this:
+///
+/// ```rust,compile_fail
+/// use std::error::Error;
+/// use eyre::{WrapErr, Report};
+///
+/// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
+///     err.wrap_err("saw a downstream error")
+/// }
+/// ```
+///
+/// We encourage you to write this:
+///
+/// ```rust
+/// use std::error::Error;
+/// use eyre::{WrapErr, Report, eyre};
+///
+/// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
+///     err.map_err(|e| eyre!(e)).wrap_err("saw a downstream error")
+/// }
 /// ```
 ///
 /// # Effect on downcasting
@@ -882,6 +996,78 @@ where
 
     /// Compatibility re-export of wrap_err_with for interopt with `anyhow`
     fn with_context<D, F>(self, f: F) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D;
+}
+
+/// Provides the `context` method for `Option` when porting from `anyhow`
+///
+/// This trait is sealed and cannot be implemented for types outside of
+/// `eyre`.
+///
+/// ## Why Doesn't `Eyre` impl `WrapErr` for `Option`?
+///
+/// `eyre` doesn't impl `WrapErr` for `Option` because `wrap_err` implies that you're creating a
+/// new error that saves the previous error as its `source`. Calling `wrap_err` on an `Option` is
+/// meaningless because there is no source error. `anyhow` avoids this issue by using a different
+/// mental model where you're adding "context" to an error, though this not a mental model for
+/// error handling that `eyre` agrees with.
+///
+/// Instead, `eyre` encourages users to think of each error as distinct, where the previous error
+/// is the context being saved by the new error, which is backwards compared to anyhow's model. In
+/// this model you're encouraged to use combinators provided by `std` for `Option` to convert an
+/// option to a `Result`
+///
+/// # Example
+///
+/// Instead of:
+///
+/// ```rust
+/// use eyre::ContextCompat;
+///
+/// fn get_thing(mut things: impl Iterator<Item = u32>) -> eyre::Result<u32> {
+///     things
+///         .find(|&thing| thing == 42)
+///         .context("the thing wasnt in the list")
+/// }
+/// ```
+///
+/// We encourage you to use this:
+///
+/// ```rust
+/// use eyre::eyre;
+///
+/// fn get_thing(mut things: impl Iterator<Item = u32>) -> eyre::Result<u32> {
+///     things
+///         .find(|&thing| thing == 42)
+///         .ok_or_else(|| eyre!("the thing wasnt in the list"))
+/// }
+/// ```
+pub trait ContextCompat<T, C>: context::private::Sealed<C>
+where
+    C: EyreContext,
+{
+    /// Compatibility version of `wrap_err` for creating new errors with new source on `Option`
+    /// when porting from `anyhow`
+    fn context<D>(self, msg: D) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static;
+
+    /// Compatibility version of `wrap_err_with` for creating new errors with new source on `Option`
+    /// when porting from `anyhow`
+    fn with_context<D, F>(self, f: F) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D;
+
+    /// Compatibility re-export of `context` for porting from `anyhow` to `eyre`
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report<C>>
+    where
+        D: Display + Send + Sync + 'static;
+
+    /// Compatibility re-export of `with_context` for porting from `anyhow` to `eyre`
+    fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report<C>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;

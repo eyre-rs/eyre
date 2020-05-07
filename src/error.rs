@@ -116,6 +116,28 @@ where
         unsafe { Report::construct(error, vtable, context) }
     }
 
+    pub(crate) fn from_display<M>(message: M) -> Self
+    where
+        M: Display + Send + Sync + 'static,
+    {
+        use crate::wrapper::{DisplayError, NoneError};
+        let error: DisplayError<M> = DisplayError(message);
+        let vtable = &ErrorVTable {
+            object_drop: object_drop::<DisplayError<M>, C>,
+            object_ref: object_ref::<DisplayError<M>, C>,
+            #[cfg(feature = "std")]
+            object_mut: object_mut::<DisplayError<M>, C>,
+            object_boxed: object_boxed::<DisplayError<M>, C>,
+            object_downcast: object_downcast::<M, C>,
+            object_drop_rest: object_drop_front::<M, C>,
+        };
+
+        // Safety: DisplayError is repr(transparent) so it is okay for the
+        // vtable to allow casting the DisplayError<M> to M.
+        let context = Some(C::default(&NoneError));
+        unsafe { Report::construct(error, vtable, context) }
+    }
+
     #[cfg(feature = "std")]
     pub(crate) fn from_msg<D, E>(msg: D, error: E) -> Self
     where
@@ -280,7 +302,7 @@ where
     /// }
     /// ```
     #[cfg(feature = "std")]
-    pub fn chain(&self) -> Chain {
+    pub fn chain(&self) -> Chain<'_> {
         self.inner.chain()
     }
 
@@ -448,13 +470,13 @@ impl<C: EyreContext> DerefMut for Report<C> {
 }
 
 impl<C: EyreContext> Display for Report<C> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.display(formatter)
     }
 }
 
 impl<C: EyreContext> Debug for Report<C> {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.inner.debug(formatter)
     }
 }
@@ -674,8 +696,8 @@ where
 // ContextError<ManuallyDrop<D>, E> and ContextError<D, ManuallyDrop<E>>.
 #[repr(C)]
 pub(crate) struct ContextError<D, E> {
-    pub msg: D,
-    pub error: E,
+    pub(crate) msg: D,
+    pub(crate) error: E,
 }
 
 impl<E, C> ErrorImpl<E, C>
@@ -707,7 +729,7 @@ where
         unsafe { &mut *(self.vtable.object_mut)(self) }
     }
 
-    pub(crate) fn chain(&self) -> Chain {
+    pub(crate) fn chain(&self) -> Chain<'_> {
         Chain::new(self.error())
     }
 }
@@ -727,7 +749,7 @@ where
     C: EyreContext,
     E: Debug,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.erase().debug(formatter)
     }
 }
@@ -737,7 +759,7 @@ where
     C: EyreContext,
     E: Display,
 {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         Display::fmt(&self.erase().error(), formatter)
     }
 }
