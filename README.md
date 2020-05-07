@@ -21,7 +21,7 @@ Add the following to your toml file:
 ```toml
 [dependencies]
 eyre = "0.3.8"
-color-eyre = "0.1"
+color-eyre = "0.2"
 ```
 
 And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
@@ -45,7 +45,7 @@ tracing integration to cut down on unused dependencies:
 ```toml
 [dependencies]
 eyre = "0.3.8"
-color-eyre = { version = "0.1", default-features = false }
+color-eyre = { version = "0.2", default-features = false }
 ```
 
 ## Example

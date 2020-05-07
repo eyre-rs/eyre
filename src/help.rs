@@ -175,18 +175,37 @@ where
     }
 }
 
-pub enum HelpInfo {
+pub(crate) enum HelpInfo {
     Note(Box<dyn Display + Send + Sync + 'static>),
     Warning(Box<dyn Display + Send + Sync + 'static>),
     Suggestion(Box<dyn Display + Send + Sync + 'static>),
 }
 
 impl Display for HelpInfo {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Note(context) => write!(f, "{}: {}", Cyan.paint("Note"), context),
             Self::Warning(context) => write!(f, "{}: {}", Yellow.paint("Warning"), context),
             Self::Suggestion(context) => write!(f, "{}: {}", Cyan.paint("Suggestion"), context),
+        }
+    }
+}
+
+impl fmt::Debug for HelpInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Note(context) => f
+                .debug_tuple("Note")
+                .field(&format_args!("{}", context))
+                .finish(),
+            Self::Warning(context) => f
+                .debug_tuple("Warning")
+                .field(&format_args!("{}", context))
+                .finish(),
+            Self::Suggestion(context) => f
+                .debug_tuple("Suggestion")
+                .field(&format_args!("{}", context))
+                .finish(),
         }
     }
 }

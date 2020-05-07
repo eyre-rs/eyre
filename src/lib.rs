@@ -8,7 +8,7 @@
 //! ```toml
 //! [dependencies]
 //! eyre = "0.3.8"
-//! color-eyre = "0.1"
+//! color-eyre = "0.2"
 //! ```
 //!
 //! And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
@@ -32,7 +32,7 @@
 //! ```toml
 //! [dependencies]
 //! eyre = "0.3.8"
-//! color-eyre = { version = "0.1", default-features = false }
+//! color-eyre = { version = "0.2", default-features = false }
 //! ```
 //!
 //! ## Example
@@ -119,6 +119,30 @@
 //! [`Help`]: trait.Help.html
 //! [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/0.3.8/eyre/type.Result.html
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.2.0")]
+#![warn(
+    missing_debug_implementations,
+    missing_docs,
+    missing_doc_code_examples,
+    rust_2018_idioms,
+    unreachable_pub,
+    bad_style,
+    const_err,
+    dead_code,
+    improper_ctypes,
+    non_shorthand_field_patterns,
+    no_mangle_generic_items,
+    overflowing_literals,
+    path_statements,
+    patterns_in_fns_without_body,
+    private_in_public,
+    unconditional_recursion,
+    unused,
+    unused_allocation,
+    unused_comparisons,
+    unused_parens,
+    while_true
+)]
 use ansi_term::Color::*;
 use backtrace::Backtrace;
 use eyre::*;
@@ -143,6 +167,7 @@ mod help;
 /// [`tracing-error`]: https://docs.rs/tracing-error
 /// [`color_eyre::Report`]: type.Report.html
 /// [`color_eyre::Result`]: type.Result.html
+#[derive(Debug)]
 pub struct Context {
     backtrace: Option<Backtrace>,
     #[cfg(feature = "capture-spantrace")]
