@@ -272,7 +272,7 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`stable_eyre`]: https://docs.rs/stable-eyre
-#![doc(html_root_url = "https://docs.rs/eyre/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.4.1")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
