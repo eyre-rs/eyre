@@ -178,7 +178,10 @@ pub struct Context {
 impl EyreContext for Context {
     #[allow(unused_variables)]
     fn default(error: &(dyn std::error::Error + 'static)) -> Self {
-        let backtrace = if std::env::var("RUST_LIB_BACKTRACE").is_ok() {
+        let backtrace = if std::env::var("RUST_LIB_BACKTRACE")
+            .or_else(|_| std::env::var("RUST_BACKTRACE"))
+            .is_ok()
+        {
             Some(Backtrace::new())
         } else {
             None

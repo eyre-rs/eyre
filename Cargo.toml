@@ -18,7 +18,8 @@ color-backtrace = "0.4.0"
 backtrace = "0.3"
 indenter = "0.2.0"
 ansi_term = "0.12.1"
-color-spantrace = { version = "0.1", optional = true }
+color-spantrace = { version = "0.1.1", optional = true }
+
 
 [dev-dependencies]
 tracing-subscriber = "0.2.5"
