@@ -76,15 +76,15 @@
 //!
 //! ## Minimal Report Format
 //!
-//! ![minimal report format](./pictures/minimal.png)
+//! ![minimal report format](https://raw.githubusercontent.com/yaahc/color-eyre/master/pictures/minimal.png)
 //!
 //! ## Short Report Format (with `RUST_LIB_BACKTRACE=1`)
 //!
-//! ![short report format](./pictures/short.png)
+//! ![short report format](https://raw.githubusercontent.com/yaahc/color-eyre/master/pictures/short.png)
 //!
 //! ## Full Report Format (with `RUST_LIB_BACKTRACE=full`)
 //!
-//! ![full report format](./pictures/full.png)
+//! ![full report format](https://raw.githubusercontent.com/yaahc/color-eyre/master/pictures/full.png)
 //!
 //! ## Explanation
 //!
