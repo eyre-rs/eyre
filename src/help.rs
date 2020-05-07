@@ -1,5 +1,5 @@
 use crate::{Report, Result};
-use console::style;
+use ansi_term::Color::*;
 use std::fmt::{self, Display};
 
 /// A helper trait for attaching help text to errors to be displayed after the chain of errors
@@ -184,9 +184,9 @@ pub enum HelpInfo {
 impl Display for HelpInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Self::Note(context) => write!(f, "Note: {}", context),
-            Self::Warning(context) => write!(f, "Warning: {}", context),
-            Self::Suggestion(context) => write!(f, "{}: {}", style("Suggestion").cyan(), context),
+            Self::Note(context) => write!(f, "{}: {}", Cyan.paint("Note"), context),
+            Self::Warning(context) => write!(f, "{}: {}", Yellow.paint("Warning"), context),
+            Self::Suggestion(context) => write!(f, "{}: {}", Cyan.paint("Suggestion"), context),
         }
     }
 }

@@ -1,12 +1,21 @@
 use color_eyre::{Help, Report};
 use eyre::WrapErr;
 use tracing::{info, instrument};
-use tracing_error::ErrorLayer;
-use tracing_subscriber::prelude::*;
-use tracing_subscriber::{fmt, EnvFilter};
 
 #[instrument]
 fn main() -> Result<(), Report> {
+    #[cfg(feature = "capture-spantrace")]
+    install_tracing();
+
+    Ok(read_config()?)
+}
+
+#[cfg(feature = "capture-spantrace")]
+fn install_tracing() {
+    use tracing_error::ErrorLayer;
+    use tracing_subscriber::prelude::*;
+    use tracing_subscriber::{fmt, EnvFilter};
+
     let fmt_layer = fmt::layer().with_target(false);
     let filter_layer = EnvFilter::try_from_default_env()
         .or_else(|_| EnvFilter::try_new("info"))
@@ -17,8 +26,6 @@ fn main() -> Result<(), Report> {
         .with(fmt_layer)
         .with(ErrorLayer::default())
         .init();
-
-    Ok(read_config()?)
 }
 
 #[instrument]

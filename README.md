@@ -1,13 +1,41 @@
-color-eyre
-----------
+## color-eyre
 
 A custom context for the [`eyre`] crate for colorful error reports, suggestions,
 and [`tracing-error`] support.
 
-**Disclaimer**: This crate is currently pre-release while I try to upstream
-changes I made to [`color-backtrace`] to support this crate. Until then I
-cannot publish this to crates.io, the documentation is filled out however so
-simply run `cargo doc --open` for an explanation of usage.
+## Setup
+
+Add the following to your toml file:
+
+```toml
+[dependencies]
+eyre = "0.3.8"
+color-eyre = "0.1"
+```
+
+And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
+
+```rust
+use color_eyre::Report;
+
+// or
+
+fn example() -> color_eyre::Result<()> {
+    # Ok(())
+    // ...
+}
+```
+
+### Disabling tracing support
+
+If you don't plan on using `tracing_error` and `SpanTrace` you can disable the
+tracing integration to cut down on unused dependencies:
+
+```toml
+[dependencies]
+eyre = "0.3.8"
+color-eyre = { version = "0.1", default-features = false }
+```
 
 ## Explanation
 
@@ -16,6 +44,8 @@ and a pair of type aliases for setting this context type as the parameter of
 [`eyre::Report`].
 
 ```rust
+use color_eyre::Context;
+
 pub type Report = eyre::Report<Context>;
 pub type Result<T, E = Report> = core::result::Result<T, E>;
 ```
@@ -26,35 +56,12 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 - captures a [`tracing_error::SpanTrace`] and prints using
 [`color-spantrace`]
 - Only capture SpanTrace by default for better performance.
-- display source lines when `RUST_LIB_BACKTRACE=full` is set from both of
-  the above libraries
+- display source lines when `RUST_LIB_BACKTRACE=full` is set
 - store help text via [`Help`] trait and display after final report
 
-## Setup
+## Example
 
-Add the following to your toml file:
-
-```toml
-[dependencies]
-eyre = "0.3.8"
-color-eyre = { git = "https://github.com/yaahc/color-eyre.git" }
-```
-
-And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
-
-```rust
-use color_eyre::Report;
-
-// or
-
-fn example(&self) -> color_eyre::Result<()> {
-    // ...
-}
-```
-
-# Example
-
-```rust
+```rust,should_panic
 use color_eyre::{Help, Report};
 use eyre::WrapErr;
 use tracing::{info, instrument};
