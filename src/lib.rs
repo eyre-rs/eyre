@@ -854,6 +854,35 @@ pub type Result<T, E = Report<DefaultContext>> = core::result::Result<T, E>;
 ///     No such file or directory (os error 2)
 /// ```
 ///
+/// # Wrapping Types That Don't impl `Error` (e.g. `&str` and `Box<dyn Error>`)
+///
+/// Due to restrictions for coherence `Report` cannot impl `From` for types that don't impl
+/// `Error`. Attempts to do so will give "this type might implement Error in the future" as an
+/// error. As such, `wrap_err`, which uses `From` under the hood, cannot be used to wrap these
+/// types. Instead we encourage you to use the combinators provided for `Result` in `std`/`core`.
+///
+/// For example, instead of this:
+///
+/// ```rust,compile_fail
+/// use std::error::Error;
+/// use eyre::{WrapErr, Report};
+///
+/// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
+///     err.wrap_err("saw a downstream error")
+/// }
+/// ```
+///
+/// We encourage you to write this:
+///
+/// ```rust
+/// use std::error::Error;
+/// use eyre::{WrapErr, Report, eyre};
+///
+/// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
+///     err.map_err(|e| eyre!(e)).wrap_err("saw a downstream error")
+/// }
+/// ```
+///
 /// # Effect on downcasting
 ///
 /// After attaching a message of type `D` onto an error of type `E`, the resulting
@@ -985,10 +1014,10 @@ where
 /// mental model where you're adding "context" to an error, though this not a mental model for
 /// error handling that `eyre` agrees with.
 ///
-/// Instead, `eyre` encourages users to think of each error as distinct errors, where the previous
-/// error is the context being saved by the new error, which is the inverse mental model. In this
-/// model you're encouraged to use combinators provided by `std` for `Option` to convert an option
-/// to a `Result`
+/// Instead, `eyre` encourages users to think of each error as distinct, where the previous error
+/// is the context being saved by the new error, which is backwards compared to anyhow's model. In
+/// this model you're encouraged to use combinators provided by `std` for `Option` to convert an
+/// option to a `Result`
 ///
 /// # Example
 ///
