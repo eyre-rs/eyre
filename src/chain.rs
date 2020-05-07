@@ -24,6 +24,26 @@ pub(crate) enum ChainState<'a> {
 }
 
 impl<'a> Chain<'a> {
+    /// Construct an iterator over a chain of errors via the `source` method
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use std::error::Error;
+    /// use std::fmt::{self, Write};
+    /// use eyre::Chain;
+    /// use indenter::indented;
+    ///
+    /// fn report(error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    ///     let mut errors = Chain::new(error).enumerate();
+    ///     for (i, error) in errors {
+    ///         writeln!(f)?;
+    ///         write!(indented(f).ind(i), "{}", error)?;
+    ///     }
+    ///
+    ///     Ok(())
+    /// }
+    /// ```
     pub fn new(head: &'a (dyn StdError + 'static)) -> Self {
         Chain {
             state: ChainState::Linked { next: Some(head) },

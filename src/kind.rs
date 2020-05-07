@@ -1,3 +1,4 @@
+#![allow(missing_debug_implementations, missing_docs)]
 // Tagged dispatch mechanism for resolving the behavior of `eyre!($expr)`.
 //
 // When eyre! is given a single expr argument to turn into eyre::Report, we
