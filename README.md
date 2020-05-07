@@ -50,7 +50,7 @@ color-eyre = { version = "0.2", default-features = false }
 
 ## Example
 
-```rust,should_panic
+```rust
 use color_eyre::{Help, Report};
 use eyre::WrapErr;
 use tracing::{info, instrument};

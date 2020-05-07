@@ -1,8 +1,15 @@
 [package]
 name = "color-eyre"
-version = "0.2.0"
+version = "0.2.2"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "A custom context for the `eyre` crate for colorful error reports, suggestions, and `tracing-error` support."
+repository = "https://github.com/yaahc/color-eyre"
+documentation = "https://docs.rs/color-eyre"
+readme = "README.md"
+categories = []
+keywords = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
