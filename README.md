@@ -170,8 +170,10 @@ The type inference issue is caused by the generic parameter, which isn't
 present in `anyhow::Error`. Specifically, the following works in anyhow:
 
 ```rust
+use anyhow::anyhow;
+
 // Works
-let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value")).unwrap();
+let val = get_optional_val().ok_or_else(|| anyhow!("failed to get value")).unwrap_err();
 ```
 
 Where as with `eyre!` this will fail due to being unable to infer the type for
@@ -179,12 +181,14 @@ the Context parameter. The solution to this problem, should you encounter it,
 is to give the compiler a hint for what type it should be resolving to, either
 via your return type or a type annotation.
 
-```rust
+```rust,compile_fail
+use eyre::eyre;
+
 // Broken
-let val = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+let val = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
 
 // Works
-let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+let val: Report = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
 ```
 
 #### `Context` and `Option`
@@ -209,10 +213,10 @@ let result = opt.context("new error message");
 With `eyre` we want users to write:
 
 ```rust
-use eyre::eyre;
+use eyre::{eyre, Result};
 
 let opt: Option<()> = None;
-let result = opt.ok_or_else(|| eyre!("new error message"));
+let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
 ```
 
 However, to help with porting we do provide a `ContextCompat` trait which

@@ -96,7 +96,7 @@ where
 
     pub(crate) fn from_adhoc<M>(message: M) -> Self
     where
-        M: Display + Send + Sync + 'static,
+        M: Display + Debug + Send + Sync + 'static,
     {
         use crate::wrapper::MessageError;
         let error: MessageError<M> = MessageError(message);

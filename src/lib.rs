@@ -211,8 +211,11 @@
 //! present in `anyhow::Error`. Specifically, the following works in anyhow:
 //!
 //! ```rust
+//! # fn get_optional_val() -> Option<()> { None };
+//! use anyhow::anyhow;
+//!
 //! // Works
-//! let val = get_optional_val.ok_or_else(|| anyhow!("failed to get value")).unwrap();
+//! let val = get_optional_val().ok_or_else(|| anyhow!("failed to get value")).unwrap_err();
 //! ```
 //!
 //! Where as with `eyre!` this will fail due to being unable to infer the type for
@@ -220,12 +223,15 @@
 //! is to give the compiler a hint for what type it should be resolving to, either
 //! via your return type or a type annotation.
 //!
-//! ```rust
+//! ```rust,compile_fail
+//! use eyre::eyre;
+//!
+//! # fn get_optional_val() -> Option<()> { None };
 //! // Broken
-//! let val = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+//! let val = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
 //!
 //! // Works
-//! let val: Report = get_optional_val.ok_or_else(|| eyre!("failed to get value")).unwrap();
+//! let val: Report = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
 //! ```
 //!
 //! #### `Context` and `Option`
@@ -250,10 +256,10 @@
 //! With `eyre` we want users to write:
 //!
 //! ```rust
-//! use eyre::eyre;
+//! use eyre::{eyre, Result};
 //!
 //! let opt: Option<()> = None;
-//! let result = opt.ok_or_else(|| eyre!("new error message"));
+//! let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
 //! ```
 //!
 //! However, to help with porting we do provide a `ContextCompat` trait which
@@ -930,7 +936,7 @@ where
 #[doc(hidden)]
 pub mod private {
     use crate::{EyreContext, Report};
-    use core::fmt::Display;
+    use core::fmt::{Debug, Display};
 
     //     #[cfg(backtrace)]
     //     use std::backtrace::Backtrace;
@@ -948,7 +954,7 @@ pub mod private {
     pub fn new_adhoc<M, C>(message: M) -> Report<C>
     where
         C: EyreContext,
-        M: Display + Send + Sync + 'static,
+        M: Display + Debug + Send + Sync + 'static,
     {
         Report::from_adhoc(message)
     }
