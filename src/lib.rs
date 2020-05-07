@@ -8,7 +8,7 @@
 //! ```toml
 //! [dependencies]
 //! eyre = "0.4"
-//! color-eyre = "0.2"
+//! color-eyre = "0.3"
 //! ```
 //!
 //! And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
@@ -32,7 +32,7 @@
 //! ```toml
 //! [dependencies]
 //! eyre = "0.4"
-//! color-eyre = { version = "0.2", default-features = false }
+//! color-eyre = { version = "0.3", default-features = false }
 //! ```
 //!
 //! ## Example
@@ -119,7 +119,7 @@
 //! [`Help`]: trait.Help.html
 //! [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/0.3.8/eyre/type.Result.html
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.2.3")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.3.0")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
