@@ -11,22 +11,18 @@ readme = "README.md"
 categories = []
 keywords = []
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [features]
-capture-spantrace = ["tracing-error", "color-spantrace"]
-
 default = ["capture-spantrace"]
+capture-spantrace = ["tracing-error", "color-spantrace"]
 
 [dependencies]
 eyre = "0.4"
 tracing-error = { version = "0.1.2", optional = true }
 color-backtrace = "0.4.0"
-backtrace = "0.3"
+backtrace = "0.3.48"
 indenter = "0.2.0"
 ansi_term = "0.12.1"
 color-spantrace = { version = "0.1.1", optional = true }
-
 
 [dev-dependencies]
 tracing-subscriber = "0.2.5"
