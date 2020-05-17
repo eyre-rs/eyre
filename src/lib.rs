@@ -364,6 +364,7 @@ impl EyreContext for Context {
                     let filters = &[
                         "<color_eyre::Context as eyre::EyreContext>::default",
                         "eyre::",
+                        "color_eyre::",
                     ];
 
                     frames.retain(|frame| {

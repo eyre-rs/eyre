@@ -16,17 +16,18 @@ default = ["capture-spantrace"]
 capture-spantrace = ["tracing-error", "color-spantrace"]
 
 [dependencies]
-eyre = "0.4"
+eyre = "0.4.2"
 tracing-error = { version = "0.1.2", optional = true }
 color-backtrace = "0.4.0"
 backtrace = "0.3.48"
-indenter = "0.2.0"
+indenter = "0.3.0"
 ansi_term = "0.12.1"
 color-spantrace = { version = "0.1.1", optional = true }
 
 [dev-dependencies]
 tracing-subscriber = "0.2.5"
 tracing = "0.1.13"
+pretty_assertions = "0.6.1"
 
 [package.metadata.docs.rs]
 all-features = true
