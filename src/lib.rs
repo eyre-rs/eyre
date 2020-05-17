@@ -1,15 +1,36 @@
 //! This library provides [`eyre::Report`][Report], a trait object based error
 //! type for easy idiomatic error handling in Rust applications.
 //!
-//! This crate is a fork of [`anyhow`] by @dtolnay with a support for customized `Reports`. For
-//! more details on customization checkout the docs on [`eyre::EyreContext`]. For an example on how
-//! to implement a custom context check out [`stable-eyre`] which implements a minimal custom
-//! context for capturing backtraces on stable.
+//! This crate is a fork of [`anyhow`] by @dtolnay with a support for customized
+//! `Reports`. For more details on customization checkout the docs on
+//! [`eyre::EyreContext`].
 //!
 //! ```toml
 //! [dependencies]
 //! eyre = "0.4"
 //! ```
+//!
+//! ## Custom Contexts
+//!
+//! The heart of this crate is it's ability to swap out the Context type to change
+//! what information is carried alongside errors and how the end report is
+//! formatted. This crate is meant to be used alongside companion crates that
+//! customize its behavior. Below is a list of known custom context crates and
+//! short summaries of what features they provide.
+//!
+//! - [`stable-eyre`]: Switches the backtrace type from `std`'s to `backtrace-rs`'s
+//!   so that it can be captured on stable. The report format is identical to
+//!   `DefaultContext`'s report format.
+//! - [`color-eyre`]: Captures a `backtrace::Backtrace` and a
+//!   `tracing_error::SpanTrace`. Provides a `Help` trait for attaching warnings
+//!   and suggestions to error reports. The end report is then pretty printed with
+//!   the help of [`color-backtrace`], [`color-spantrace`], and `ansi_term`. Check
+//!   out the README on [`color-eyre`] for screenshots of the report format.
+//! - [`simple-eyre`]: A minimal `EyreContext` that captures no additional
+//!   information, for when you do not wish to capture `Backtrace`s with errors.
+//! - [`jane-eyre`]: A custom context type that exists purely for the pun.
+//!   Currently just re-exports `color-eyre`.
+//!
 //! ## Details
 //!
 //! - Use `Result<T, eyre::Report>`, or equivalently `eyre::Result<T>`, as
@@ -265,14 +286,20 @@
 //! However, to help with porting we do provide a `ContextCompat` trait which
 //! implements `context` for options which you can import to make existing
 //! `.context` calls compile.
+//!
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
 //! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
 //! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
-//! [`stable_eyre`]: https://docs.rs/stable-eyre
-#![doc(html_root_url = "https://docs.rs/eyre/0.4.1")]
+//! [`stable-eyre`]: https://github.com/yaahc/stable-eyre
+//! [`color-eyre`]: https://github.com/yaahc/color-eyre
+//! [`jane-eyre`]: https://github.com/yaahc/jane-eyre
+//! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
+//! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
+//! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
+#![doc(html_root_url = "https://docs.rs/eyre/0.4.2")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
