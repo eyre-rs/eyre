@@ -23,6 +23,19 @@ jobs:
   test:
     name: Test Suite
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+
+  test-features:
+    name: Test Suite
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         rust:
@@ -37,6 +50,11 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --all-features
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-default-features
 
   fmt:
     name: Rustfmt

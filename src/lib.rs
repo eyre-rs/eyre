@@ -41,11 +41,21 @@
 //! use color_eyre::{Help, Report};
 //! use eyre::WrapErr;
 //! use tracing::{info, instrument};
-//! use tracing_error::ErrorLayer;
-//! use tracing_subscriber::prelude::*;
-//! use tracing_subscriber::{fmt, EnvFilter};
 //!
+//! #[instrument]
 //! fn main() -> Result<(), Report> {
+//!     #[cfg(feature = "capture-spantrace")]
+//!     install_tracing();
+//!
+//!     Ok(read_config()?)
+//! }
+//!
+//! #[cfg(feature = "capture-spantrace")]
+//! fn install_tracing() {
+//!     use tracing_error::ErrorLayer;
+//!     use tracing_subscriber::prelude::*;
+//!     use tracing_subscriber::{fmt, EnvFilter};
+//!
 //!     let fmt_layer = fmt::layer().with_target(false);
 //!     let filter_layer = EnvFilter::try_from_default_env()
 //!         .or_else(|_| EnvFilter::try_new("info"))
@@ -56,8 +66,6 @@
 //!         .with(fmt_layer)
 //!         .with(ErrorLayer::default())
 //!         .init();
-//!
-//!     Ok(read_config()?)
 //! }
 //!
 //! #[instrument]
@@ -99,6 +107,8 @@
 //! pub type Result<T, E = Report> = core::result::Result<T, E>;
 //! ```
 //!
+//! Please refer to the [`Context`] type's docs for more details about its feature set.
+//!
 //! ## Features
 //!
 //! - captures a [`backtrace::Backtrace`] and prints using [`color-backtrace`]
@@ -119,7 +129,9 @@
 //! [`Help`]: trait.Help.html
 //! [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/0.3.8/eyre/type.Result.html
+//! [`Context`]: struct.Context.html
 #![doc(html_root_url = "https://docs.rs/color-eyre/0.3.0")]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -151,7 +163,11 @@ use help::HelpInfo;
 use indenter::{indented, Format};
 #[cfg(feature = "capture-spantrace")]
 use std::error::Error;
-use std::fmt::Write as _;
+use std::{
+    env,
+    fmt::Write as _,
+    sync::atomic::{AtomicUsize, Ordering::SeqCst},
+};
 #[cfg(feature = "capture-spantrace")]
 use tracing_error::{ExtractSpanTrace, SpanTrace, SpanTraceStatus};
 
@@ -175,13 +191,108 @@ pub struct Context {
     help: Vec<HelpInfo>,
 }
 
+impl Context {
+    /// Return a reference to the captured `Backtrace` type
+    ///
+    /// # Examples
+    ///
+    /// Backtrace capture can be enabled with the `RUST_BACKTRACE` env variable:
+    ///
+    /// ```
+    /// use color_eyre::Report;
+    /// use eyre::eyre;
+    ///
+    /// std::env::set_var("RUST_BACKTRACE", "1");
+    ///
+    /// let report: Report = eyre!("an error occurred");
+    /// assert!(report.context().backtrace().is_some());
+    /// ```
+    ///
+    /// Alternatively, if you don't want backtraces to be printed on panic, you can use
+    /// `RUST_LIB_BACKTRACE`:
+    ///
+    /// ```
+    /// use color_eyre::Report;
+    /// use eyre::eyre;
+    ///
+    /// std::env::set_var("RUST_LIB_BACKTRACE", "1");
+    ///
+    /// let report: Report = eyre!("an error occurred");
+    /// assert!(report.context().backtrace().is_some());
+    /// ```
+    ///
+    /// And if you don't want backtraces to be captured but you still want panics to print
+    /// backtraces you can explicitly set `RUST_LIB_BACKTRACE` to 0:
+    ///
+    /// ```
+    /// use color_eyre::Report;
+    /// use eyre::eyre;
+    ///
+    /// std::env::set_var("RUST_BACKTRACE", "1");
+    /// std::env::set_var("RUST_LIB_BACKTRACE", "0");
+    ///
+    /// let report: Report = eyre!("an error occurred");
+    /// assert!(report.context().backtrace().is_none());
+    /// ```
+    ///
+    pub fn backtrace(&self) -> Option<&Backtrace> {
+        self.backtrace.as_ref()
+    }
+
+    /// Return a reference to the captured `SpanTrace` type
+    ///
+    /// # Examples
+    ///
+    /// SpanTraces are always captured by default:
+    ///
+    /// ```
+    /// use color_eyre::Report;
+    /// use eyre::eyre;
+    ///
+    /// let report: Report = eyre!("an error occurred");
+    /// assert!(report.context().span_trace().is_some());
+    /// ```
+    ///
+    /// However, `SpanTrace` is not captured if one of the source errors already captured a
+    /// `SpanTrace` via [`tracing_error::TracedError`]:
+    ///
+    /// ```
+    /// use color_eyre::Report;
+    /// use eyre::eyre;
+    /// use tracing_error::{TracedError, InstrumentError};
+    ///
+    /// #[derive(Debug)]
+    /// struct SourceError;
+    ///
+    /// impl std::fmt::Display for SourceError {
+    ///     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    ///         write!(f, "SourceError")
+    ///     }
+    /// }
+    ///
+    /// impl std::error::Error for SourceError {}
+    ///
+    /// let error = SourceError;
+    ///
+    /// // the type annotation here is unnecessary, I've only added it for demonstration purposes
+    /// let error: TracedError<SourceError> = error.in_current_span();
+    ///
+    /// let report: Report = error.into();
+    /// assert!(report.context().span_trace().is_none());
+    /// ```
+    ///
+    /// [`tracing_error::TracedError`]: https://docs.rs/tracing-error/0.1.2/tracing_error/struct.TracedError.html
+    #[cfg(feature = "capture-spantrace")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "capture-spantrace")))]
+    pub fn span_trace(&self) -> Option<&SpanTrace> {
+        self.span_trace.as_ref()
+    }
+}
+
 impl EyreContext for Context {
     #[allow(unused_variables)]
     fn default(error: &(dyn std::error::Error + 'static)) -> Self {
-        let backtrace = if std::env::var("RUST_LIB_BACKTRACE")
-            .or_else(|_| std::env::var("RUST_BACKTRACE"))
-            .is_ok()
-        {
+        let backtrace = if backtrace_enabled() {
             Some(Backtrace::new())
         } else {
             None
@@ -284,6 +395,27 @@ impl EyreContext for Context {
 
         Ok(())
     }
+}
+
+fn backtrace_enabled() -> bool {
+    // Cache the result of reading the environment variables to make
+    // backtrace captures speedy, because otherwise reading environment
+    // variables every time can be somewhat slow.
+    static ENABLED: AtomicUsize = AtomicUsize::new(0);
+    match ENABLED.load(SeqCst) {
+        0 => {}
+        1 => return false,
+        _ => return true,
+    }
+    let enabled = match env::var("RUST_LIB_BACKTRACE") {
+        Ok(s) => s != "0",
+        Err(_) => match env::var("RUST_BACKTRACE") {
+            Ok(s) => s != "0",
+            Err(_) => false,
+        },
+    };
+    ENABLED.store(enabled as usize + 1, SeqCst);
+    enabled
 }
 
 #[cfg(feature = "capture-spantrace")]
