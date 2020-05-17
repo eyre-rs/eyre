@@ -40,10 +40,6 @@ jobs:
         with:
           command: test
           args: --all-features
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features
 
   test-versions:
     name: Test Suite
