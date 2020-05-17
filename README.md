@@ -125,13 +125,13 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 [`eyre`]: https://docs.rs/eyre
 [`tracing-error`]: https://docs.rs/tracing-error
 [`color-backtrace`]: https://docs.rs/color-backtrace
-[`eyre::EyreContext`]: https://docs.rs/eyre/0.3.8/eyre/trait.EyreContext.html
-[`backtrace::Backtrace`]: https://docs.rs/backtrace/0.3.46/backtrace/struct.Backtrace.html
-[`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/0.1.2/tracing_error/struct.SpanTrace.html
+[`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
+[`backtrace::Backtrace`]: https://docs.rs/backtrace/*/backtrace/struct.Backtrace.html
+[`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 [`Help`]: trait.Help.html
-[`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
-[`eyre::Result`]: https://docs.rs/eyre/0.3.8/eyre/type.Result.html
+[`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
+[`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
 
 #### License
 
