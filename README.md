@@ -14,8 +14,6 @@ eyre = "0.4"
 simple-eyre = "0.2"
 ```
 
-<br>
-
 ## Example
 
 ```rust
@@ -28,10 +26,6 @@ fn main() -> Result<(), Report> {
     Err(e).wrap_err("usage example successfully experienced a failure")
 }
 ```
-
-<br>
-
-<br>
 
 #### License
 
