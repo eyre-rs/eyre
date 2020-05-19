@@ -117,6 +117,8 @@
 //! - Only capture SpanTrace by default for better performance.
 //! - display source lines when `RUST_LIB_BACKTRACE=full` is set
 //! - store help text via [`Help`] trait and display after final report
+//! - custom `color-backtrace` configuration via `color_eyre::install`,
+//!   such as adding custom filters
 //!
 //!
 //! [`eyre`]: https://docs.rs/eyre
@@ -130,7 +132,7 @@
 //! [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
 //! [`Context`]: struct.Context.html
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.3.1")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.3.2")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_debug_implementations,
@@ -157,21 +159,25 @@
 )]
 use ansi_term::Color::*;
 use backtrace::Backtrace;
+pub use color_backtrace::BacktracePrinter;
 use eyre::*;
 pub use help::Help;
 use help::HelpInfo;
 use indenter::{indented, Format};
+use once_cell::sync::OnceCell;
 #[cfg(feature = "capture-spantrace")]
 use std::error::Error;
 use std::{
     env,
-    fmt::Write as _,
+    fmt::{self, Write as _},
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
 };
 #[cfg(feature = "capture-spantrace")]
 use tracing_error::{ExtractSpanTrace, SpanTrace, SpanTraceStatus};
 
 mod help;
+
+static CONFIG: OnceCell<BacktracePrinter> = OnceCell::new();
 
 /// A custom context type for [`eyre::Report`] which provides colorful error
 /// reports and [`tracing-error`] support.
@@ -190,6 +196,9 @@ pub struct Context {
     span_trace: Option<SpanTrace>,
     help: Vec<HelpInfo>,
 }
+
+#[derive(Debug)]
+struct InstallError;
 
 impl Context {
     /// Return a reference to the captured `Backtrace` type
@@ -359,28 +368,11 @@ impl EyreContext for Context {
         if let Some(backtrace) = self.backtrace.as_ref() {
             write!(f, "\n\n")?;
 
-            let bt_str = color_backtrace::BacktracePrinter::new()
-                .add_frame_filter(Box::new(|frames| {
-                    let filters = &[
-                        "<color_eyre::Context as eyre::EyreContext>::default",
-                        "eyre::",
-                        "color_eyre::",
-                    ];
-
-                    frames.retain(|frame| {
-                        !filters.iter().any(|f| {
-                            let name = if let Some(name) = frame.name.as_ref() {
-                                name.as_str()
-                            } else {
-                                return true;
-                            };
-
-                            name.starts_with(f)
-                        })
-                    });
-                }))
+            let bt_str = CONFIG
+                .get_or_init(default_printer)
                 .format_trace_to_string(&backtrace)
                 .unwrap();
+
             write!(
                 indented(f).with_format(Format::Uniform { indentation: "  " }),
                 "{}",
@@ -397,6 +389,14 @@ impl EyreContext for Context {
         Ok(())
     }
 }
+
+impl fmt::Display for InstallError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("could not install the BacktracePrinter as another was already installed")
+    }
+}
+
+impl std::error::Error for InstallError {}
 
 fn backtrace_enabled() -> bool {
     // Cache the result of reading the environment variables to make
@@ -425,6 +425,68 @@ fn get_deepest_spantrace<'a>(error: &'a (dyn Error + 'static)) -> Option<&'a Spa
         .rev()
         .flat_map(|error| error.span_trace())
         .next()
+}
+
+/// Override the global BacktracePrinter used by `color_eyre::Context` when printing captured
+/// backtraces.
+///
+/// # Examples
+///
+/// This enables configuration like custom frame filters:
+///
+/// ```rust
+/// use color_eyre::BacktracePrinter;
+///
+/// let printer = BacktracePrinter::new()
+///     .add_frame_filter(Box::new(|frames| {
+///         let filters = &[
+///             "evil_function",
+///         ];
+///
+///         frames.retain(|frame| {
+///             !filters.iter().any(|f| {
+///                 let name = if let Some(name) = frame.name.as_ref() {
+///                     name.as_str()
+///                 } else {
+///                     return true;
+///                 };
+///
+///                 name.starts_with(f)
+///             })
+///         });
+///     }));
+///
+/// color_eyre::install(printer).unwrap();
+/// ```
+pub fn install(printer: BacktracePrinter) -> Result<(), impl std::error::Error> {
+    let printer = add_eyre_filters(printer);
+    CONFIG.set(printer).map_err(|_| InstallError)
+}
+
+fn default_printer() -> BacktracePrinter {
+    add_eyre_filters(BacktracePrinter::new())
+}
+
+fn add_eyre_filters(printer: BacktracePrinter) -> BacktracePrinter {
+    printer.add_frame_filter(Box::new(|frames| {
+        let filters = &[
+            "<color_eyre::Context as eyre::EyreContext>::default",
+            "eyre::",
+            "color_eyre::",
+        ];
+
+        frames.retain(|frame| {
+            !filters.iter().any(|f| {
+                let name = if let Some(name) = frame.name.as_ref() {
+                    name.as_str()
+                } else {
+                    return true;
+                };
+
+                name.starts_with(f)
+            })
+        });
+    }))
 }
 
 /// A type alias for `eyre::Report<color_eyre::Context>`

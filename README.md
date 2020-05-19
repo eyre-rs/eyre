@@ -120,6 +120,8 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 - Only capture SpanTrace by default for better performance.
 - display source lines when `RUST_LIB_BACKTRACE=full` is set
 - store help text via [`Help`] trait and display after final report
+- custom `color-backtrace` configuration via `color_eyre::install`, such as
+  adding custom frame filters
 
 
 [`eyre`]: https://docs.rs/eyre
