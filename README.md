@@ -15,7 +15,7 @@ This crate is a fork of [`anyhow`] by @dtolnay with a support for customized
 
 ## Custom Contexts
 
-The heart of this crate is it's ability to swap out the Context type to change
+The heart of this crate is its ability to swap out the Context type to change
 what information is carried alongside errors and how the end report is
 formatted. This crate is meant to be used alongside companion crates that
 customize its behavior. Below is a list of known custom context crates and
