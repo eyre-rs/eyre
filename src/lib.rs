@@ -342,8 +342,8 @@ mod alloc {
     #[cfg(feature = "std")]
     pub(crate) use std::boxed::Box;
 
-    #[cfg(not(feature = "std"))]
-    pub(crate) use alloc::string::String;
+    // #[cfg(not(feature = "std"))]
+    // pub(crate) use alloc::string::String;
 
     // #[cfg(feature = "std")]
     // pub(crate) use std::string::String;
@@ -371,8 +371,11 @@ use core::fmt::Debug;
 #[cfg(feature = "std")]
 use std::error::Error as StdError;
 
+/// `StdError` is a trait representing expectations for error values for no_std mode where the
+/// `std::error::Error` trait is not available.
 #[cfg(not(feature = "std"))]
 pub trait StdError: Debug + Display {
+    /// The lower-level source of this error, if any.
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         None
     }
@@ -778,8 +781,7 @@ impl EyreContext for DefaultContext {
 ///     None
 /// }
 /// ```
-#[cfg(feature = "std")]
-#[derive(Clone)]
+#[cfg_attr(feature = "std", derive(Clone))]
 #[allow(missing_debug_implementations)]
 pub struct Chain<'a> {
     state: crate::chain::ChainState<'a>,

@@ -1,4 +1,5 @@
 use crate::alloc::Box;
+#[cfg(feature = "std")]
 use crate::chain::Chain;
 use crate::EyreContext;
 use crate::{Report, StdError};
@@ -729,6 +730,7 @@ where
         unsafe { &mut *(self.vtable.object_mut)(self) }
     }
 
+    #[cfg(feature = "std")]
     pub(crate) fn chain(&self) -> Chain<'_> {
         Chain::new(self.error())
     }

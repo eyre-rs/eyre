@@ -4,13 +4,7 @@ use crate::StdError;
 #[cfg(feature = "std")]
 use std::vec;
 
-#[cfg(feature = "std")]
 pub(crate) use crate::Chain;
-
-#[cfg(not(feature = "std"))]
-pub(crate) struct Chain<'a> {
-    state: ChainState<'a>,
-}
 
 #[derive(Clone)]
 pub(crate) enum ChainState<'a> {
