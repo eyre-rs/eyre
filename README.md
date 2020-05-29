@@ -135,7 +135,7 @@ short summaries of what features they provide.
 
 ## No-std support
 
-**NOTE**: tests are currently broken for `no_std` so I cannot guaruntee that
+**NOTE**: tests are currently broken for `no_std` so I cannot guarantee that
 everything works still. I'm waiting for upstream fixes to be merged rather than
 fixing them myself, so bear with me.
 
