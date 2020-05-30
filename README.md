@@ -54,6 +54,29 @@ eyre = "0.4"
 color-eyre = { version = "0.3", default-features = false }
 ```
 
+### Improving perf on debug builds
+
+In debug mode `color-eyre` behaves noticably worse than `eyre`. This is caused
+by the fact that `eyre` uses `std::backtrace::Backtrace` instead of
+`backtrace::Backtrace`. The std version of backtrace is precompiled with
+optimizations, this means that whether or not you're in debug mode doesn't
+matter much for how expensive backtrace capture is, it will always be in the
+10s of milliseconds to capture. A debug version of `backtrace::Backtrace`
+however isn't so lucky, and can take an order of magnitude more time to capture
+a backtrace compared to it's std counterpart.
+
+Cargo [profile
+overrides](https://doc.rust-lang.org/cargo/reference/profiles.html#overrides)
+can be used to mitigate this problem. By configuring your project to always
+build `backtrace` with optimizations you should get the same performance from
+`color-eyre` that you're used to with `eyre`. To do so add the following to
+your Cargo.toml:
+
+```toml
+[profile.dev.package.backtrace]
+opt-level = 3
+```
+
 ## Features
 
 ### Multiple report format verbosity levels

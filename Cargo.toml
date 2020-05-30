@@ -34,3 +34,6 @@ thiserror = "1.0.19"
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[profile.dev.package.backtrace]
+opt-level = 3
