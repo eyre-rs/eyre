@@ -400,6 +400,10 @@ pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interopt with `anyhow`
 pub use eyre as anyhow;
 #[doc(hidden)]
+pub use DefaultHandler as DefaultContext;
+#[doc(hidden)]
+pub use EyreHandler as EyreContext;
+#[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interopt with `anyhow`
 pub use Report as Error;
@@ -501,9 +505,6 @@ where
 {
     inner: ManuallyDrop<Box<ErrorImpl<(), H>>>,
 }
-
-#[doc(hidden)]
-pub type DefaultContext = DefaultHandler;
 
 /// Error Report Handler trait for customizing `eyre::Report`
 ///
