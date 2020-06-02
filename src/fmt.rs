@@ -1,22 +1,22 @@
 use crate::error::ErrorImpl;
-use crate::EyreContext;
+use crate::EyreHandler;
 use core::fmt;
 
-impl<C> ErrorImpl<(), C>
+impl<H> ErrorImpl<(), H>
 where
-    C: EyreContext,
+    H: EyreHandler,
 {
     pub(crate) fn display(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.context
+        self.handler
             .as_ref()
-            .map(|context| context.display(self.error(), f))
+            .map(|handler| handler.display(self.error(), f))
             .unwrap_or_else(|| core::fmt::Display::fmt(self.error(), f))
     }
 
     pub(crate) fn debug(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.context
+        self.handler
             .as_ref()
-            .map(|context| context.debug(self.error(), f))
+            .map(|handler| handler.debug(self.error(), f))
             .unwrap_or_else(|| core::fmt::Debug::fmt(self.error(), f))
     }
 }

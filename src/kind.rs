@@ -45,7 +45,7 @@
 //     let error = $msg;
 //     (&error).eyre_kind().new(error)
 
-use crate::{EyreContext, Report};
+use crate::{EyreHandler, Report};
 use core::fmt::{Debug, Display};
 
 #[cfg(feature = "std")]
@@ -66,7 +66,7 @@ pub trait AdhocKind: Sized {
 impl<T> AdhocKind for &T where T: ?Sized + Display + Debug + Send + Sync + 'static {}
 
 impl Adhoc {
-    pub fn new<M, C: EyreContext>(self, message: M) -> Report<C>
+    pub fn new<M, H: EyreHandler>(self, message: M) -> Report<H>
     where
         M: Display + Debug + Send + Sync + 'static,
     {
@@ -110,7 +110,7 @@ impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 
 #[cfg(feature = "std")]
 impl Boxed {
-    pub fn new<C: EyreContext>(self, error: Box<dyn StdError + Send + Sync>) -> Report<C> {
+    pub fn new<H: EyreHandler>(self, error: Box<dyn StdError + Send + Sync>) -> Report<H> {
         Report::from_boxed(error)
     }
 }
