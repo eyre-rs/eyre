@@ -1,5 +1,5 @@
 use crate::error::ContextError;
-use crate::{ContextCompat, EyreContext, Report, StdError, WrapErr};
+use crate::{ContextCompat, EyreHandler, Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]
@@ -8,22 +8,22 @@ use std::backtrace::Backtrace;
 mod ext {
     use super::*;
 
-    pub trait StdError<C>
+    pub trait StdError<H>
     where
-        C: EyreContext,
+        H: EyreHandler,
     {
-        fn ext_report<D>(self, msg: D) -> Report<C>
+        fn ext_report<D>(self, msg: D) -> Report<H>
         where
             D: Display + Send + Sync + 'static;
     }
 
     #[cfg(feature = "std")]
-    impl<E, C> StdError<C> for E
+    impl<E, H> StdError<H> for E
     where
-        C: EyreContext,
+        H: EyreHandler,
         E: std::error::Error + Send + Sync + 'static,
     {
-        fn ext_report<D>(self, msg: D) -> Report<C>
+        fn ext_report<D>(self, msg: D) -> Report<H>
         where
             D: Display + Send + Sync + 'static,
         {
@@ -31,11 +31,11 @@ mod ext {
         }
     }
 
-    impl<C> StdError<C> for Report<C>
+    impl<H> StdError<H> for Report<H>
     where
-        C: EyreContext,
+        H: EyreHandler,
     {
-        fn ext_report<D>(self, msg: D) -> Report<C>
+        fn ext_report<D>(self, msg: D) -> Report<H>
         where
             D: Display + Send + Sync + 'static,
         {
@@ -44,19 +44,19 @@ mod ext {
     }
 }
 
-impl<T, E, C> WrapErr<T, E, C> for Result<T, E>
+impl<T, E, H> WrapErr<T, E, H> for Result<T, E>
 where
-    C: EyreContext,
-    E: ext::StdError<C> + Send + Sync + 'static,
+    H: EyreHandler,
+    E: ext::StdError<H> + Send + Sync + 'static,
 {
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report<C>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
     {
         self.map_err(|error| error.ext_report(msg))
     }
 
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<C>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -64,14 +64,14 @@ where
         self.map_err(|error| error.ext_report(msg()))
     }
 
-    fn context<D>(self, msg: D) -> Result<T, Report<C>>
+    fn context<D>(self, msg: D) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
     {
         self.wrap_err(msg)
     }
 
-    fn with_context<D, F>(self, msg: F) -> Result<T, Report<C>>
+    fn with_context<D, F>(self, msg: F) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -80,18 +80,18 @@ where
     }
 }
 
-impl<T, C> ContextCompat<T, C> for Option<T>
+impl<T, H> ContextCompat<T, H> for Option<T>
 where
-    C: EyreContext,
+    H: EyreHandler,
 {
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report<C>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
     {
         self.context(msg)
     }
 
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<C>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -99,14 +99,14 @@ where
         self.with_context(msg)
     }
 
-    fn context<D>(self, msg: D) -> Result<T, Report<C>>
+    fn context<D>(self, msg: D) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
     {
         self.ok_or_else(|| Report::from_display(msg))
     }
 
-    fn with_context<D, F>(self, msg: F) -> Result<T, Report<C>>
+    fn with_context<D, F>(self, msg: F) -> Result<T, Report<H>>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -152,9 +152,9 @@ where
     }
 }
 
-impl<D, C> StdError for ContextError<D, Report<C>>
+impl<D, H> StdError for ContextError<D, Report<H>>
 where
-    C: EyreContext,
+    H: EyreHandler,
     D: Display,
 {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
@@ -185,8 +185,8 @@ impl Write for Quoted<&mut fmt::Formatter<'_>> {
 pub(crate) mod private {
     use super::*;
 
-    pub trait Sealed<C: EyreContext> {}
+    pub trait Sealed<H: EyreHandler> {}
 
-    impl<T, E, C: EyreContext> Sealed<C> for Result<T, E> where E: ext::StdError<C> {}
-    impl<T, C: EyreContext> Sealed<C> for Option<T> {}
+    impl<T, E, H: EyreHandler> Sealed<H> for Result<T, E> where E: ext::StdError<H> {}
+    impl<T, H: EyreHandler> Sealed<H> for Option<T> {}
 }

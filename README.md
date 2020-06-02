@@ -5,34 +5,42 @@ eyre
 [![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/eyre)
 
+[actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
+[actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
+
 This library provides [`eyre::Report`][Report], a trait object based
 error handling type for easy idiomatic error handling and reporting in Rust
 applications.
 
 This crate is a fork of [`anyhow`] by @dtolnay with a support for customized
 `Reports`. For more details on customization checkout the docs on
-[`eyre::EyreContext`].
+[`eyre::EyreHandler`].
 
-## Custom Contexts
+```toml
+[dependencies]
+eyre = "0.4"
+```
 
-The heart of this crate is its ability to swap out the Context type to change
+## Custom Report Handlers
+
+The heart of this crate is its ability to swap out the Handler type to change
 what information is carried alongside errors and how the end report is
 formatted. This crate is meant to be used alongside companion crates that
-customize its behavior. Below is a list of known custom context crates and
-short summaries of what features they provide.
+customize its behavior. Below is a list of known crates that export report
+handlers for eyre and short summaries of what features they provide.
 
 - [`stable-eyre`]: Switches the backtrace type from `std`'s to `backtrace-rs`'s
   so that it can be captured on stable. The report format is identical to
-  `DefaultContext`'s report format.
+  `DefaultHandler`'s report format.
 - [`color-eyre`]: Captures a `backtrace::Backtrace` and a
   `tracing_error::SpanTrace`. Provides a `Help` trait for attaching warnings
   and suggestions to error reports. The end report is then pretty printed with
   the help of [`color-backtrace`], [`color-spantrace`], and `ansi_term`. Check
   out the README on [`color-eyre`] for screenshots of the report format.
-- [`simple-eyre`]: A minimal `EyreContext` that captures no additional
+- [`simple-eyre`]: A minimal `EyreHandler` that captures no additional
   information, for when you do not wish to capture `Backtrace`s with errors.
-- [`jane-eyre`]: A custom context type that exists purely for the pun.
-  Currently just re-exports `color-eyre`.
+- [`jane-eyre`]: A a report handler crate that exists purely for the pun.
+Currently just re-exports `color-eyre`.
 
 ## Details
 
@@ -196,7 +204,7 @@ let val = get_optional_val().ok_or_else(|| anyhow!("failed to get value")).unwra
 ```
 
 Where as with `eyre!` this will fail due to being unable to infer the type for
-the Context parameter. The solution to this problem, should you encounter it,
+the Handler parameter. The solution to this problem, should you encounter it,
 is to give the compiler a hint for what type it should be resolving to, either
 via your return type or a type annotation.
 
@@ -243,7 +251,7 @@ implements `context` for options which you can import to make existing
 `.context` calls compile.
 
 [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
-[`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
+[`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
 [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
 [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 [`anyhow`]: https://github.com/dtolnay/anyhow
@@ -254,8 +262,6 @@ implements `context` for options which you can import to make existing
 [`simple-eyre`]: https://github.com/yaahc/simple-eyre
 [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-[actions-badge]: https://github.com/yaahc/eyre/workflows/Continuous%20integration/badge.svg
-[actions-url]: https://github.com/yaahc/eyre/actions?query=workflow%3A%22Continuous+integration%22
 
 
 #### License
