@@ -45,7 +45,7 @@
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.1")]
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.2")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -69,7 +69,10 @@
     unused_parens,
     while_true
 )]
-use ansi_term::{Color::*, Style};
+use ansi_term::{
+    Color::{Cyan, Red},
+    Style,
+};
 use std::env;
 use std::fmt;
 use std::fs::File;
@@ -158,15 +161,15 @@ impl Frame<'_> {
             f,
             "{:>2}: {}{}{}",
             i,
-            Red.paint(self.metadata.target()),
-            Red.paint("::"),
-            Red.paint(self.metadata.name()),
+            Red.make_intense().paint(self.metadata.target()),
+            Red.make_intense().paint("::"),
+            Red.make_intense().paint(self.metadata.name()),
         )
     }
 
     fn print_fields(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if !self.fields.is_empty() {
-            write!(f, " with {}", Cyan.paint(self.fields))?;
+            write!(f, " with {}", Cyan.make_intense().paint(self.fields))?;
         }
 
         Ok(())
@@ -246,5 +249,37 @@ impl fmt::Display for ColorSpanTrace<'_> {
         });
 
         err
+    }
+}
+
+// TODO: remove when / if ansi_term merges these changes upstream
+trait ColorExt {
+    fn make_intense(self) -> Self;
+}
+
+impl ColorExt for ansi_term::Color {
+    fn make_intense(self) -> Self {
+        use ansi_term::Color::*;
+
+        match self {
+            Black => Fixed(8),
+            Red => Fixed(9),
+            Green => Fixed(10),
+            Yellow => Fixed(11),
+            Blue => Fixed(12),
+            Purple => Fixed(13),
+            Cyan => Fixed(14),
+            White => Fixed(15),
+            Fixed(color) if color < 8 => Fixed(color + 8),
+            other => other,
+        }
+    }
+}
+impl ColorExt for ansi_term::Style {
+    fn make_intense(mut self) -> Self {
+        if let Some(color) = self.foreground {
+            self.foreground = Some(color.make_intense());
+        }
+        self
     }
 }
