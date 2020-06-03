@@ -4,7 +4,7 @@ version = "0.3.2"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
-description = "A custom context for the `eyre` crate for colorful error reports, suggestions, and `tracing-error` support."
+description = "An error report handler for panics and eyre::Reports for colorful, consistent, and well formatted error reports for all kinds of errors."
 repository = "https://github.com/yaahc/color-eyre"
 documentation = "https://docs.rs/color-eyre"
 readme = "README.md"
@@ -16,7 +16,7 @@ default = ["capture-spantrace"]
 capture-spantrace = ["tracing-error", "color-spantrace"]
 
 [dependencies]
-eyre = "0.4.2"
+eyre = "0.4.3"
 tracing-error = { version = "0.1.2", optional = true }
 color-backtrace = "0.4.0"
 backtrace = "0.3.48"

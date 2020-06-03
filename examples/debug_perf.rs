@@ -26,7 +26,7 @@ fn time_report_inner() {
         .suggestion("try using a file that exists next time")
         .unwrap_err();
 
-    let _ = println!("Error: {:?}", report);
+    println!("Error: {:?}", report);
     drop(report);
     let end = std::time::Instant::now();
 

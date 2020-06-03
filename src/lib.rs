@@ -1,5 +1,5 @@
-//! A custom context for the [`eyre`] crate for colorful error reports with suggestions, custom
-//! sections, [`tracing-error`] support, and backtraces on stable.
+//! An error report handler for panics and the [`eyre`] crate for colorful, consistent, and well
+//! formatted error reports for all kinds of errors.
 //!
 //! ## TLDR
 //!
@@ -69,53 +69,7 @@
 //! ### Multiple report format verbosity levels
 //!
 //! `color-eyre` provides 3 different report formats for how it formats the captured `SpanTrace`
-//! and `Backtrace`, minimal, short, and full. Take the following example, taken from
-//! [`examples/usage.rs`]:
-//!
-//! ```rust,should_panic
-//! use color_eyre::{Help, Report};
-//! use eyre::WrapErr;
-//! use tracing::{info, instrument};
-//!
-//! #[instrument]
-//! fn main() -> Result<(), Report> {
-//!     #[cfg(feature = "capture-spantrace")]
-//!     install_tracing();
-//!
-//!     Ok(read_config()?)
-//! }
-//!
-//! #[cfg(feature = "capture-spantrace")]
-//! fn install_tracing() {
-//!     use tracing_error::ErrorLayer;
-//!     use tracing_subscriber::prelude::*;
-//!     use tracing_subscriber::{fmt, EnvFilter};
-//!
-//!     let fmt_layer = fmt::layer().with_target(false);
-//!     let filter_layer = EnvFilter::try_from_default_env()
-//!         .or_else(|_| EnvFilter::try_new("info"))
-//!         .unwrap();
-//!
-//!     tracing_subscriber::registry()
-//!         .with(filter_layer)
-//!         .with(fmt_layer)
-//!         .with(ErrorLayer::default())
-//!         .init();
-//! }
-//!
-//! #[instrument]
-//! fn read_file(path: &str) -> Result<(), Report> {
-//!     info!("Reading file");
-//!     Ok(std::fs::read_to_string(path).map(drop)?)
-//! }
-//!
-//! #[instrument]
-//! fn read_config() -> Result<(), Report> {
-//!     read_file("fake_file")
-//!         .wrap_err("Unable to read config")
-//!         .suggestion("try using a file that exists next time")
-//! }
-//! ```
+//! and `Backtrace`, minimal, short, and full. Take the below screenshots of the output produced by [`examples/usage.rs`]:
 //!
 //! ---
 //!
@@ -141,9 +95,10 @@
 //!
 //! ### Custom `Section`s for error reports via [`Help`] trait
 //!
-//! The `section` module provides helpers for adding extra sections to error reports. Sections are
-//! disinct from error messages and are displayed independently from the chain of errors. Take this
-//! example of adding sections to contain `stderr` and `stdout` from a failed command, taken from
+//! The `section` module provides helpers for adding extra sections to error
+//! reports. Sections are disinct from error messages and are displayed
+//! independently from the chain of errors. Take this example of adding sections
+//! to contain `stderr` and `stdout` from a failed command, taken from
 //! [`examples/custom_section.rs`]:
 //!
 //! ```rust
@@ -166,16 +121,8 @@
 //!         if !output.status.success() {
 //!             let stderr = String::from_utf8_lossy(&output.stderr);
 //!             Err(eyre!("cmd exited with non-zero status code"))
-//!                 .with_section(move || {
-//!                     "Stdout:"
-//!                         .skip_if(|| stdout.is_empty())
-//!                         .body(stdout.trim().to_string())
-//!                 })
-//!                 .with_section(move || {
-//!                     "Stderr:"
-//!                         .skip_if(|| stderr.is_empty())
-//!                         .body(stderr.trim().to_string())
-//!                 })
+//!                 .with_section(move || stdout.trim().to_string().header("Stdout:"))
+//!                 .with_section(move || stderr.trim().to_string().header("Stderr:"))
 //!         } else {
 //!             Ok(stdout.into())
 //!         }
@@ -185,26 +132,25 @@
 //!
 //! ---
 //!
-//! Here we have an function that, if the command exits unsuccessfully, creates a report indicating
-//! the failure and attaches two sections, one for `stdout` and one for `stderr`. Each section
-//! includes a short header and a body that contains the actual output. Additionally these sections
-//! use `skip_if` to tell the report not to include them if there was no output, preventing empty
-//! sections from polluting the end report.
+//! Here we have an function that, if the command exits unsuccessfully, creates a
+//! report indicating the failure and attaches two sections, one for `stdout` and
+//! one for `stderr`.
 //!
-//! Running `cargo run --example custom_section` shows us how these sections are included in the
-//! output:
+//! Running `cargo run --example custom_section` shows us how these sections are
+//! included in the output:
 //!
 //! ![custom section example](https://raw.githubusercontent.com/yaahc/color-eyre/master/pictures/custom_section.png)
 //!
-//! Only the `Stderr:` section actually gets included. The `cat` command fails, so stdout ends up
-//! being empty and is skipped in the final report. This gives us a short and concise error report
-//! indicating exactly what was attempted and how it failed.
+//! Only the `Stderr:` section actually gets included. The `cat` command fails,
+//! so stdout ends up being empty and is skipped in the final report. This gives
+//! us a short and concise error report indicating exactly what was attempted and
+//! how it failed.
 //!
 //! ### Aggregating multiple errors into one report
 //!
-//! It's not uncommon for programs like batched task runners or parsers to want to
-//! return an error with multiple sources. The current version of the error trait
-//! does not support this use case very well, though there is [work being
+//! It's not uncommon for programs like batched task runners or parsers to want
+//! to return an error with multiple sources. The current version of the error
+//! trait does not support this use case very well, though there is [work being
 //! done](https://github.com/rust-lang/rfcs/pull/2895) to improve this.
 //!
 //! For now however one way to work around this is to compose errors outside the
@@ -215,41 +161,43 @@
 //!
 //! ### Custom configuration for `color-backtrace` for setting custom filters and more
 //!
-//! The pretty printing for backtraces and span traces isn't actually provided by `color-eyre`, but
-//! instead comes from its dependencies [`color-backtrace`] and [`color-spantrace`].
-//! `color-backtrace` in particular has many more features than are exported by `color-eyre`, such
-//! as customized color schemes, panic hooks, and custom frame filters. The custom frame filters
-//! are particularly useful when combined with `color-eyre`, so to enable their usage we provide
-//! the `install` fn for setting up a custom `BacktracePrinter` with custom filters installed.
+//! The pretty printing for backtraces and span traces isn't actually provided by
+//! `color-eyre`, but instead comes from its dependencies [`color-backtrace`] and
+//! [`color-spantrace`]. `color-backtrace` in particular has many more features
+//! than are exported by `color-eyre`, such as customized color schemes, panic
+//! hooks, and custom frame filters. The custom frame filters are particularly
+//! useful when combined with `color-eyre`, so to enable their usage we provide
+//! the `install` fn for setting up a custom `BacktracePrinter` with custom
+//! filters installed.
 //!
 //! For an example of how to setup custom filters, check out [`examples/custom_filter.rs`].
 //!
 //! ## Explanation
 //!
-//! This crate works by defining a `Context` type which implements [`eyre::EyreContext`]
-//! and a pair of type aliases for setting this context type as the parameter of
-//! [`eyre::Report`].
+//! This crate works by defining a `Handler` type which implements
+//! [`eyre::EyreHandler`] and a pair of type aliases for setting this handler
+//! type as the parameter of [`eyre::Report`].
 //!
 //! ```rust
-//! use color_eyre::Context;
+//! use color_eyre::Handler;
 //!
-//! pub type Report = eyre::Report<Context>;
+//! pub type Report = eyre::Report<Handler>;
 //! pub type Result<T, E = Report> = core::result::Result<T, E>;
 //! ```
 //!
-//! Please refer to the [`Context`] type's docs for more details about its feature set.
+//! Please refer to the [`Handler`] type's docs for more details about its feature set.
 //!
 //! [`eyre`]: https://docs.rs/eyre
 //! [`tracing-error`]: https://docs.rs/tracing-error
 //! [`color-backtrace`]: https://docs.rs/color-backtrace
-//! [`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
+//! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
 //! [`backtrace::Backtrace`]: https://docs.rs/backtrace/*/backtrace/struct.Backtrace.html
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 //! [`Help`]: https://docs.rs/color-eyre/*/color_eyre/trait.Help.html
 //! [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
-//! [`Context`]: https://docs.rs/color-eyre/*/color_eyre/struct.Context.html
+//! [`Handler`]: https://docs.rs/color-eyre/*/color_eyre/struct.Handler.html
 //! [`examples/usage.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/usage.rs
 //! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
@@ -279,13 +227,14 @@
     unused_parens,
     while_true
 )]
+use crate::writers::HeaderWriter;
 use ansi_term::Color::*;
 use backtrace::Backtrace;
 pub use color_backtrace::BacktracePrinter;
 use eyre::*;
 use indenter::{indented, Format};
 use once_cell::sync::OnceCell;
-use section::Order;
+use section::help::HelpInfo;
 pub use section::{help::Help, Section, SectionExt};
 #[cfg(feature = "capture-spantrace")]
 use std::error::Error;
@@ -296,12 +245,15 @@ use std::{
 };
 #[cfg(feature = "capture-spantrace")]
 use tracing_error::{ExtractSpanTrace, SpanTrace, SpanTraceStatus};
+#[doc(hidden)]
+pub use Handler as Context;
 
 pub mod section;
+mod writers;
 
 static CONFIG: OnceCell<BacktracePrinter> = OnceCell::new();
 
-/// A custom context type for [`eyre::Report`] which provides colorful error
+/// A custom handler type for [`eyre::Report`] which provides colorful error
 /// reports and [`tracing-error`] support.
 ///
 /// This type is not intended to be used directly, prefer using it via the
@@ -312,17 +264,19 @@ static CONFIG: OnceCell<BacktracePrinter> = OnceCell::new();
 /// [`color_eyre::Report`]: type.Report.html
 /// [`color_eyre::Result`]: type.Result.html
 #[derive(Debug)]
-pub struct Context {
+pub struct Handler {
     backtrace: Option<Backtrace>,
     #[cfg(feature = "capture-spantrace")]
     span_trace: Option<SpanTrace>,
-    sections: Vec<Section>,
+    sections: Vec<HelpInfo>,
 }
 
 #[derive(Debug)]
 struct InstallError;
+#[cfg(feature = "capture-spantrace")]
+struct FormattedSpanTrace<'a>(&'a SpanTrace);
 
-impl Context {
+impl Handler {
     /// Return a reference to the captured `Backtrace` type
     ///
     /// # Examples
@@ -336,7 +290,7 @@ impl Context {
     /// std::env::set_var("RUST_BACKTRACE", "1");
     ///
     /// let report: Report = eyre!("an error occurred");
-    /// assert!(report.context().backtrace().is_some());
+    /// assert!(report.handler().backtrace().is_some());
     /// ```
     ///
     /// Alternatively, if you don't want backtraces to be printed on panic, you can use
@@ -349,7 +303,7 @@ impl Context {
     /// std::env::set_var("RUST_LIB_BACKTRACE", "1");
     ///
     /// let report: Report = eyre!("an error occurred");
-    /// assert!(report.context().backtrace().is_some());
+    /// assert!(report.handler().backtrace().is_some());
     /// ```
     ///
     /// And if you don't want backtraces to be captured but you still want panics to print
@@ -363,7 +317,7 @@ impl Context {
     /// std::env::set_var("RUST_LIB_BACKTRACE", "0");
     ///
     /// let report: Report = eyre!("an error occurred");
-    /// assert!(report.context().backtrace().is_none());
+    /// assert!(report.handler().backtrace().is_none());
     /// ```
     ///
     pub fn backtrace(&self) -> Option<&Backtrace> {
@@ -381,7 +335,7 @@ impl Context {
     /// use eyre::eyre;
     ///
     /// let report: Report = eyre!("an error occurred");
-    /// assert!(report.context().span_trace().is_some());
+    /// assert!(report.handler().span_trace().is_some());
     /// ```
     ///
     /// However, `SpanTrace` is not captured if one of the source errors already captured a
@@ -409,7 +363,7 @@ impl Context {
     /// let error: TracedError<SourceError> = error.in_current_span();
     ///
     /// let report: Report = error.into();
-    /// assert!(report.context().span_trace().is_none());
+    /// assert!(report.handler().span_trace().is_none());
     /// ```
     ///
     /// [`tracing_error::TracedError`]: https://docs.rs/tracing-error/0.1.2/tracing_error/struct.TracedError.html
@@ -420,7 +374,7 @@ impl Context {
     }
 }
 
-impl EyreContext for Context {
+impl EyreHandler for Handler {
     #[allow(unused_variables)]
     fn default(error: &(dyn std::error::Error + 'static)) -> Self {
         let backtrace = if backtrace_enabled() {
@@ -463,26 +417,32 @@ impl EyreContext for Context {
 
         let mut buf = String::new();
         for (n, error) in errors {
-            writeln!(f)?;
             buf.clear();
             write!(&mut buf, "{}", error).unwrap();
+            writeln!(f)?;
             write!(indented(f).ind(n), "{}", Red.paint(&buf))?;
         }
 
+        let separated = &mut HeaderWriter {
+            inner: &mut *f,
+            header: &"\n\n",
+            started: false,
+        };
+
         for section in self
             .sections
             .iter()
-            .filter(|s| matches!(s.order, Order::AfterErrMsgs))
+            .filter(|s| matches!(s, HelpInfo::Error(_)))
         {
-            write!(f, "\n\n{:?}", section)?;
+            write!(separated.ready(), "{}", section)?;
         }
 
         for section in self
             .sections
             .iter()
-            .filter(|s| matches!(s.order, Order::BeforeSpanTrace))
+            .filter(|s| matches!(s, HelpInfo::Custom(_)))
         {
-            write!(f, "\n\n{:?}", section)?;
+            write!(separated.ready(), "{}", section)?;
         }
 
         #[cfg(feature = "capture-spantrace")]
@@ -493,33 +453,23 @@ impl EyreContext for Context {
                 .or_else(|| get_deepest_spantrace(error))
                 .expect("SpanTrace capture failed");
 
-            match span_trace.status() {
-                SpanTraceStatus::CAPTURED => {
-                    write!(f, "\n\n")?;
-                    write!(indented(f).with_format(Format::Uniform { indentation: "  " }), "{}", color_spantrace::colorize(span_trace))?
-                },
-                SpanTraceStatus::UNSUPPORTED => write!(f, "\n\nWarning: SpanTrace capture is Unsupported.\nEnsure that you've setup an error layer and the versions match")?,
-                _ => (),
-            }
+            write!(&mut separated.ready(), "{}", FormattedSpanTrace(span_trace))?;
         }
 
         if let Some(backtrace) = self.backtrace.as_ref() {
-            write!(f, "\n\n")?;
-
-            let bt_str = CONFIG
-                .get_or_init(default_printer)
+            let bt_str = installed_printer()
                 .format_trace_to_string(&backtrace)
                 .unwrap();
 
             write!(
-                indented(f).with_format(Format::Uniform { indentation: "  " }),
+                indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),
                 "{}",
                 bt_str
             )?;
         } else if self
             .sections
             .iter()
-            .any(|s| matches!(s.order, Order::AfterBackTrace))
+            .any(|s| !matches!(s, HelpInfo::Custom(_) | HelpInfo::Error(_)))
         {
             writeln!(f)?;
         }
@@ -527,9 +477,26 @@ impl EyreContext for Context {
         for section in self
             .sections
             .iter()
-            .filter(|s| matches!(s.order, Order::AfterBackTrace))
+            .filter(|s| !matches!(s, HelpInfo::Custom(_) | HelpInfo::Error(_)))
         {
-            write!(f, "\n{:?}", section)?;
+            write!(f, "\n{}", section)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[cfg(feature = "capture-spantrace")]
+impl fmt::Display for FormattedSpanTrace<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use std::fmt::Write;
+
+        match self.0.status() {
+            SpanTraceStatus::CAPTURED => {
+                write!(indented(f).with_format(Format::Uniform { indentation: "  " }), "{}", color_spantrace::colorize(self.0))?;
+            },
+            SpanTraceStatus::UNSUPPORTED => write!(f, "Warning: SpanTrace capture is Unsupported.\nEnsure that you've setup an error layer and the versions match")?,
+            _ => (),
         }
 
         Ok(())
@@ -573,7 +540,7 @@ fn get_deepest_spantrace<'a>(error: &'a (dyn Error + 'static)) -> Option<&'a Spa
         .next()
 }
 
-/// Override the global BacktracePrinter used by `color_eyre::Context` when printing captured
+/// Override the global BacktracePrinter used by `color_eyre::Handler` when printing captured
 /// backtraces.
 ///
 /// # Examples
@@ -606,7 +573,16 @@ fn get_deepest_spantrace<'a>(error: &'a (dyn Error + 'static)) -> Option<&'a Spa
 /// ```
 pub fn install(printer: BacktracePrinter) -> Result<(), impl std::error::Error> {
     let printer = add_eyre_filters(printer);
-    CONFIG.set(printer).map_err(|_| InstallError)
+
+    if CONFIG.set(printer).is_err() {
+        return Err(InstallError);
+    }
+
+    Ok(())
+}
+
+fn installed_printer() -> &'static color_backtrace::BacktracePrinter {
+    CONFIG.get_or_init(default_printer)
 }
 
 fn default_printer() -> BacktracePrinter {
@@ -616,7 +592,7 @@ fn default_printer() -> BacktracePrinter {
 fn add_eyre_filters(printer: BacktracePrinter) -> BacktracePrinter {
     printer.add_frame_filter(Box::new(|frames| {
         let filters = &[
-            "<color_eyre::Context as eyre::EyreContext>::default",
+            "<color_eyre::Handler as eyre::EyreHandler>::default",
             "eyre::",
             "color_eyre::",
         ];
@@ -635,7 +611,7 @@ fn add_eyre_filters(printer: BacktracePrinter) -> BacktracePrinter {
     }))
 }
 
-/// A type alias for `eyre::Report<color_eyre::Context>`
+/// A type alias for `eyre::Report<color_eyre::Handler>`
 ///
 /// # Example
 ///
@@ -648,7 +624,7 @@ fn add_eyre_filters(printer: BacktracePrinter) -> BacktracePrinter {
 /// # Ok(Config)
 /// }
 /// ```
-pub type Report = eyre::Report<Context>;
+pub type Report = eyre::Report<Handler>;
 
 /// A type alias for `Result<T, color_eyre::Report>`
 ///

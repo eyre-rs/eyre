@@ -17,16 +17,8 @@ impl Output for Command {
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             Err(eyre!("cmd exited with non-zero status code"))
-                .with_section(move || {
-                    "Stdout:"
-                        .skip_if(|| stdout.is_empty())
-                        .body(stdout.trim().to_string())
-                })
-                .with_section(move || {
-                    "Stderr:"
-                        .skip_if(|| stderr.is_empty())
-                        .body(stderr.trim().to_string())
-                })
+                .with_section(move || stdout.trim().to_string().header("Stdout:"))
+                .with_section(move || stderr.trim().to_string().header("Stderr:"))
         } else {
             Ok(stdout.into())
         }
@@ -61,7 +53,7 @@ fn install_tracing() {
 
 #[instrument]
 fn read_file(path: &str) -> Result<String, Report> {
-    Command::new("cat").arg("fake_file").output2()
+    Command::new("cat").arg(path).output2()
 }
 
 #[instrument]
