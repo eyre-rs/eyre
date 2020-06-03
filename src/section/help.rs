@@ -1,4 +1,5 @@
-//! Provides an extension trait for attaching `Section`s to error reports.
+//! Provides an extension trait for attaching `Section` to error reports.
+use crate::ColorExt;
 use crate::{Report, Result};
 use ansi_term::Color::*;
 use indenter::indented;
@@ -351,23 +352,30 @@ pub(crate) enum HelpInfo {
 impl Display for HelpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HelpInfo::Note(n) => write!(f, "{}: {}", Cyan.paint("Note"), n),
-            HelpInfo::Warning(w) => write!(f, "{}: {}", Yellow.paint("Warning"), w),
-            HelpInfo::Suggestion(s) => write!(f, "{}: {}", Cyan.paint("Suggestion"), s),
-            HelpInfo::Custom(c) => write!(f, "{}", c),
-            HelpInfo::Error(e) => {
+            HelpInfo::Note(note) => write!(f, "{}: {}", Cyan.make_intense().paint("Note"), note),
+            HelpInfo::Warning(warning) => {
+                write!(f, "{}: {}", Yellow.make_intense().paint("Warning"), warning)
+            }
+            HelpInfo::Suggestion(suggestion) => write!(
+                f,
+                "{}: {}",
+                Cyan.make_intense().paint("Suggestion"),
+                suggestion
+            ),
+            HelpInfo::Custom(section) => write!(f, "{}", section),
+            HelpInfo::Error(error) => {
                 // a lot here
                 let errors = std::iter::successors(
-                    Some(e.as_ref() as &(dyn std::error::Error + 'static)),
+                    Some(error.as_ref() as &(dyn std::error::Error + 'static)),
                     |e| e.source(),
                 );
 
                 write!(f, "Error:")?;
                 let mut buf = String::new();
-                for (n, e) in errors.enumerate() {
+                for (n, error) in errors.enumerate() {
                     writeln!(f)?;
                     buf.clear();
-                    write!(&mut buf, "{}", e).unwrap();
+                    write!(&mut buf, "{}", error).unwrap();
                     write!(indented(f).ind(n), "{}", Red.paint(&buf))?;
                 }
 
