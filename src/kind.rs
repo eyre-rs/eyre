@@ -124,8 +124,8 @@ impl Boxed {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    use crate::{eyre, EyreHandler, Report};
+    use crate::eyre;
+    use std::num::ParseIntError;
 
     struct NonDefaultHandler;
 
@@ -144,11 +144,14 @@ mod test {
         }
     }
 
-    // This has to compile without changes
-    fn _throw_error<E>(e: E) -> Report<NonDefaultHandler>
-    where
-        E: Into<Report<NonDefaultHandler>>,
-    {
-        eyre!(e).wrap_err("blaah")
+    fn _parse(s: &str) -> Result<i32, ParseIntError> {
+        s.parse::<i32>()
+    }
+
+    fn _throw_error() -> Result<(), Report<NonDefaultHandler>> {
+        match _parse("abc") {
+            Ok(_) => Ok(()),
+            Err(e) => Err(eyre!(e).wrap_err("try parsing an actual number")),
+        }
     }
 }
