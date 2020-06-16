@@ -28,13 +28,13 @@ fn test_boxed_thiserror() {
     let error = MyError {
         source: io::Error::new(io::ErrorKind::Other, "oh no!"),
     };
-    let error = eyre!(error);
+    let error: Report = eyre!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }
 
 #[test]
 fn test_boxed_eyre() {
-    let error = eyre!("oh no!").wrap_err("it failed");
+    let error: Report = eyre!("oh no!").wrap_err("it failed");
     let error = eyre!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }
