@@ -552,64 +552,6 @@ impl dyn EyreHandler {
 }
 
 /// Error Report Handler trait for customizing `eyre::Report`
-///
-/// ## Customization
-///
-/// In order to insert your own custom context and report format you must first
-/// implement the `eyre::EyreHandler` trait.
-///
-/// Once you've defined a custom Handler type you can use it throughout your
-/// application by defining a type alias.
-///
-/// ```rust
-/// use backtrace::Backtrace;
-/// use eyre::EyreHandler;
-/// # use eyre::Chain;
-/// # use std::error::Error;
-/// use indenter::indented;
-///
-/// pub struct Handler {
-///     backtrace: Backtrace,
-/// }
-///
-/// impl EyreHandler for Handler {
-///     // ...
-/// #     #[allow(unused_variables)]
-/// #     fn default(error: &(dyn Error + 'static)) -> Self {
-/// #         let backtrace = Backtrace::new();
-/// #         Self { backtrace }
-/// #     }
-/// #     fn debug(
-/// #         &self,
-/// #         error: &(dyn Error + 'static),
-/// #         f: &mut core::fmt::Formatter<'_>,
-/// #     ) -> core::fmt::Result {
-/// #         use core::fmt::Write as _;
-/// #         if f.alternate() {
-/// #             return core::fmt::Debug::fmt(error, f);
-/// #         }
-/// #         write!(f, "{}", error)?;
-/// #         if let Some(cause) = error.source() {
-/// #             write!(f, "\n\nCaused by:")?;
-/// #             let multiple = cause.source().is_some();
-/// #             for (n, error) in Chain::new(cause).enumerate() {
-/// #                 writeln!(f)?;
-/// #                 if multiple {
-/// #                     write!(indented(f).ind(n), "{}", error)?;
-/// #                 } else {
-/// #                     write!(indented(f), "{}", error)?;
-/// #                 }
-/// #             }
-/// #         }
-/// #         let backtrace = &self.backtrace;
-/// #         write!(f, "\n\nStack backtrace:\n{:?}", backtrace)?;
-/// #         Ok(())
-/// #     }
-/// }
-///
-/// type Report = eyre::Report<Handler>;
-/// type Result<T, E = eyre::Report<Handler>> = core::result::Result<T, E>;
-/// ```
 pub trait EyreHandler: core::any::Any + Send + Sync {
     /// Define the report format
     ///
