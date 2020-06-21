@@ -13,8 +13,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = "0.4"
-//! color-eyre = "0.3"
+//! color-eyre = "0.4"
 //! ```
 //!
 //! And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
@@ -37,8 +36,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = "0.4"
-//! color-eyre = { version = "0.3", default-features = false }
+//! color-eyre = { version = "0.4", default-features = false }
 //! ```
 //!
 //! ### Improving perf on debug builds
@@ -102,8 +100,7 @@
 //! [`examples/custom_section.rs`]:
 //!
 //! ```rust
-//! use color_eyre::{SectionExt, Help, Report};
-//! use eyre::eyre;
+//! use color_eyre::{eyre::eyre, SectionExt, Help, Report};
 //! use std::process::Command;
 //! use tracing::instrument;
 //!
@@ -202,7 +199,7 @@
 //! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.3.4")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.4.0")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_debug_implementations,
@@ -231,7 +228,7 @@ use crate::writers::HeaderWriter;
 use ansi_term::Color::*;
 use backtrace::Backtrace;
 pub use color_backtrace::BacktracePrinter;
-use eyre::*;
+pub use eyre;
 use indenter::{indented, Format};
 use once_cell::sync::OnceCell;
 use section::help::HelpInfo;
@@ -259,7 +256,7 @@ static CONFIG: OnceCell<BacktracePrinter> = OnceCell::new();
 /// This type is not intended to be used directly, prefer using it via the
 /// [`color_eyre::Report`] and [`color_eyre::Result`] type aliases.
 ///
-/// [`eyre::Report`]: https://docs.rs/eyre/0.3.8/eyre/struct.Report.html
+/// [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 /// [`tracing-error`]: https://docs.rs/tracing-error
 /// [`color_eyre::Report`]: type.Report.html
 /// [`color_eyre::Result`]: type.Result.html
@@ -284,8 +281,7 @@ impl Handler {
     /// Backtrace capture can be enabled with the `RUST_BACKTRACE` env variable:
     ///
     /// ```
-    /// use color_eyre::Report;
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report};
     ///
     /// std::env::set_var("RUST_BACKTRACE", "1");
     ///
@@ -297,8 +293,7 @@ impl Handler {
     /// `RUST_LIB_BACKTRACE`:
     ///
     /// ```
-    /// use color_eyre::Report;
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report};
     ///
     /// std::env::set_var("RUST_LIB_BACKTRACE", "1");
     ///
@@ -310,8 +305,7 @@ impl Handler {
     /// backtraces you can explicitly set `RUST_LIB_BACKTRACE` to 0:
     ///
     /// ```
-    /// use color_eyre::Report;
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report};
     ///
     /// std::env::set_var("RUST_BACKTRACE", "1");
     /// std::env::set_var("RUST_LIB_BACKTRACE", "0");
@@ -331,8 +325,7 @@ impl Handler {
     /// SpanTraces are always captured by default:
     ///
     /// ```
-    /// use color_eyre::Report;
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report};
     ///
     /// let report: Report = eyre!("an error occurred");
     /// assert!(report.handler().span_trace().is_some());
@@ -342,8 +335,7 @@ impl Handler {
     /// `SpanTrace` via [`tracing_error::TracedError`]:
     ///
     /// ```
-    /// use color_eyre::Report;
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report};
     /// use tracing_error::{TracedError, InstrumentError};
     ///
     /// #[derive(Debug)]
@@ -374,7 +366,7 @@ impl Handler {
     }
 }
 
-impl EyreHandler for Handler {
+impl eyre::EyreHandler for Handler {
     #[allow(unused_variables)]
     fn default(error: &(dyn std::error::Error + 'static)) -> Self {
         let backtrace = if backtrace_enabled() {
@@ -384,7 +376,7 @@ impl EyreHandler for Handler {
         };
 
         #[cfg(feature = "capture-spantrace")]
-        let span_trace = if get_deepest_spantrace(error).is_none() {
+        let span_trace = if dbg!(get_deepest_spantrace(error)).is_none() {
             Some(SpanTrace::capture())
         } else {
             None
@@ -407,13 +399,13 @@ impl EyreHandler for Handler {
             return core::fmt::Debug::fmt(error, f);
         }
 
-        #[cfg(feature = "capture-spantrace")]
-        let errors = Chain::new(error)
-            .filter(|e| e.span_trace().is_none())
-            .enumerate();
+        // #[cfg(feature = "capture-spantrace")]
+        // let errors = Chain::new(error)
+        //     .filter(|e| e.span_trace().is_none())
+        //     .enumerate();
 
-        #[cfg(not(feature = "capture-spantrace"))]
-        let errors = Chain::new(error).enumerate();
+        // #[cfg(not(feature = "capture-spantrace"))]
+        let errors = eyre::Chain::new(error).enumerate();
 
         let mut buf = String::new();
         for (n, error) in errors {
@@ -534,7 +526,7 @@ fn backtrace_enabled() -> bool {
 
 #[cfg(feature = "capture-spantrace")]
 fn get_deepest_spantrace<'a>(error: &'a (dyn Error + 'static)) -> Option<&'a SpanTrace> {
-    Chain::new(error)
+    eyre::Chain::new(error)
         .rev()
         .flat_map(|error| error.span_trace())
         .next()

@@ -30,8 +30,7 @@ pub trait Help<T>: private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{Report, Help};
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report, Help};
     ///
     /// Err(eyre!("command failed"))
     ///     .section("Please report bugs to https://real.url/bugs")?;
@@ -47,8 +46,7 @@ pub trait Help<T>: private::Sealed {
     /// # Examples
     ///
     /// ```rust
-    /// use color_eyre::{Report, Help, SectionExt};
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report, Help, SectionExt};
     ///
     /// let output = std::process::Command::new("ls")
     ///     .output()?;
@@ -75,8 +73,7 @@ pub trait Help<T>: private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{Report, Help};
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report, Help};
     /// use thiserror::Error;
     ///
     /// #[derive(Debug, Error)]
@@ -98,8 +95,7 @@ pub trait Help<T>: private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{Report, Help};
-    /// use eyre::eyre;
+    /// use color_eyre::{eyre::eyre, Report, Help};
     /// use thiserror::Error;
     ///
     /// #[derive(Debug, Error)]

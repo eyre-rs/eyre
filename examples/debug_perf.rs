@@ -1,7 +1,9 @@
 //! example for manually testing the perf of color-eyre in debug vs release
 
-use color_eyre::{Help, Report};
-use eyre::{eyre, WrapErr};
+use color_eyre::{
+    eyre::{eyre, WrapErr},
+    Help, Report,
+};
 use tracing::instrument;
 
 fn main() -> Result<(), Report> {

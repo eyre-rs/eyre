@@ -1,5 +1,4 @@
-use color_eyre::{Help, Report};
-use eyre::WrapErr;
+use color_eyre::{eyre::WrapErr, Help, Report};
 use tracing::{info, instrument};
 
 #[instrument]

@@ -1,6 +1,4 @@
-use color_eyre::BacktracePrinter;
-use color_eyre::{Help, Report};
-use eyre::WrapErr;
+use color_eyre::{eyre::WrapErr, BacktracePrinter, Help, Report};
 use tracing::{info, instrument};
 
 #[instrument]

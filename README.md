@@ -26,8 +26,7 @@ Add the following to your toml file:
 
 ```toml
 [dependencies]
-eyre = "0.4"
-color-eyre = "0.3"
+color-eyre = "0.4"
 ```
 
 And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
@@ -50,8 +49,7 @@ tracing integration to cut down on unused dependencies:
 
 ```toml
 [dependencies]
-eyre = "0.4"
-color-eyre = { version = "0.3", default-features = false }
+color-eyre = { version = "0.4", default-features = false }
 ```
 
 ### Improving perf on debug builds
@@ -115,8 +113,7 @@ to contain `stderr` and `stdout` from a failed command, taken from
 [`examples/custom_section.rs`]:
 
 ```rust
-use color_eyre::{SectionExt, Help, Report};
-use eyre::eyre;
+use color_eyre::{eyre::eyre, SectionExt, Help, Report};
 use std::process::Command;
 use tracing::instrument;
 

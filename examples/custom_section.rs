@@ -1,5 +1,7 @@
-use color_eyre::{Help, Report, SectionExt};
-use eyre::{eyre, WrapErr};
+use color_eyre::{
+    eyre::{eyre, WrapErr},
+    Help, Report, SectionExt,
+};
 use std::process::Command;
 use tracing::instrument;
 
