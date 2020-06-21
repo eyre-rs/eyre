@@ -571,13 +571,6 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
     /// }
     ///
     /// impl EyreHandler for Handler {
-    /// #     #[allow(unused_variables)]
-    /// #     fn default(error: &(dyn Error + 'static)) -> Self {
-    /// #         let backtrace = Backtrace::new();
-    /// #         Self { backtrace }
-    /// #     }
-    ///     // ...
-    ///
     ///     fn debug(
     ///         &self,
     ///         error: &(dyn Error + 'static),
