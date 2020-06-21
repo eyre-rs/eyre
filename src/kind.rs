@@ -48,7 +48,6 @@
 use crate::Report;
 use core::fmt::{Debug, Display};
 
-#[cfg(feature = "std")]
 use crate::StdError;
 
 pub struct Adhoc;
@@ -91,10 +90,8 @@ impl Trait {
     }
 }
 
-#[cfg(feature = "std")]
 pub struct Boxed;
 
-#[cfg(feature = "std")]
 pub trait BoxedKind: Sized {
     #[inline]
     fn eyre_kind(&self) -> Boxed {
@@ -102,43 +99,10 @@ pub trait BoxedKind: Sized {
     }
 }
 
-#[cfg(feature = "std")]
 impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 
-#[cfg(feature = "std")]
 impl Boxed {
     pub fn new(self, error: Box<dyn StdError + Send + Sync>) -> Report {
         Report::from_boxed(error)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::eyre;
-    use crate::EyreHandler;
-    use std::num::ParseIntError;
-
-    struct NonDefaultHandler;
-
-    impl EyreHandler for NonDefaultHandler {
-        fn debug(
-            &self,
-            _error: &(dyn StdError + 'static),
-            _f: &mut core::fmt::Formatter<'_>,
-        ) -> core::fmt::Result {
-            Ok(())
-        }
-    }
-
-    fn _parse(s: &str) -> Result<i32, ParseIntError> {
-        s.parse::<i32>()
-    }
-
-    fn _throw_error() -> Result<(), Report> {
-        match _parse("abc") {
-            Ok(_) => Ok(()),
-            Err(e) => Err(eyre!(e).wrap_err("try parsing an actual number")),
-        }
     }
 }

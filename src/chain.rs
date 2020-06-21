@@ -1,23 +1,15 @@
 use self::ChainState::*;
 use crate::StdError;
 
-#[cfg(feature = "std")]
 use std::vec;
 
-#[cfg(feature = "std")]
 pub(crate) use crate::Chain;
-
-#[cfg(not(feature = "std"))]
-pub(crate) struct Chain<'a> {
-    state: ChainState<'a>,
-}
 
 #[derive(Clone)]
 pub(crate) enum ChainState<'a> {
     Linked {
         next: Option<&'a (dyn StdError + 'static)>,
     },
-    #[cfg(feature = "std")]
     Buffered {
         rest: vec::IntoIter<&'a (dyn StdError + 'static)>,
     },
@@ -61,7 +53,6 @@ impl<'a> Iterator for Chain<'a> {
                 *next = error.source();
                 Some(error)
             }
-            #[cfg(feature = "std")]
             Buffered { rest } => rest.next(),
         }
     }
@@ -72,7 +63,6 @@ impl<'a> Iterator for Chain<'a> {
     }
 }
 
-#[cfg(feature = "std")]
 impl DoubleEndedIterator for Chain<'_> {
     fn next_back(&mut self) -> Option<Self::Item> {
         match &mut self.state {
@@ -103,13 +93,11 @@ impl ExactSizeIterator for Chain<'_> {
                 }
                 len
             }
-            #[cfg(feature = "std")]
             Buffered { rest } => rest.len(),
         }
     }
 }
 
-#[cfg(feature = "std")]
 impl Default for Chain<'_> {
     fn default() -> Self {
         Chain {

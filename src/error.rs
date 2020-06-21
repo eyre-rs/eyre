@@ -1,4 +1,3 @@
-use crate::alloc::Box;
 use crate::chain::Chain;
 use crate::EyreHandler;
 use crate::{Report, StdError};
@@ -7,7 +6,6 @@ use core::fmt::{self, Debug, Display};
 use core::mem::{self, ManuallyDrop};
 use core::ptr::{self, NonNull};
 
-#[cfg(feature = "std")]
 use core::ops::{Deref, DerefMut};
 
 impl Report {
@@ -18,8 +16,6 @@ impl Report {
     ///
     /// If the error type does not provide a backtrace, a backtrace will be
     /// created here to ensure that a backtrace exists.
-    #[cfg(feature = "std")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "std")))]
     pub fn new<E>(error: E) -> Self
     where
         E: StdError + Send + Sync + 'static,
@@ -71,7 +67,6 @@ impl Report {
         Report::from_adhoc(message)
     }
 
-    #[cfg(feature = "std")]
     pub(crate) fn from_std<E>(error: E) -> Self
     where
         E: StdError + Send + Sync + 'static,
@@ -79,7 +74,6 @@ impl Report {
         let vtable = &ErrorVTable {
             object_drop: object_drop::<E>,
             object_ref: object_ref::<E>,
-            #[cfg(feature = "std")]
             object_mut: object_mut::<E>,
             object_boxed: object_boxed::<E>,
             object_downcast: object_downcast::<E>,
@@ -101,7 +95,6 @@ impl Report {
         let vtable = &ErrorVTable {
             object_drop: object_drop::<MessageError<M>>,
             object_ref: object_ref::<MessageError<M>>,
-            #[cfg(feature = "std")]
             object_mut: object_mut::<MessageError<M>>,
             object_boxed: object_boxed::<MessageError<M>>,
             object_downcast: object_downcast::<M>,
@@ -124,7 +117,6 @@ impl Report {
         let vtable = &ErrorVTable {
             object_drop: object_drop::<DisplayError<M>>,
             object_ref: object_ref::<DisplayError<M>>,
-            #[cfg(feature = "std")]
             object_mut: object_mut::<DisplayError<M>>,
             object_boxed: object_boxed::<DisplayError<M>>,
             object_downcast: object_downcast::<M>,
@@ -138,7 +130,6 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
-    #[cfg(feature = "std")]
     pub(crate) fn from_msg<D, E>(msg: D, error: E) -> Self
     where
         D: Display + Send + Sync + 'static,
@@ -149,7 +140,6 @@ impl Report {
         let vtable = &ErrorVTable {
             object_drop: object_drop::<ContextError<D, E>>,
             object_ref: object_ref::<ContextError<D, E>>,
-            #[cfg(feature = "std")]
             object_mut: object_mut::<ContextError<D, E>>,
             object_boxed: object_boxed::<ContextError<D, E>>,
             object_downcast: context_downcast::<D, E>,
@@ -162,7 +152,6 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
-    #[cfg(feature = "std")]
     pub(crate) fn from_boxed(error: Box<dyn StdError + Send + Sync>) -> Self {
         use crate::wrapper::BoxedError;
         let error = BoxedError(error);
@@ -171,7 +160,6 @@ impl Report {
         let vtable = &ErrorVTable {
             object_drop: object_drop::<BoxedError>,
             object_ref: object_ref::<BoxedError>,
-            #[cfg(feature = "std")]
             object_mut: object_mut::<BoxedError>,
             object_boxed: object_boxed::<BoxedError>,
             object_downcast: object_downcast::<Box<dyn StdError + Send + Sync>>,
@@ -275,7 +263,6 @@ impl Report {
         let vtable = &ErrorVTable {
             object_drop: object_drop::<ContextError<D, Report>>,
             object_ref: object_ref::<ContextError<D, Report>>,
-            #[cfg(feature = "std")]
             object_mut: object_mut::<ContextError<D, Report>>,
             object_boxed: object_boxed::<ContextError<D, Report>>,
             object_downcast: context_chain_downcast::<D>,
@@ -307,7 +294,6 @@ impl Report {
     ///     None
     /// }
     /// ```
-    #[cfg(feature = "std")]
     pub fn chain(&self) -> Chain<'_> {
         self.inner.chain()
     }
@@ -317,7 +303,6 @@ impl Report {
     ///
     /// The root cause is the last error in the iterator produced by
     /// [`chain()`][Report::chain].
-    #[cfg(feature = "std")]
     pub fn root_cause(&self) -> &(dyn StdError + 'static) {
         let mut chain = self.chain();
         let mut root_cause = chain.next().unwrap();
@@ -460,7 +445,6 @@ impl Report {
     }
 }
 
-#[cfg(feature = "std")]
 impl<E> From<E> for Report
 where
     E: StdError + Send + Sync + 'static,
@@ -470,7 +454,6 @@ where
     }
 }
 
-#[cfg(feature = "std")]
 impl Deref for Report {
     type Target = dyn StdError + Send + Sync + 'static;
 
@@ -479,7 +462,6 @@ impl Deref for Report {
     }
 }
 
-#[cfg(feature = "std")]
 impl DerefMut for Report {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.inner.error_mut()
@@ -514,7 +496,6 @@ impl Drop for Report {
 struct ErrorVTable {
     object_drop: unsafe fn(Box<ErrorImpl<()>>),
     object_ref: unsafe fn(&ErrorImpl<()>) -> &(dyn StdError + Send + Sync + 'static),
-    #[cfg(feature = "std")]
     object_mut: unsafe fn(&mut ErrorImpl<()>) -> &mut (dyn StdError + Send + Sync + 'static),
     #[allow(clippy::type_complexity)]
     object_boxed: unsafe fn(Box<ErrorImpl<()>>) -> Box<dyn StdError + Send + Sync + 'static>,
@@ -550,7 +531,6 @@ where
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
-#[cfg(feature = "std")]
 unsafe fn object_mut<E>(e: &mut ErrorImpl<()>) -> &mut (dyn StdError + Send + Sync + 'static)
 where
     E: StdError + Send + Sync + 'static,
@@ -585,7 +565,6 @@ where
 }
 
 // Safety: requires layout of *e to match ErrorImpl<ContextError<D, E>>.
-#[cfg(feature = "std")]
 unsafe fn context_downcast<D, E>(e: &ErrorImpl<()>, target: TypeId) -> Option<NonNull<()>>
 where
     D: 'static,
@@ -605,7 +584,6 @@ where
 }
 
 // Safety: requires layout of *e to match ErrorImpl<ContextError<D, E>>.
-#[cfg(feature = "std")]
 unsafe fn context_drop_rest<D, E>(e: Box<ErrorImpl<()>>, target: TypeId)
 where
     D: 'static,
@@ -707,7 +685,6 @@ impl ErrorImpl<()> {
         unsafe { &*(self.vtable.object_ref)(self) }
     }
 
-    #[cfg(feature = "std")]
     pub(crate) fn error_mut(&mut self) -> &mut (dyn StdError + Send + Sync + 'static) {
         // Use vtable to attach E's native StdError vtable for the right
         // original type E.
@@ -768,14 +745,12 @@ impl From<Report> for Box<dyn StdError + 'static> {
     }
 }
 
-#[cfg(feature = "std")]
 impl AsRef<dyn StdError + Send + Sync> for Report {
     fn as_ref(&self) -> &(dyn StdError + Send + Sync + 'static) {
         &**self
     }
 }
 
-#[cfg(feature = "std")]
 impl AsRef<dyn StdError> for Report {
     fn as_ref(&self) -> &(dyn StdError + 'static) {
         &**self

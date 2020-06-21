@@ -24,6 +24,25 @@ jobs:
         with:
           command: check
 
+  check-no-std:
+    name: Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --no-default-features
+
   test-features:
     name: Test Suite
     runs-on: ubuntu-latest

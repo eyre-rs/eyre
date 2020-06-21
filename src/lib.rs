@@ -206,7 +206,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! eyre = { version = "0.5", default-features = false }
+//! eyre = { version = "0.6", default-features = false }
 //! ```
 //!
 //! Since the `?`-based error conversions would normally rely on the
@@ -317,7 +317,7 @@
 //! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.5.0")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.0")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -343,29 +343,11 @@
 )]
 #![cfg_attr(backtrace, feature(backtrace))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
-#![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
     clippy::needless_doctest_main,
     clippy::new_ret_no_self,
     clippy::wrong_self_convention
 )]
-
-mod alloc {
-    #[cfg(not(feature = "std"))]
-    extern crate alloc;
-
-    #[cfg(not(feature = "std"))]
-    pub(crate) use alloc::boxed::Box;
-
-    #[cfg(feature = "std")]
-    pub(crate) use std::boxed::Box;
-
-    #[cfg(not(feature = "std"))]
-    pub(crate) use alloc::string::String;
-
-    // #[cfg(feature = "std")]
-    // pub(crate) use std::string::String;
-}
 
 #[macro_use]
 mod backtrace;
@@ -377,24 +359,12 @@ mod kind;
 mod macros;
 mod wrapper;
 
-use crate::alloc::Box;
 use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::Display;
 use core::mem::ManuallyDrop;
 
-#[cfg(not(feature = "std"))]
-use core::fmt::Debug;
-
-#[cfg(feature = "std")]
 use std::error::Error as StdError;
-
-#[cfg(not(feature = "std"))]
-pub trait StdError: Debug + Display {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
-        None
-    }
-}
 
 pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interopt with `anyhow`
@@ -509,10 +479,22 @@ type ErrorHook =
 
 static HOOK: OnceCell<ErrorHook> = OnceCell::new();
 
-///
-pub fn set_hook(hook: ErrorHook) -> Result<(), Box<dyn StdError + Send + Sync + 'static>> {
-    HOOK.set(hook)
-        .map_err(|_| "unable to set global hook".into())
+/// Error indicating that `set_hook` was unable to install the provided ErrorHook
+#[derive(Debug)]
+pub struct InstallError;
+
+impl core::fmt::Display for InstallError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str("cannot install provided ErrorHook, a hook has already been installed")
+    }
+}
+
+impl StdError for InstallError {}
+
+/// Install the provided error hook for constructing EyreHandlers when converting
+/// Errors to Reports
+pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
+    HOOK.set(hook).map_err(|_| InstallError)
 }
 
 fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
@@ -725,7 +707,6 @@ impl EyreHandler for DefaultHandler {
 ///     None
 /// }
 /// ```
-#[cfg(feature = "std")]
 #[derive(Clone)]
 #[allow(missing_debug_implementations)]
 pub struct Chain<'a> {
@@ -1053,7 +1034,6 @@ pub mod private {
     pub mod kind {
         pub use crate::kind::{AdhocKind, TraitKind};
 
-        #[cfg(feature = "std")]
         pub use crate::kind::BoxedKind;
     }
 

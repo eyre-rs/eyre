@@ -18,7 +18,7 @@ This crate is a fork of [`anyhow`] by @dtolnay with a support for customized
 
 ```toml
 [dependencies]
-eyre = "0.5"
+eyre = "0.6"
 ```
 
 ## Custom Report Handlers
@@ -153,7 +153,7 @@ Cargo.toml. A global allocator is required.
 
 ```toml
 [dependencies]
-eyre = { version = "0.5", default-features = false }
+eyre = { version = "0.6", default-features = false }
 ```
 
 Since the `?`-based error conversions would normally rely on the
