@@ -51,9 +51,6 @@ use core::fmt::{Debug, Display};
 #[cfg(feature = "std")]
 use crate::StdError;
 
-// #[cfg(backtrace)]
-// use std::backtrace::Backtrace;
-
 pub struct Adhoc;
 
 pub trait AdhocKind: Sized {
@@ -74,21 +71,27 @@ impl Adhoc {
     }
 }
 
-pub struct Trait;
+pub struct Trait<H>(std::marker::PhantomData<H>);
 
-pub trait TraitKind: Sized {
+pub trait TraitKind<H>: Sized {
     #[inline]
-    fn eyre_kind(&self) -> Trait {
-        Trait
+    fn eyre_kind(&self) -> Trait<H> {
+        Trait(std::marker::PhantomData)
     }
 }
 
-impl<E> TraitKind for E where E: Into<Report> {}
+impl<E, H> TraitKind<H> for E
+where
+    E: Into<Report<H>>,
+    H: EyreHandler,
+{
+}
 
-impl Trait {
-    pub fn new<E>(self, error: E) -> Report
+impl<H> Trait<H> {
+    pub fn new<E>(self, error: E) -> Report<H>
     where
-        E: Into<Report>,
+        E: Into<Report<H>>,
+        H: EyreHandler,
     {
         error.into()
     }
@@ -112,5 +115,40 @@ impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 impl Boxed {
     pub fn new<H: EyreHandler>(self, error: Box<dyn StdError + Send + Sync>) -> Report<H> {
         Report::from_boxed(error)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::eyre;
+    use std::num::ParseIntError;
+
+    struct NonDefaultHandler;
+
+    impl EyreHandler for NonDefaultHandler {
+        #[allow(unused_variables)]
+        fn default(error: &(dyn StdError + 'static)) -> Self {
+            Self
+        }
+
+        fn debug(
+            &self,
+            _error: &(dyn StdError + 'static),
+            _f: &mut core::fmt::Formatter<'_>,
+        ) -> core::fmt::Result {
+            Ok(())
+        }
+    }
+
+    fn _parse(s: &str) -> Result<i32, ParseIntError> {
+        s.parse::<i32>()
+    }
+
+    fn _throw_error() -> Result<(), Report<NonDefaultHandler>> {
+        match _parse("abc") {
+            Ok(_) => Ok(()),
+            Err(e) => Err(eyre!(e).wrap_err("try parsing an actual number")),
+        }
     }
 }
