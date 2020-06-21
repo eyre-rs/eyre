@@ -498,7 +498,11 @@ pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
 }
 
 fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
-    HOOK.get_or_init(|| Box::new(DefaultHandler::default_with))(error)
+    let hook = HOOK
+        .get_or_init(|| Box::new(DefaultHandler::default_with))
+        .as_ref();
+
+    hook(error)
 }
 
 impl dyn EyreHandler {
