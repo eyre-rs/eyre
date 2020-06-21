@@ -199,7 +199,7 @@
 //! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.4.1")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_debug_implementations,
@@ -376,7 +376,7 @@ impl eyre::EyreHandler for Handler {
         };
 
         #[cfg(feature = "capture-spantrace")]
-        let span_trace = if dbg!(get_deepest_spantrace(error)).is_none() {
+        let span_trace = if get_deepest_spantrace(error).is_none() {
             Some(SpanTrace::capture())
         } else {
             None
@@ -399,12 +399,12 @@ impl eyre::EyreHandler for Handler {
             return core::fmt::Debug::fmt(error, f);
         }
 
-        // #[cfg(feature = "capture-spantrace")]
-        // let errors = Chain::new(error)
-        //     .filter(|e| e.span_trace().is_none())
-        //     .enumerate();
+        #[cfg(feature = "capture-spantrace")]
+        let errors = eyre::Chain::new(error)
+            .filter(|e| e.span_trace().is_none())
+            .enumerate();
 
-        // #[cfg(not(feature = "capture-spantrace"))]
+        #[cfg(not(feature = "capture-spantrace"))]
         let errors = eyre::Chain::new(error).enumerate();
 
         let mut buf = String::new();
