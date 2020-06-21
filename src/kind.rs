@@ -45,7 +45,7 @@
 //     let error = $msg;
 //     (&error).eyre_kind().new(error)
 
-use crate::{EyreHandler, Report};
+use crate::Report;
 use core::fmt::{Debug, Display};
 
 #[cfg(feature = "std")]
@@ -63,7 +63,7 @@ pub trait AdhocKind: Sized {
 impl<T> AdhocKind for &T where T: ?Sized + Display + Debug + Send + Sync + 'static {}
 
 impl Adhoc {
-    pub fn new<M, H: EyreHandler>(self, message: M) -> Report<H>
+    pub fn new<M>(self, message: M) -> Report
     where
         M: Display + Debug + Send + Sync + 'static,
     {
@@ -71,27 +71,21 @@ impl Adhoc {
     }
 }
 
-pub struct Trait<H>(std::marker::PhantomData<H>);
+pub struct Trait;
 
-pub trait TraitKind<H>: Sized {
+pub trait TraitKind: Sized {
     #[inline]
-    fn eyre_kind(&self) -> Trait<H> {
-        Trait(std::marker::PhantomData)
+    fn eyre_kind(&self) -> Trait {
+        Trait
     }
 }
 
-impl<E, H> TraitKind<H> for E
-where
-    E: Into<Report<H>>,
-    H: EyreHandler,
-{
-}
+impl<E> TraitKind for E where E: Into<Report> {}
 
-impl<H> Trait<H> {
-    pub fn new<E>(self, error: E) -> Report<H>
+impl Trait {
+    pub fn new<E>(self, error: E) -> Report
     where
-        E: Into<Report<H>>,
-        H: EyreHandler,
+        E: Into<Report>,
     {
         error.into()
     }
@@ -113,7 +107,7 @@ impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 
 #[cfg(feature = "std")]
 impl Boxed {
-    pub fn new<H: EyreHandler>(self, error: Box<dyn StdError + Send + Sync>) -> Report<H> {
+    pub fn new(self, error: Box<dyn StdError + Send + Sync>) -> Report {
         Report::from_boxed(error)
     }
 }
@@ -122,16 +116,12 @@ impl Boxed {
 mod test {
     use super::*;
     use crate::eyre;
+    use crate::EyreHandler;
     use std::num::ParseIntError;
 
     struct NonDefaultHandler;
 
     impl EyreHandler for NonDefaultHandler {
-        #[allow(unused_variables)]
-        fn default(error: &(dyn StdError + 'static)) -> Self {
-            Self
-        }
-
         fn debug(
             &self,
             _error: &(dyn StdError + 'static),
@@ -145,7 +135,7 @@ mod test {
         s.parse::<i32>()
     }
 
-    fn _throw_error() -> Result<(), Report<NonDefaultHandler>> {
+    fn _throw_error() -> Result<(), Report> {
         match _parse("abc") {
             Ok(_) => Ok(()),
             Err(e) => Err(eyre!(e).wrap_err("try parsing an actual number")),

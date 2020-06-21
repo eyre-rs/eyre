@@ -399,6 +399,7 @@ pub trait StdError: Debug + Display {
 pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interopt with `anyhow`
 pub use eyre as anyhow;
+use once_cell::sync::OnceCell;
 #[doc(hidden)]
 pub use DefaultHandler as DefaultContext;
 #[doc(hidden)]
@@ -499,11 +500,55 @@ pub use WrapErr as Context;
 ///     # Ok(())
 /// }
 /// ```
-pub struct Report<H = DefaultHandler>
-where
-    H: EyreHandler,
-{
-    inner: ManuallyDrop<Box<ErrorImpl<(), H>>>,
+pub struct Report {
+    inner: ManuallyDrop<Box<ErrorImpl<()>>>,
+}
+
+type ErrorHook =
+    Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
+
+static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+
+///
+pub fn set_hook(hook: ErrorHook) -> Result<(), Box<dyn StdError + Send + Sync + 'static>> {
+    HOOK.set(hook)
+        .map_err(|_| "unable to set global hook".into())
+}
+
+fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
+    HOOK.get_or_init(|| Box::new(DefaultHandler::default_with))(error)
+}
+
+impl dyn EyreHandler {
+    ///
+    pub fn is<T: EyreHandler>(&self) -> bool {
+        // Get `TypeId` of the type this function is instantiated with.
+        let t = core::any::TypeId::of::<T>();
+
+        // Get `TypeId` of the type in the trait object (`self`).
+        let concrete = self.type_id();
+
+        // Compare both `TypeId`s on equality.
+        t == concrete
+    }
+
+    ///
+    pub fn downcast_ref<T: EyreHandler>(&self) -> Option<&T> {
+        if self.is::<T>() {
+            unsafe { Some(&*(self as *const dyn EyreHandler as *const T)) }
+        } else {
+            None
+        }
+    }
+
+    ///
+    pub fn downcast_mut<T: EyreHandler>(&mut self) -> Option<&mut T> {
+        if self.is::<T>() {
+            unsafe { Some(&mut *(self as *mut dyn EyreHandler as *mut T)) }
+        } else {
+            None
+        }
+    }
 }
 
 /// Error Report Handler trait for customizing `eyre::Report`
@@ -565,64 +610,7 @@ where
 /// type Report = eyre::Report<Handler>;
 /// type Result<T, E = eyre::Report<Handler>> = core::result::Result<T, E>;
 /// ```
-pub trait EyreHandler: Sized + Send + Sync + 'static {
-    /// Default construct a `Handler` when constructing a `Report`.
-    ///
-    /// This method provides a reference to the error being wrapped to support conditional
-    /// capturing of context like `backtrace` depending on whether the source error already
-    /// captured one.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use backtrace::Backtrace;
-    /// use eyre::EyreHandler;
-    /// # use eyre::Chain;
-    /// use std::error::Error;
-    ///
-    /// pub struct Handler {
-    ///     backtrace: Backtrace,
-    /// }
-    ///
-    /// impl EyreHandler for Handler {
-    /// #     #[allow(unused_variables)]
-    ///     fn default(error: &(dyn Error + 'static)) -> Self {
-    ///         let backtrace = Backtrace::new();
-    ///
-    ///         Self { backtrace }
-    ///     }
-    ///
-    ///     // ...
-    /// #     fn debug(
-    /// #         &self,
-    /// #         error: &(dyn Error + 'static),
-    /// #         f: &mut core::fmt::Formatter<'_>,
-    /// #     ) -> core::fmt::Result {
-    /// #         use core::fmt::Write as _;
-    /// #         if f.alternate() {
-    /// #             return core::fmt::Debug::fmt(error, f);
-    /// #         }
-    /// #         write!(f, "{}", error)?;
-    /// #         if let Some(cause) = error.source() {
-    /// #             write!(f, "\n\nCaused by:")?;
-    /// #             let multiple = cause.source().is_some();
-    /// #             for (n, error) in Chain::new(cause).enumerate() {
-    /// #                 writeln!(f)?;
-    /// #                 if multiple {
-    /// #                     write!(indenter::indented(f).ind(n), "{}", error)?;
-    /// #                 } else {
-    /// #                     write!(indenter::indented(f), "{}", error)?;
-    /// #                 }
-    /// #             }
-    /// #         }
-    /// #         let backtrace = &self.backtrace;
-    /// #         write!(f, "\n\nStack backtrace:\n{:?}", backtrace)?;
-    /// #         Ok(())
-    /// #     }
-    /// }
-    /// ```
-    fn default(err: &(dyn StdError + 'static)) -> Self;
-
+pub trait EyreHandler: core::any::Any + Send + Sync {
     /// Define the report format
     ///
     /// Used to override the report format of `eyre::Report`
@@ -715,6 +703,15 @@ pub struct DefaultHandler {
     backtrace: Option<Backtrace>,
 }
 
+impl DefaultHandler {
+    #[allow(unused_variables)]
+    fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
+        let backtrace = backtrace_if_absent!(error);
+
+        Box::new(Self { backtrace })
+    }
+}
+
 impl core::fmt::Debug for DefaultHandler {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("DefaultHandler")
@@ -730,13 +727,6 @@ impl core::fmt::Debug for DefaultHandler {
 }
 
 impl EyreHandler for DefaultHandler {
-    #[allow(unused_variables)]
-    fn default(error: &(dyn StdError + 'static)) -> Self {
-        let backtrace = backtrace_if_absent!(error);
-
-        Self { backtrace }
-    }
-
     fn debug(
         &self,
         error: &(dyn StdError + 'static),
@@ -855,7 +845,7 @@ pub struct Chain<'a> {
 ///     Ok(())
 /// }
 /// ```
-pub type Result<T, E = Report<DefaultHandler>> = core::result::Result<T, E>;
+pub type Result<T, E = Report> = core::result::Result<T, E>;
 
 /// Provides the `wrap_err` method for `Result`.
 ///
@@ -1022,29 +1012,26 @@ pub type Result<T, E = Report<DefaultHandler>> = core::result::Result<T, E>;
 ///         # panic!("expected downcast to succeed");
 ///     }
 ///     ```
-pub trait WrapErr<T, E, H>: context::private::Sealed<H>
-where
-    H: EyreHandler,
-{
+pub trait WrapErr<T, E>: context::private::Sealed {
     /// Wrap the error value with a new adhoc error
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report<H>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Wrap the error value with a new adhoc error that is evaluated lazily
     /// only once an error does occur.
-    fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report<H>>
+    fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
     /// Compatibility re-export of wrap_err for interopt with `anyhow`
-    fn context<D>(self, msg: D) -> Result<T, Report<H>>
+    fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility re-export of wrap_err_with for interopt with `anyhow`
-    fn with_context<D, F>(self, f: F) -> Result<T, Report<H>>
+    fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
@@ -1093,30 +1080,27 @@ where
 ///         .ok_or_else(|| eyre!("the thing wasnt in the list"))
 /// }
 /// ```
-pub trait ContextCompat<T, H>: context::private::Sealed<H>
-where
-    H: EyreHandler,
-{
+pub trait ContextCompat<T>: context::private::Sealed {
     /// Compatibility version of `wrap_err` for creating new errors with new source on `Option`
     /// when porting from `anyhow`
-    fn context<D>(self, msg: D) -> Result<T, Report<H>>
+    fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility version of `wrap_err_with` for creating new errors with new source on `Option`
     /// when porting from `anyhow`
-    fn with_context<D, F>(self, f: F) -> Result<T, Report<H>>
+    fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
     /// Compatibility re-export of `context` for porting from `anyhow` to `eyre`
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report<H>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility re-export of `with_context` for porting from `anyhow` to `eyre`
-    fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report<H>>
+    fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
@@ -1125,11 +1109,8 @@ where
 // Not public API. Referenced by macro-generated code.
 #[doc(hidden)]
 pub mod private {
-    use crate::{EyreHandler, Report};
+    use crate::Report;
     use core::fmt::{Debug, Display};
-
-    //     #[cfg(backtrace)]
-    //     use std::backtrace::Backtrace;
 
     pub use core::result::Result::Err;
 
@@ -1141,9 +1122,8 @@ pub mod private {
         pub use crate::kind::BoxedKind;
     }
 
-    pub fn new_adhoc<M, H>(message: M) -> Report<H>
+    pub fn new_adhoc<M>(message: M) -> Report
     where
-        H: EyreHandler,
         M: Display + Debug + Send + Sync + 'static,
     {
         Report::from_adhoc(message)

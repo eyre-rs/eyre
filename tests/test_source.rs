@@ -33,7 +33,7 @@ fn test_literal_source() {
 #[test]
 fn test_variable_source() {
     let msg = "oh no!";
-    let error: Report = eyre!(msg);
+    let error = eyre!(msg);
     assert!(error.source().is_none());
 
     let msg = msg.to_owned();

@@ -3,7 +3,7 @@ mod drop;
 
 use self::common::*;
 use self::drop::{DetectDrop, Flag};
-use eyre::{DefaultContext, Report};
+use eyre::Report;
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;
@@ -90,7 +90,7 @@ fn test_large_alignment() {
 
     impl StdError for LargeAlignedError {}
 
-    let error: Report<DefaultContext> = Report::new(LargeAlignedError("oh no!"));
+    let error = Report::new(LargeAlignedError("oh no!"));
     assert_eq!(
         "oh no!",
         error.downcast_ref::<LargeAlignedError>().unwrap().0
