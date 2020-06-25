@@ -70,7 +70,7 @@
     while_true
 )]
 use ansi_term::{
-    Color::{Cyan, Red},
+    Color::{Cyan, Purple, Red},
     Style,
 };
 use std::env;
@@ -181,7 +181,12 @@ impl Frame<'_> {
                 .metadata
                 .line()
                 .map_or("<unknown line>".to_owned(), |x| x.to_string());
-            write!(f, "\n    at {}:{}", file, lineno)?;
+            write!(
+                f,
+                "\n    at {}:{}",
+                Purple.paint(file),
+                Purple.paint(lineno)
+            )?;
         } else {
             write!(f, "\n    at <unknown source file>")?;
         }
@@ -202,20 +207,24 @@ impl Frame<'_> {
             e @ Err(_) => e.unwrap(),
         };
 
+        use std::fmt::Write;
+
         // Extract relevant lines.
         let reader = BufReader::new(file);
         let start_line = lineno - 2.min(lineno - 1);
         let surrounding_src = reader.lines().skip(start_line as usize - 1).take(5);
         let bold = Style::new().bold();
+        let mut buf = String::new();
         for (line, cur_line_no) in surrounding_src.zip(start_line..) {
             if cur_line_no == lineno {
                 write!(
-                    f,
-                    "\n{:>8}{}{}",
-                    bold.paint(cur_line_no.to_string()),
-                    bold.paint(" > "),
-                    bold.paint(line.unwrap())
+                    &mut buf,
+                    "{:>8} > {}",
+                    cur_line_no.to_string(),
+                    line.unwrap()
                 )?;
+                write!(f, "\n{}", bold.paint(&buf))?;
+                buf.clear();
             } else {
                 write!(f, "\n{:>8} │ {}", cur_line_no, line.unwrap())?;
             }
