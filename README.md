@@ -52,6 +52,24 @@ tracing integration to cut down on unused dependencies:
 color-eyre = { version = "0.4", default-features = false }
 ```
 
+### Disabling SpanTrace capture by default
+
+color-eyre defaults to capturing span traces. This is because `SpanTrace`
+capture is significantly cheaper than `Backtrace` capture. However, like
+backtraces, span traces are most useful for debugging applications, and it's
+not uncommon to want to disable span trace capture by default to keep noise out
+of error messages intended for users of an application rather than the
+developer.
+
+To disable span trace capture you must explicitly set one of the env variables
+that regulate `SpanTrace` capture to `"0"`:
+
+```rust
+if std::env::var("RUST_SPANTRACE").is_err() {
+    std::env::set_var("RUST_SPANTRACE", "0");
+}
+```
+
 ### Improving perf on debug builds
 
 In debug mode `color-eyre` behaves noticably worse than `eyre`. This is caused
