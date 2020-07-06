@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.5.0" # remember to update html_root_url
+version = "0.6.0" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -9,10 +9,6 @@ repository = "https://github.com/yaahc/eyre"
 documentation = "https://docs.rs/eyre"
 readme = "README.md"
 categories = ["rust-patterns"]
-
-[features]
-default = ["std"]
-std = []
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
@@ -24,6 +20,7 @@ anyhow = "1.0.28"
 
 [dependencies]
 indenter = "0.3.0"
+once_cell = "1.4.0"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

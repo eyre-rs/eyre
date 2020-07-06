@@ -1,5 +1,5 @@
 use crate::error::ContextError;
-use crate::{ContextCompat, EyreHandler, Report, StdError, WrapErr};
+use crate::{ContextCompat, Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]
@@ -8,22 +8,17 @@ use std::backtrace::Backtrace;
 mod ext {
     use super::*;
 
-    pub trait StdError<H>
-    where
-        H: EyreHandler,
-    {
-        fn ext_report<D>(self, msg: D) -> Report<H>
+    pub trait StdError {
+        fn ext_report<D>(self, msg: D) -> Report
         where
             D: Display + Send + Sync + 'static;
     }
 
-    #[cfg(feature = "std")]
-    impl<E, H> StdError<H> for E
+    impl<E> StdError for E
     where
-        H: EyreHandler,
         E: std::error::Error + Send + Sync + 'static,
     {
-        fn ext_report<D>(self, msg: D) -> Report<H>
+        fn ext_report<D>(self, msg: D) -> Report
         where
             D: Display + Send + Sync + 'static,
         {
@@ -31,11 +26,8 @@ mod ext {
         }
     }
 
-    impl<H> StdError<H> for Report<H>
-    where
-        H: EyreHandler,
-    {
-        fn ext_report<D>(self, msg: D) -> Report<H>
+    impl StdError for Report {
+        fn ext_report<D>(self, msg: D) -> Report
         where
             D: Display + Send + Sync + 'static,
         {
@@ -44,19 +36,18 @@ mod ext {
     }
 }
 
-impl<T, E, H> WrapErr<T, E, H> for Result<T, E>
+impl<T, E> WrapErr<T, E> for Result<T, E>
 where
-    H: EyreHandler,
-    E: ext::StdError<H> + Send + Sync + 'static,
+    E: ext::StdError + Send + Sync + 'static,
 {
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report<H>>
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
     {
         self.map_err(|error| error.ext_report(msg))
     }
 
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<H>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -64,14 +55,14 @@ where
         self.map_err(|error| error.ext_report(msg()))
     }
 
-    fn context<D>(self, msg: D) -> Result<T, Report<H>>
+    fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
     {
         self.wrap_err(msg)
     }
 
-    fn with_context<D, F>(self, msg: F) -> Result<T, Report<H>>
+    fn with_context<D, F>(self, msg: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -80,18 +71,15 @@ where
     }
 }
 
-impl<T, H> ContextCompat<T, H> for Option<T>
-where
-    H: EyreHandler,
-{
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report<H>>
+impl<T> ContextCompat<T> for Option<T> {
+    fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
     {
         self.context(msg)
     }
 
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report<H>>
+    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -99,14 +87,14 @@ where
         self.with_context(msg)
     }
 
-    fn context<D>(self, msg: D) -> Result<T, Report<H>>
+    fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
     {
         self.ok_or_else(|| Report::from_display(msg))
     }
 
-    fn with_context<D, F>(self, msg: F) -> Result<T, Report<H>>
+    fn with_context<D, F>(self, msg: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
@@ -152,9 +140,8 @@ where
     }
 }
 
-impl<D, H> StdError for ContextError<D, Report<H>>
+impl<D> StdError for ContextError<D, Report>
 where
-    H: EyreHandler,
     D: Display,
 {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
@@ -185,8 +172,8 @@ impl Write for Quoted<&mut fmt::Formatter<'_>> {
 pub(crate) mod private {
     use super::*;
 
-    pub trait Sealed<H: EyreHandler> {}
+    pub trait Sealed {}
 
-    impl<T, E, H: EyreHandler> Sealed<H> for Result<T, E> where E: ext::StdError<H> {}
-    impl<T, H: EyreHandler> Sealed<H> for Option<T> {}
+    impl<T, E> Sealed for Result<T, E> where E: ext::StdError {}
+    impl<T> Sealed for Option<T> {}
 }

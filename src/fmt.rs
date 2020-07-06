@@ -1,11 +1,7 @@
 use crate::error::ErrorImpl;
-use crate::EyreHandler;
 use core::fmt;
 
-impl<H> ErrorImpl<(), H>
-where
-    H: EyreHandler,
-{
+impl ErrorImpl<()> {
     pub(crate) fn display(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.handler
             .as_ref()

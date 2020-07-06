@@ -12,21 +12,16 @@ This library provides [`eyre::Report`][Report], a trait object based
 error handling type for easy idiomatic error handling and reporting in Rust
 applications.
 
-This crate is a fork of [`anyhow`] by @dtolnay with a support for customized
-`Reports`. For more details on customization checkout the docs on
+This crate is a fork of [`anyhow`]  with a support for customized
+error reports. For more details on customization checkout the docs on
 [`eyre::EyreHandler`].
-
-```toml
-[dependencies]
-eyre = "0.5"
-```
 
 ## Custom Report Handlers
 
-The heart of this crate is its ability to swap out the Handler type to change
+The heart of this crate is it's ability to swap out the Handler type to change
 what information is carried alongside errors and how the end report is
 formatted. This crate is meant to be used alongside companion crates that
-customize its behavior. Below is a list of known crates that export report
+customize it's behavior. Below is a list of known crates that export report
 handlers for eyre and short summaries of what features they provide.
 
 - [`stable-eyre`]: Switches the backtrace type from `std`'s to `backtrace-rs`'s
@@ -36,11 +31,11 @@ handlers for eyre and short summaries of what features they provide.
   `tracing_error::SpanTrace`. Provides a `Help` trait for attaching warnings
   and suggestions to error reports. The end report is then pretty printed with
   the help of [`color-backtrace`], [`color-spantrace`], and `ansi_term`. Check
-  out the README on [`color-eyre`] for screenshots of the report format.
+  out the README on [`color-eyre`] for details on the report format.
 - [`simple-eyre`]: A minimal `EyreHandler` that captures no additional
   information, for when you do not wish to capture `Backtrace`s with errors.
-- [`jane-eyre`]: A a report handler crate that exists purely for the pun.
-Currently just re-exports `color-eyre`.
+- [`jane-eyre`]: A report handler crate that exists purely for the pun.
+  Currently just re-exports `color-eyre`.
 
 ## Details
 
@@ -153,7 +148,7 @@ Cargo.toml. A global allocator is required.
 
 ```toml
 [dependencies]
-eyre = { version = "0.5", default-features = false }
+eyre = { version = "0.6", default-features = false }
 ```
 
 Since the `?`-based error conversions would normally rely on the
@@ -172,10 +167,11 @@ the necessary improvements for this to be possible as part of [RFC 2504].
 
 ## Comparison to thiserror
 
-Use Eyre if you don't care what error type your functions return, you just
-want it to be easy. This is common in application code. Use [thiserror] if you
-are a library that wants to design your own dedicated error type(s) so that on
-failures the caller gets exactly the information that you choose.
+Use `eyre` if you don't think you'll do anything with an error other than
+report it. This is common in application code. Use `thiserror` if you think
+you need an error type that can be handled via match or reported. This is
+common in library crates where you don't know how your users will handle
+your errors.
 
 [thiserror]: https://github.com/dtolnay/thiserror
 
@@ -183,40 +179,7 @@ failures the caller gets exactly the information that you choose.
 
 This crate does its best to be usable as a drop in replacement of `anyhow` and
 vice-versa by `re-exporting` all of the renamed APIs with the names used in
-`anyhow`.
-
-There are two main incompatibilities that you might encounter when porting a
-codebase from `anyhow` to `eyre`:
-
-- type inference errors when using `eyre!`
-- `.context` not being implemented for `Option`
-
-#### Type Inference Errors
-
-The type inference issue is caused by the generic parameter, which isn't
-present in `anyhow::Error`. Specifically, the following works in anyhow:
-
-```rust
-use anyhow::anyhow;
-
-// Works
-let val = get_optional_val().ok_or_else(|| anyhow!("failed to get value")).unwrap_err();
-```
-
-Where as with `eyre!` this will fail due to being unable to infer the type for
-the Handler parameter. The solution to this problem, should you encounter it,
-is to give the compiler a hint for what type it should be resolving to, either
-via your return type or a type annotation.
-
-```rust,compile_fail
-use eyre::eyre;
-
-// Broken
-let val = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
-
-// Works
-let val: Report = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
-```
+`anyhow`, though there are some differences still.
 
 #### `Context` and `Option`
 
@@ -246,7 +209,7 @@ let opt: Option<()> = None;
 let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
 ```
 
-However, to help with porting we do provide a `ContextCompat` trait which
+**NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
 implements `context` for options which you can import to make existing
 `.context` calls compile.
 

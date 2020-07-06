@@ -1,7 +1,6 @@
 mod drop;
 
 use self::drop::{DetectDrop, Flag};
-use eyre::DefaultContext;
 use eyre::Report;
 use std::marker::Unpin;
 use std::mem;
@@ -28,6 +27,6 @@ fn test_autotraits() {
 #[test]
 fn test_drop() {
     let has_dropped = Flag::new();
-    drop(Report::<DefaultContext>::new(DetectDrop::new(&has_dropped)));
+    drop(Report::new(DetectDrop::new(&has_dropped)));
     assert!(has_dropped.get());
 }

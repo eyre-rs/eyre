@@ -63,25 +63,21 @@ impl Display for NoneError {
 
 impl StdError for NoneError {}
 
-#[cfg(feature = "std")]
 #[repr(transparent)]
 pub(crate) struct BoxedError(pub(crate) Box<dyn StdError + Send + Sync>);
 
-#[cfg(feature = "std")]
 impl Debug for BoxedError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Debug::fmt(&self.0, f)
     }
 }
 
-#[cfg(feature = "std")]
 impl Display for BoxedError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Display::fmt(&self.0, f)
     }
 }
 
-#[cfg(feature = "std")]
 impl StdError for BoxedError {
     #[cfg(backtrace)]
     fn backtrace(&self) -> Option<&crate::backtrace::Backtrace> {
