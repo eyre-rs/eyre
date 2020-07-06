@@ -2,16 +2,16 @@
 //! error handling type for easy idiomatic error handling and reporting in Rust
 //! applications.
 //!
-//! This crate is a fork of [`anyhow`] by @dtolnay with a support for customized
-//! `Reports`. For more details on customization checkout the docs on
+//! This crate is a fork of [`anyhow`]  with a support for customized
+//! error reports. For more details on customization checkout the docs on
 //! [`eyre::EyreHandler`].
 //!
 //! ## Custom Report Handlers
 //!
-//! The heart of this crate is its ability to swap out the Handler type to change
+//! The heart of this crate is it's ability to swap out the Handler type to change
 //! what information is carried alongside errors and how the end report is
 //! formatted. This crate is meant to be used alongside companion crates that
-//! customize its behavior. Below is a list of known crates that export report
+//! customize it's behavior. Below is a list of known crates that export report
 //! handlers for eyre and short summaries of what features they provide.
 //!
 //! - [`stable-eyre`]: Switches the backtrace type from `std`'s to `backtrace-rs`'s
@@ -21,11 +21,11 @@
 //!   `tracing_error::SpanTrace`. Provides a `Help` trait for attaching warnings
 //!   and suggestions to error reports. The end report is then pretty printed with
 //!   the help of [`color-backtrace`], [`color-spantrace`], and `ansi_term`. Check
-//!   out the README on [`color-eyre`] for screenshots of the report format.
+//!   out the README on [`color-eyre`] for details on the report format.
 //! - [`simple-eyre`]: A minimal `EyreHandler` that captures no additional
 //!   information, for when you do not wish to capture `Backtrace`s with errors.
-//! - [`jane-eyre`]: A a report handler crate that exists purely for the pun.
-//! Currently just re-exports `color-eyre`.
+//! - [`jane-eyre`]: A report handler crate that exists purely for the pun.
+//!   Currently just re-exports `color-eyre`.
 //!
 //! ## Details
 //!
@@ -225,10 +225,11 @@
 //!
 //! ## Comparison to thiserror
 //!
-//! Use Eyre if you don't care what error type your functions return, you just
-//! want it to be easy. This is common in application code. Use [thiserror] if you
-//! are a library that wants to design your own dedicated error type(s) so that on
-//! failures the caller gets exactly the information that you choose.
+//! Use `eyre` if you don't think you'll do anything with an error other than
+//! report it. This is common in application code. Use `thiserror` if you think
+//! you need an error type that can be handled via match or reported. This is
+//! common in library crates where you don't know how your users will handle
+//! your errors.
 //!
 //! [thiserror]: https://github.com/dtolnay/thiserror
 //!
@@ -236,42 +237,7 @@
 //!
 //! This crate does its best to be usable as a drop in replacement of `anyhow` and
 //! vice-versa by `re-exporting` all of the renamed APIs with the names used in
-//! `anyhow`.
-//!
-//! There are two main incompatibilities that you might encounter when porting a
-//! codebase from `anyhow` to `eyre`:
-//!
-//! - type inference errors when using `eyre!`
-//! - `.context` not being implemented for `Option`
-//!
-//! #### Type Inference Errors
-//!
-//! The type inference issue is caused by the generic parameter, which isn't
-//! present in `anyhow::Error`. Specifically, the following works in anyhow:
-//!
-//! ```rust
-//! # fn get_optional_val() -> Option<()> { None };
-//! use anyhow::anyhow;
-//!
-//! // Works
-//! let val = get_optional_val().ok_or_else(|| anyhow!("failed to get value")).unwrap_err();
-//! ```
-//!
-//! Where as with `eyre!` this will fail due to being unable to infer the type for
-//! the Handler parameter. The solution to this problem, should you encounter it,
-//! is to give the compiler a hint for what type it should be resolving to, either
-//! via your return type or a type annotation.
-//!
-//! ```rust,compile_fail
-//! use eyre::eyre;
-//!
-//! # fn get_optional_val() -> Option<()> { None };
-//! // Broken
-//! let val = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
-//!
-//! // Works
-//! let val: Report = get_optional_val().ok_or_else(|| eyre!("failed to get value")).unwrap();
-//! ```
+//! `anyhow`, though there are some differences still.
 //!
 //! #### `Context` and `Option`
 //!
@@ -301,7 +267,7 @@
 //! let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
 //! ```
 //!
-//! However, to help with porting we do provide a `ContextCompat` trait which
+//! **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
 //! implements `context` for options which you can import to make existing
 //! `.context` calls compile.
 //!
@@ -449,27 +415,11 @@ pub use WrapErr as Context;
 /// ```
 ///
 /// If none of the built-in representations are appropriate and you would prefer
-/// to render the error and its cause chain yourself, it can be done something
-/// like this:
+/// to render the error and its cause chain yourself, it can be done by defining
+/// your own [`EyreHandler`] and [`hook`] to use it.
 ///
-/// ```
-/// use eyre::{WrapErr, Result};
-///
-/// fn main() {
-///     if let Err(err) = try_main() {
-///         eprintln!("ERROR: {}", err);
-///         err.chain().skip(1).for_each(|cause| eprintln!("because: {}", cause));
-///         std::process::exit(1);
-///     }
-/// }
-///
-/// fn try_main() -> Result<()> {
-///     # const IGNORE: &str = stringify! {
-///     ...
-///     # };
-///     # Ok(())
-/// }
-/// ```
+/// [`EyreHandler`]: trait.EyreHandler.html
+/// [`hook`]: fn.set_hook.html
 pub struct Report {
     inner: ManuallyDrop<Box<ErrorImpl<()>>>,
 }
@@ -493,6 +443,100 @@ impl StdError for InstallError {}
 
 /// Install the provided error hook for constructing EyreHandlers when converting
 /// Errors to Reports
+///
+/// # Details
+///
+/// To customize the format and content of error reports from `eyre` you must
+/// first define a new `EyreHandler` type to capture and store the extra context
+/// and to define the format of how to display the chain of errors and this
+/// stored context. Once this type has been defined you must also define a global
+/// hook used to construct these handlers whenever `Report`s are constructed.
+///
+/// # Examples
+///
+/// ```rust,should_panic
+/// use backtrace::Backtrace;
+/// use eyre::EyreHandler;
+/// use std::error::Error;
+/// use std::{fmt, iter};
+///
+/// fn main() -> eyre::Result<()> {
+///     // Install our custom eyre report hook for constructing our custom Handlers
+///     install().unwrap();
+///
+///     // construct a report with, hopefully, our custom handler!
+///     let mut report = eyre::eyre!("hello from custom error town!");
+///
+///     // manually set the custom msg for this report after it has been constructed
+///     if let Some(handler) = report.handler_mut().downcast_mut::<Handler>() {
+///         handler.custom_msg = Some("you're the best users, you know that right???");
+///     }
+///
+///     // print that shit!!
+///     Err(report)
+/// }
+///
+/// // define a handler that captures backtraces unless told not to
+/// fn install() -> Result<(), impl Error> {
+///     let capture_backtrace = std::env::var("RUST_BACKWARDS_TRACE")
+///         .map(|val| val != "0")
+///         .unwrap_or(true);
+///
+///     let hook = Hook { capture_backtrace };
+///
+///     eyre::set_hook(Box::new(move |e| Box::new(hook.make_handler(e))))
+/// }
+///
+/// struct Hook {
+///     capture_backtrace: bool,
+/// }
+///
+/// impl Hook {
+///     fn make_handler(&self, _error: &(dyn Error + 'static)) -> Handler {
+///         let backtrace = if self.capture_backtrace {
+///             Some(Backtrace::new())
+///         } else {
+///             None
+///         };
+///
+///         Handler {
+///             backtrace,
+///             custom_msg: None,
+///         }
+///     }
+/// }
+///
+/// struct Handler {
+///     // custom configured backtrace capture
+///     backtrace: Option<Backtrace>,
+///     // customizable message payload associated with reports
+///     custom_msg: Option<&'static str>,
+/// }
+///
+/// impl EyreHandler for Handler {
+///     fn debug(&self, error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>) -> fmt::Result {
+///         if f.alternate() {
+///             return fmt::Debug::fmt(error, f);
+///         }
+///
+///         let errors = iter::successors(Some(error), |error| error.source());
+///
+///         for (ind, error) in errors.enumerate() {
+///             write!(f, "\n{:>4}: {}", ind, error)?;
+///         }
+///
+///         if let Some(backtrace) = self.backtrace.as_ref() {
+///             writeln!(f, "\n\nBacktrace:\n{:?}", backtrace)?;
+///         }
+///
+///         if let Some(msg) = self.custom_msg.as_ref() {
+///             writeln!(f, "\n\n{}", msg)?;
+///         }
+///
+///         Ok(())
+///     }
+/// }
+/// ```
 pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
     HOOK.set(hook).map_err(|_| InstallError)
 }
@@ -717,7 +761,7 @@ pub struct Chain<'a> {
     state: crate::chain::ChainState<'a>,
 }
 
-/// `Result<T, Error>`
+/// type alias for `Result<T, Report>`
 ///
 /// This is a reasonable return type to use throughout your application but also for `fn main`; if
 /// you do, failures will be printed along with a backtrace if one was captured.
