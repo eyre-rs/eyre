@@ -1,14 +1,17 @@
-use color_eyre::{eyre::Report, eyre::WrapErr, Section};
-use tracing::{info, instrument};
+use tracing::instrument;
 
 #[instrument]
-fn main() -> Result<(), Report> {
+fn main() {
     #[cfg(feature = "capture-spantrace")]
     install_tracing();
+    color_eyre::install().unwrap();
 
-    color_eyre::install()?;
+    do_thing(42);
+}
 
-    Ok(read_config()?)
+#[instrument]
+fn do_thing(thing: u32) {
+    panic!("some real basic stuff went wrong")
 }
 
 #[cfg(feature = "capture-spantrace")]
@@ -27,17 +30,4 @@ fn install_tracing() {
         .with(fmt_layer)
         .with(ErrorLayer::default())
         .init();
-}
-
-#[instrument]
-fn read_file(path: &str) -> Result<(), Report> {
-    info!("Reading file");
-    Ok(std::fs::read_to_string(path).map(drop)?)
-}
-
-#[instrument]
-fn read_config() -> Result<(), Report> {
-    read_file("fake_file")
-        .wrap_err("Unable to read config")
-        .suggestion("try using a file that exists next time")
 }

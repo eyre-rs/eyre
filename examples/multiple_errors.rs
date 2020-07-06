@@ -1,7 +1,8 @@
-use color_eyre::{eyre::eyre, Help, Report};
+use color_eyre::{eyre::eyre, eyre::Report, Section};
 use thiserror::Error;
 
 fn main() -> Result<(), Report> {
+    color_eyre::install()?;
     let errors = get_errors();
     join_errors(errors)
 }

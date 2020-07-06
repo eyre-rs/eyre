@@ -1,4 +1,4 @@
-use color_eyre::{eyre::WrapErr, BacktracePrinter, Help, Report};
+use color_eyre::{eyre::Report, eyre::WrapErr, Section};
 use tracing::{info, instrument};
 
 #[instrument]
@@ -7,23 +7,24 @@ fn main() -> Result<(), Report> {
     #[cfg(feature = "capture-spantrace")]
     install_tracing();
 
-    let printer = BacktracePrinter::new().add_frame_filter(Box::new(|frames| {
-        let filters = &["custom_filter::main"];
+    color_eyre::config::HookBuilder::default()
+        .add_frame_filter(Box::new(|frames| {
+            let filters = &["custom_filter::main"];
 
-        frames.retain(|frame| {
-            !filters.iter().any(|f| {
-                let name = if let Some(name) = frame.name.as_ref() {
-                    name.as_str()
-                } else {
-                    return true;
-                };
+            frames.retain(|frame| {
+                !filters.iter().any(|f| {
+                    let name = if let Some(name) = frame.name.as_ref() {
+                        name.as_str()
+                    } else {
+                        return true;
+                    };
 
-                name.starts_with(f)
-            })
-        });
-    }));
-
-    color_eyre::install(printer).unwrap();
+                    name.starts_with(f)
+                })
+            });
+        }))
+        .install()
+        .unwrap();
 
     Ok(read_config()?)
 }

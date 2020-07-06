@@ -1,6 +1,7 @@
 use color_eyre::{
+    eyre::Report,
     eyre::{eyre, WrapErr},
-    Help, Report, SectionExt,
+    Section, SectionExt,
 };
 use std::process::Command;
 use tracing::instrument;
@@ -31,6 +32,7 @@ impl Output for Command {
 fn main() -> Result<(), Report> {
     #[cfg(feature = "capture-spantrace")]
     install_tracing();
+    color_eyre::install()?;
 
     Ok(read_config().map(drop)?)
 }

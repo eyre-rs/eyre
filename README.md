@@ -26,19 +26,19 @@ Add the following to your toml file:
 
 ```toml
 [dependencies]
-color-eyre = "0.4"
+color-eyre = "0.5"
 ```
 
-And then import the type alias from color-eyre for [`eyre::Report`] or [`eyre::Result`].
+And install the panic and error report handlers:
 
 ```rust
-use color_eyre::Report;
+use color_eyre::eyre::Result;
 
-// or
+fn main() -> Result<()> {
+    color_eyre::install()?;
 
-fn example() -> color_eyre::Result<()> {
-    # Ok(())
     // ...
+    # Ok(())
 }
 ```
 
@@ -49,7 +49,7 @@ tracing integration to cut down on unused dependencies:
 
 ```toml
 [dependencies]
-color-eyre = { version = "0.4", default-features = false }
+color-eyre = { version = "0.5", default-features = false }
 ```
 
 ### Disabling SpanTrace capture by default
@@ -58,7 +58,6 @@ color-eyre defaults to capturing span traces. This is because `SpanTrace`
 capture is significantly cheaper than `Backtrace` capture. However, like
 backtraces, span traces are most useful for debugging applications, and it's
 not uncommon to want to disable span trace capture by default to keep noise out
-of error messages intended for users of an application rather than the
 developer.
 
 To disable span trace capture you must explicitly set one of the env variables
@@ -79,7 +78,7 @@ optimizations, this means that whether or not you're in debug mode doesn't
 matter much for how expensive backtrace capture is, it will always be in the
 10s of milliseconds to capture. A debug version of `backtrace::Backtrace`
 however isn't so lucky, and can take an order of magnitude more time to capture
-a backtrace compared to it's std counterpart.
+a backtrace compared to its std counterpart.
 
 Cargo [profile
 overrides](https://doc.rust-lang.org/cargo/reference/profiles.html#overrides)
@@ -98,7 +97,7 @@ opt-level = 3
 ### Multiple report format verbosity levels
 
 `color-eyre` provides 3 different report formats for how it formats the captured `SpanTrace`
-and `Backtrace`, minimal, short, and full. Take the below screenshots of the output produced by [`examples/usage.rs`]:
+and `Backtrace`, minimal, short, and full. Take the below snippets of the output produced by [`examples/usage.rs`]:
 
 ---
 
@@ -131,7 +130,7 @@ to contain `stderr` and `stdout` from a failed command, taken from
 [`examples/custom_section.rs`]:
 
 ```rust
-use color_eyre::{eyre::eyre, SectionExt, Help, Report};
+use color_eyre::{eyre::eyre, SectionExt, Help, eyre::Report};
 use std::process::Command;
 use tracing::instrument;
 
@@ -199,21 +198,6 @@ the `install` fn for setting up a custom `BacktracePrinter` with custom
 filters installed.
 
 For an example of how to setup custom filters, check out [`examples/custom_filter.rs`].
-
-## Explanation
-
-This crate works by defining a `Handler` type which implements
-[`eyre::EyreHandler`] and a pair of type aliases for setting this handler
-type as the parameter of [`eyre::Report`].
-
-```rust
-use color_eyre::Handler;
-
-pub type Report = eyre::Report<Handler>;
-pub type Result<T, E = Report> = core::result::Result<T, E>;
-```
-
-Please refer to the [`Handler`] type's docs for more details about its feature set.
 
 [`eyre`]: https://docs.rs/eyre
 [`tracing-error`]: https://docs.rs/tracing-error

@@ -1,14 +1,16 @@
 //! example for manually testing the perf of color-eyre in debug vs release
 
 use color_eyre::{
+    eyre::Report,
     eyre::{eyre, WrapErr},
-    Help, Report,
+    Section,
 };
 use tracing::instrument;
 
 fn main() -> Result<(), Report> {
     #[cfg(feature = "capture-spantrace")]
     install_tracing();
+    color_eyre::install()?;
 
     time_report();
 
