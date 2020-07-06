@@ -45,7 +45,7 @@
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.3")]
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.4")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
