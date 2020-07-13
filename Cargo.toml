@@ -1,6 +1,6 @@
 [package]
 name = "simple-eyre"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -14,5 +14,5 @@ One of the simplest error reporters one can build ontop of eyre, defining only a
 """
 
 [dependencies]
-eyre = "0.4.2"
+eyre = "0.6.0"
 indenter = "0.3.0"

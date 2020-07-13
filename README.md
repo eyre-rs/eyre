@@ -1,31 +1,39 @@
-Simple-Eyre
-===========
+## simple-eyre
 
 [![Latest Version](https://img.shields.io/crates/v/simple-eyre.svg)](https://crates.io/crates/simple-eyre)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/simple-eyre)
 
-This library provides a custom [`eyre::EyreContext`] type for usage with
-[`eyre`] that provides a minimal error report with no additional context.
-Essentially the minimal implementation of an error reporter.
+This library provides a custom [`eyre::EyreHandler`] type for usage with [`eyre`] that provides
+a minimal error report with no additional context. Essentially the minimal implementation of an
+error reporter.
+
+## Setup
+
+Add the following to your toml file:
 
 ```toml
 [dependencies]
-eyre = "0.4"
-simple-eyre = "0.2"
+simple-eyre = "0.3"
 ```
 
-## Example
+Then install the hook handler before constructing any `eyre::Report` types.
 
-```rust
-use eyre::{eyre, WrapErr};
-use simple_eyre::Report;
+# Example
+
+```rust,should_panic
+use simple_eyre::eyre::{eyre, WrapErr, Report};
 
 fn main() -> Result<(), Report> {
+    simple_eyre::install()?;
+
     let e: Report = eyre!("oh no this program is just bad!");
 
     Err(e).wrap_err("usage example successfully experienced a failure")
 }
 ```
+
+[`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
+[`eyre`]: https://docs.rs/eyre
 
 #### License
 
@@ -41,6 +49,3 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
 be dual licensed as above, without any additional terms or conditions.
 </sub>
-
-[`eyre::EyreContext`]: https://docs.rs/eyre/*/eyre/trait.EyreContext.html
-[`eyre`]: https://docs.rs/eyre
