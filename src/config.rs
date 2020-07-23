@@ -18,6 +18,7 @@ impl std::error::Error for InstallError {}
 
 /// A representation of a Frame from a Backtrace or a SpanTrace
 #[derive(Debug)]
+#[non_exhaustive]
 pub struct Frame {
     /// Frame index
     pub n: usize,
@@ -27,7 +28,6 @@ pub struct Frame {
     pub lineno: Option<u32>,
     /// source file path
     pub filename: Option<PathBuf>,
-    _private_ctor: (),
 }
 
 impl fmt::Display for Frame {
@@ -535,7 +535,6 @@ impl fmt::Display for BacktraceFormatter<'_> {
                 lineno: sym.lineno(),
                 filename: sym.filename().map(|x| x.into()),
                 n,
-                _private_ctor: (),
             })
             .collect();
 
