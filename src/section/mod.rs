@@ -1,5 +1,6 @@
 //! Helpers for adding custom sections to error reports
-use std::fmt::{self, Display, Write};
+use crate::writers::WriterExt;
+use std::fmt::{self, Display};
 
 pub(crate) mod help;
 
@@ -55,17 +56,10 @@ where
     B: Display + Send + Sync + 'static,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut headered = crate::writers::HeaderWriter {
-            inner: f,
-            header: &self.header,
-            started: false,
-        };
-
-        let mut headered = crate::writers::HeaderWriter {
-            inner: headered.ready(),
-            header: &"\n",
-            started: false,
-        };
+        use std::fmt::Write;
+        let mut headered = f.header(&self.header);
+        let headered = headered.ready();
+        let mut headered = headered.header("\n");
 
         let mut headered = headered.ready();
 

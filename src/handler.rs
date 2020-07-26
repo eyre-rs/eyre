@@ -1,6 +1,10 @@
 use crate::config::installed_printer;
 use crate::ColorExt;
-use crate::{section::help::HelpInfo, writers::HeaderWriter, Handler};
+use crate::{
+    section::help::HelpInfo,
+    writers::{EnvSection, WriterExt},
+    Handler,
+};
 use ansi_term::Color::*;
 use backtrace::Backtrace;
 use indenter::{indented, Format};
@@ -50,11 +54,7 @@ impl eyre::EyreHandler for Handler {
             write!(indented(f).ind(n), "{}", Red.make_intense().paint(&buf))?;
         }
 
-        let separated = &mut HeaderWriter {
-            inner: &mut *f,
-            header: &"\n\n",
-            started: false,
-        };
+        let mut separated = f.header("\n\n");
 
         for section in self
             .sections
@@ -73,12 +73,14 @@ impl eyre::EyreHandler for Handler {
         }
 
         #[cfg(feature = "capture-spantrace")]
+        let span_trace = self
+            .span_trace
+            .as_ref()
+            .or_else(|| get_deepest_spantrace(error));
+
+        #[cfg(feature = "capture-spantrace")]
         {
-            if let Some(span_trace) = self
-                .span_trace
-                .as_ref()
-                .or_else(|| get_deepest_spantrace(error))
-            {
+            if let Some(span_trace) = span_trace {
                 write!(
                     &mut separated.ready(),
                     "{}",
@@ -95,21 +97,28 @@ impl eyre::EyreHandler for Handler {
                 "{}",
                 fmted_bt
             )?;
-        } else if self
-            .sections
-            .iter()
-            .any(|s| !matches!(s, HelpInfo::Custom(_) | HelpInfo::Error(_)))
-        {
-            writeln!(f)?;
         }
+
+        let f = separated.ready();
+        let mut h = f.header("\n");
+        let mut f = h.in_progress();
 
         for section in self
             .sections
             .iter()
             .filter(|s| !matches!(s, HelpInfo::Custom(_) | HelpInfo::Error(_)))
         {
-            write!(f, "\n{}", section)?;
+            write!(&mut f, "{}", section)?;
+            f = h.ready();
         }
+
+        let env_section = EnvSection {
+            bt_captured: &self.backtrace.is_some(),
+            #[cfg(feature = "capture-spantrace")]
+            span_trace,
+        };
+
+        write!(&mut separated.ready(), "{}", env_section)?;
 
         Ok(())
     }
