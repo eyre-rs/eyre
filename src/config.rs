@@ -375,21 +375,21 @@ fn eyre_frame_filters(frames: &mut Vec<&Frame>) {
     });
 }
 
-fn install_panic_hook() {
-    std::panic::set_hook(Box::new(move |pi| {
-        if let Err(e) = print_panic_info(pi) {
-            // Panicking while handling a panic would send us into a deadlock,
-            // so we just print the error to stderr instead.
-            eprintln!("Error while printing panic: {:?}", e);
-        }
-    }))
+struct PanicPrinter<'a>(&'a std::panic::PanicInfo<'a>);
+
+impl fmt::Display for PanicPrinter<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        print_panic_info(self, f)
+    }
 }
 
-fn print_panic_info(pi: &std::panic::PanicInfo<'_>) -> std::io::Result<()> {
-    use std::io::Write;
+fn install_panic_hook() {
+    std::panic::set_hook(Box::new(|pi| eprintln!("{}", PanicPrinter(pi))))
+}
 
-    let stdout = std::io::stdout();
-    let mut out = stdout.lock();
+fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) -> fmt::Result {
+    let pi = printer.0;
+
     writeln!(out, "{}", Red.paint("The application panicked (crashed)."))?;
 
     // Print panic message.
@@ -418,19 +418,16 @@ fn print_panic_info(pi: &std::panic::PanicInfo<'_>) -> std::io::Result<()> {
     // Print some info on how to increase verbosity.
     if v == Verbosity::Minimal {
         write!(out, "\nBacktrace omitted.\n\nRun with ")?;
-        // out.set_color(&self.colors.env_var)?;
         write!(out, "RUST_BACKTRACE=1")?;
         writeln!(out, " environment variable to display it.")?;
     } else {
         // This text only makes sense if frames are displayed.
         write!(out, "\nRun with ")?;
-        // out.set_color(&self.colors.env_var)?;
         write!(out, "COLORBT_SHOW_HIDDEN=1")?;
         writeln!(out, " environment variable to disable frame filtering.")?;
     }
     if v <= Verbosity::Medium {
         write!(out, "Run with ")?;
-        // out.set_color(&self.colors.env_var)?;
         write!(out, "RUST_BACKTRACE=full")?;
         writeln!(out, " to include source snippets.")?;
     }
