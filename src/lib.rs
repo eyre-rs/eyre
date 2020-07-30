@@ -5,27 +5,27 @@
 //!
 //! `color_eyre` helps you build error reports that look like this:
 //!
-//! <pre><font color="#06989A"><b>color-eyre</b></font> on <font color="#75507B"><b> hooked</b></font> <font color="#CC0000"><b>[$!] </b></font>is <font color="#FF8700"><b>📦 v0.5.0</b></font> via <font color="#CC0000"><b>🦀 v1.44.0</b></font>
-//! <font color="#4E9A06"><b>❯</b></font> cargo run --example custom_section
-//! <font color="#4E9A06"><b>    Finished</b></font> dev [unoptimized + debuginfo] target(s) in 0.04s
-//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/custom_section`
+//! <pre><span style="color: #06989A"><b>color-eyre</b></span> on <span style="color: #75507B"><b> hooked</b></span> <span style="color: #CC0000"><b>[$!] </b></span>is <span style="color: #FF8700"><b>📦 v0.5.0</b></span> via <span style="color: #CC0000"><b>🦀 v1.44.0</b></span>
+//! <span style="color: #4E9A06"><b>❯</b></span> cargo run --example custom_section
+//! <span style="color: #4E9A06"><b>    Finished</b></span> dev [unoptimized + debuginfo] target(s) in 0.04s
+//! <span style="color: #4E9A06"><b>     Running</b></span> `target/debug/examples/custom_section`
 //! Error:
-//!    0: <font color="#F15D22">Unable to read config</font>
-//!    1: <font color="#F15D22">cmd exited with non-zero status code</font>
+//!    0: <span style="color: #F15D22">Unable to read config</span>
+//!    1: <span style="color: #F15D22">cmd exited with non-zero status code</span>
 //!
 //! Stderr:
 //!    cat: fake_file: No such file or directory
 //!
 //!   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //!
-//!    0: <font color="#F15D22">custom_section::output2</font> with <font color="#34E2E2">self=&quot;cat&quot; &quot;fake_file&quot;</font>
-//!       at <font color="#75507B">examples/custom_section.rs</font>:<font color="#75507B">14</font>
-//!    1: <font color="#F15D22">custom_section::read_file</font> with <font color="#34E2E2">path=&quot;fake_file&quot;</font>
-//!       at <font color="#75507B">examples/custom_section.rs</font>:<font color="#75507B">58</font>
-//!    2: <font color="#F15D22">custom_section::read_config</font>
-//!       at <font color="#75507B">examples/custom_section.rs</font>:<font color="#75507B">63</font>
+//!    0: <span style="color: #F15D22">custom_section::output2</span> with <span style="color: #34E2E2">self=&quot;cat&quot; &quot;fake_file&quot;</span>
+//!       at <span style="color: #75507B">examples/custom_section.rs</span>:<span style="color: #75507B">14</span>
+//!    1: <span style="color: #F15D22">custom_section::read_file</span> with <span style="color: #34E2E2">path=&quot;fake_file&quot;</span>
+//!       at <span style="color: #75507B">examples/custom_section.rs</span>:<span style="color: #75507B">58</span>
+//!    2: <span style="color: #F15D22">custom_section::read_config</span>
+//!       at <span style="color: #75507B">examples/custom_section.rs</span>:<span style="color: #75507B">63</span>
 //!
-//! <font color="#34E2E2">Suggestion</font>: try using a file that exists next time</pre>
+//! <span style="color: #34E2E2">Suggestion</span>: try using a file that exists next time</pre>
 //!
 //! ## Setup
 //!
@@ -111,56 +111,56 @@
 //! Running `cargo run --example usage` without `RUST_LIB_BACKTRACE` set will produce a minimal
 //! report like this:
 //!
-//! <pre><font color="#06989A"><b>color-eyre</b></font> on <font color="#75507B"><b> hooked</b></font> <font color="#CC0000"><b>[$!] </b></font>is <font color="#FF8700"><b>📦 v0.5.0</b></font> via <font color="#CC0000"><b>🦀 v1.44.0</b></font> took <font color="#C4A000"><b>2s</b></font>
-//! <font color="#CC0000"><b>❯</b></font> cargo run --example usage
-//! <font color="#4E9A06"><b>    Finished</b></font> dev [unoptimized + debuginfo] target(s) in 0.04s
-//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/usage`
-//! <font color="#A1A1A1">Jul 05 19:15:58.026 </font><font color="#4E9A06"> INFO</font> <b>read_config</b>:<b>read_file{</b>path=&quot;fake_file&quot;<b>}</b>: Reading file
+//! <pre><span style="color: #06989A"><b>color-eyre</b></span> on <span style="color: #75507B"><b> hooked</b></span> <span style="color: #CC0000"><b>[$!] </b></span>is <span style="color: #FF8700"><b>📦 v0.5.0</b></span> via <span style="color: #CC0000"><b>🦀 v1.44.0</b></span> took <span style="color: #C4A000"><b>2s</b></span>
+//! <span style="color: #CC0000"><b>❯</b></span> cargo run --example usage
+//! <span style="color: #4E9A06"><b>    Finished</b></span> dev [unoptimized + debuginfo] target(s) in 0.04s
+//! <span style="color: #4E9A06"><b>     Running</b></span> `target/debug/examples/usage`
+//! <span style="color: #A1A1A1">Jul 05 19:15:58.026 </span><span style="color: #4E9A06"> INFO</span> <b>read_config</b>:<b>read_file{</b>path=&quot;fake_file&quot;<b>}</b>: Reading file
 //! Error:
-//!    0: <font color="#F15D22">Unable to read config</font>
-//!    1: <font color="#F15D22">No such file or directory (os error 2)</font>
+//!    0: <span style="color: #F15D22">Unable to read config</span>
+//!    1: <span style="color: #F15D22">No such file or directory (os error 2)</span>
 //!
 //!   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //!
-//!    0: <font color="#F15D22">usage::read_file</font> with <font color="#34E2E2">path=&quot;fake_file&quot;</font>
-//!       at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">32</font>
-//!    1: <font color="#F15D22">usage::read_config</font>
-//!       at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">38</font>
+//!    0: <span style="color: #F15D22">usage::read_file</span> with <span style="color: #34E2E2">path=&quot;fake_file&quot;</span>
+//!       at <span style="color: #75507B">examples/usage.rs</span>:<span style="color: #75507B">32</span>
+//!    1: <span style="color: #F15D22">usage::read_config</span>
+//!       at <span style="color: #75507B">examples/usage.rs</span>:<span style="color: #75507B">38</span>
 //!
-//! <font color="#34E2E2">Suggestion</font>: try using a file that exists next time</pre>
+//! <span style="color: #34E2E2">Suggestion</span>: try using a file that exists next time</pre>
 //!
 //! <br>
 //!
 //! Running `RUST_LIB_BACKTRACE=1 cargo run --example usage` tells `color-eyre` to use the short
 //! format, which additionally capture a [`backtrace::Backtrace`]:
 //!
-//! <pre><font color="#06989A"><b>color-eyre</b></font> on <font color="#75507B"><b> hooked</b></font> <font color="#CC0000"><b>[$!] </b></font>is <font color="#FF8700"><b>📦 v0.5.0</b></font> via <font color="#CC0000"><b>🦀 v1.44.0</b></font>
-//! <font color="#CC0000"><b>❯</b></font> RUST_LIB_BACKTRACE=1 cargo run --example usage
-//! <font color="#4E9A06"><b>    Finished</b></font> dev [unoptimized + debuginfo] target(s) in 0.04s
-//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/usage`
-//! <font color="#A1A1A1">Jul 05 19:16:02.853 </font><font color="#4E9A06"> INFO</font> <b>read_config</b>:<b>read_file{</b>path=&quot;fake_file&quot;<b>}</b>: Reading file
+//! <pre><span style="color: #06989A"><b>color-eyre</b></span> on <span style="color: #75507B"><b> hooked</b></span> <span style="color: #CC0000"><b>[$!] </b></span>is <span style="color: #FF8700"><b>📦 v0.5.0</b></span> via <span style="color: #CC0000"><b>🦀 v1.44.0</b></span>
+//! <span style="color: #CC0000"><b>❯</b></span> RUST_LIB_BACKTRACE=1 cargo run --example usage
+//! <span style="color: #4E9A06"><b>    Finished</b></span> dev [unoptimized + debuginfo] target(s) in 0.04s
+//! <span style="color: #4E9A06"><b>     Running</b></span> `target/debug/examples/usage`
+//! <span style="color: #A1A1A1">Jul 05 19:16:02.853 </span><span style="color: #4E9A06"> INFO</span> <b>read_config</b>:<b>read_file{</b>path=&quot;fake_file&quot;<b>}</b>: Reading file
 //! Error:
-//!    0: <font color="#F15D22">Unable to read config</font>
-//!    1: <font color="#F15D22">No such file or directory (os error 2)</font>
+//!    0: <span style="color: #F15D22">Unable to read config</span>
+//!    1: <span style="color: #F15D22">No such file or directory (os error 2)</span>
 //!
 //!   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //!
-//!    0: <font color="#F15D22">usage::read_file</font> with <font color="#34E2E2">path=&quot;fake_file&quot;</font>
-//!       at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">32</font>
-//!    1: <font color="#F15D22">usage::read_config</font>
-//!       at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">38</font>
+//!    0: <span style="color: #F15D22">usage::read_file</span> with <span style="color: #34E2E2">path=&quot;fake_file&quot;</span>
+//!       at <span style="color: #75507B">examples/usage.rs</span>:<span style="color: #75507B">32</span>
+//!    1: <span style="color: #F15D22">usage::read_config</span>
+//!       at <span style="color: #75507B">examples/usage.rs</span>:<span style="color: #75507B">38</span>
 //!
 //!   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//!   <font color="#34E2E2">                              ⋮ 5 frames hidden ⋮                               </font>
-//!    6: <font color="#F15D22">usage::read_file</font><font color="#88807C">::haee210cb22460af3</font>
-//!       at <font color="#75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</font>:<font color="#75507B">35</font>
-//!    7: <font color="#F15D22">usage::read_config</font><font color="#88807C">::ha649ef4ec333524d</font>
-//!       at <font color="#75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</font>:<font color="#75507B">40</font>
-//!    8: <font color="#F15D22">usage::main</font><font color="#88807C">::hbe443b50eac38236</font>
-//!       at <font color="#75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</font>:<font color="#75507B">11</font>
-//!   <font color="#34E2E2">                              ⋮ 10 frames hidden ⋮                              </font>
+//!   <span style="color: #34E2E2">                              ⋮ 5 frames hidden ⋮                               </span>
+//!    6: <span style="color: #F15D22">usage::read_file</span><span style="color: #88807C">::haee210cb22460af3</span>
+//!       at <span style="color: #75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</span>:<span style="color: #75507B">35</span>
+//!    7: <span style="color: #F15D22">usage::read_config</span><span style="color: #88807C">::ha649ef4ec333524d</span>
+//!       at <span style="color: #75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</span>:<span style="color: #75507B">40</span>
+//!    8: <span style="color: #F15D22">usage::main</span><span style="color: #88807C">::hbe443b50eac38236</span>
+//!       at <span style="color: #75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</span>:<span style="color: #75507B">11</span>
+//!   <span style="color: #34E2E2">                              ⋮ 10 frames hidden ⋮                              </span>
 //!
-//! <font color="#34E2E2">Suggestion</font>: try using a file that exists next time</pre>
+//! <span style="color: #34E2E2">Suggestion</span>: try using a file that exists next time</pre>
 //!
 //! <br>
 //!
@@ -168,26 +168,26 @@
 //! the full format, which in addition to the above will attempt to include source lines where the
 //! error originated from, assuming it can find them on the disk.
 //!
-//! <pre><font color="#06989A"><b>color-eyre</b></font> on <font color="#75507B"><b> hooked</b></font> <font color="#CC0000"><b>[$!] </b></font>is <font color="#FF8700"><b>📦 v0.5.0</b></font> via <font color="#CC0000"><b>🦀 v1.44.0</b></font>
-//! <font color="#CC0000"><b>❯</b></font> RUST_LIB_BACKTRACE=full cargo run --example usage
-//! <font color="#4E9A06"><b>    Finished</b></font> dev [unoptimized + debuginfo] target(s) in 0.05s
-//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/usage`
-//! <font color="#A1A1A1">Jul 05 19:16:06.335 </font><font color="#4E9A06"> INFO</font> <b>read_config</b>:<b>read_file{</b>path=&quot;fake_file&quot;<b>}</b>: Reading file
+//! <pre><span style="color: #06989A"><b>color-eyre</b></span> on <span style="color: #75507B"><b> hooked</b></span> <span style="color: #CC0000"><b>[$!] </b></span>is <span style="color: #FF8700"><b>📦 v0.5.0</b></span> via <span style="color: #CC0000"><b>🦀 v1.44.0</b></span>
+//! <span style="color: #CC0000"><b>❯</b></span> RUST_LIB_BACKTRACE=full cargo run --example usage
+//! <span style="color: #4E9A06"><b>    Finished</b></span> dev [unoptimized + debuginfo] target(s) in 0.05s
+//! <span style="color: #4E9A06"><b>     Running</b></span> `target/debug/examples/usage`
+//! <span style="color: #A1A1A1">Jul 05 19:16:06.335 </span><span style="color: #4E9A06"> INFO</span> <b>read_config</b>:<b>read_file{</b>path=&quot;fake_file&quot;<b>}</b>: Reading file
 //! Error:
-//!    0: <font color="#F15D22">Unable to read config</font>
-//!    1: <font color="#F15D22">No such file or directory (os error 2)</font>
+//!    0: <span style="color: #F15D22">Unable to read config</span>
+//!    1: <span style="color: #F15D22">No such file or directory (os error 2)</span>
 //!
 //!   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //!
-//!    0: <font color="#F15D22">usage::read_file</font> with <font color="#34E2E2">path=&quot;fake_file&quot;</font>
-//!       at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">32</font>
+//!    0: <span style="color: #F15D22">usage::read_file</span> with <span style="color: #34E2E2">path=&quot;fake_file&quot;</span>
+//!       at <span style="color: #75507B">examples/usage.rs</span>:<span style="color: #75507B">32</span>
 //!         30 │ }
 //!         31 │
 //!   <b>      32 &gt; #[instrument]</b>
 //!         33 │ fn read_file(path: &amp;str) -&gt; Result&lt;(), Report&gt; {
 //!         34 │     info!(&quot;Reading file&quot;);
-//!    1: <font color="#F15D22">usage::read_config</font>
-//!       at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">38</font>
+//!    1: <span style="color: #F15D22">usage::read_config</span>
+//!       at <span style="color: #75507B">examples/usage.rs</span>:<span style="color: #75507B">38</span>
 //!         36 │ }
 //!         37 │
 //!   <b>      38 &gt; #[instrument]</b>
@@ -195,31 +195,31 @@
 //!         40 │     read_file(&quot;fake_file&quot;)
 //!
 //!   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-//!   <font color="#34E2E2">                              ⋮ 5 frames hidden ⋮                               </font>
-//!    6: <font color="#F15D22">usage::read_file</font><font color="#88807C">::haee210cb22460af3</font>
-//!       at <font color="#75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</font>:<font color="#75507B">35</font>
+//!   <span style="color: #34E2E2">                              ⋮ 5 frames hidden ⋮                               </span>
+//!    6: <span style="color: #F15D22">usage::read_file</span><span style="color: #88807C">::haee210cb22460af3</span>
+//!       at <span style="color: #75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</span>:<span style="color: #75507B">35</span>
 //!         33 │ fn read_file(path: &amp;str) -&gt; Result&lt;(), Report&gt; {
 //!         34 │     info!(&quot;Reading file&quot;);
-//!   <font color="#D3D7CF"><b>      35 &gt;     Ok(std::fs::read_to_string(path).map(drop)?)</b></font>
+//!   <span style="color: #D3D7CF"><b>      35 &gt;     Ok(std::fs::read_to_string(path).map(drop)?)</b></span>
 //!         36 │ }
 //!         37 │
-//!    7: <font color="#F15D22">usage::read_config</font><font color="#88807C">::ha649ef4ec333524d</font>
-//!       at <font color="#75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</font>:<font color="#75507B">40</font>
+//!    7: <span style="color: #F15D22">usage::read_config</span><span style="color: #88807C">::ha649ef4ec333524d</span>
+//!       at <span style="color: #75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</span>:<span style="color: #75507B">40</span>
 //!         38 │ #[instrument]
 //!         39 │ fn read_config() -&gt; Result&lt;(), Report&gt; {
-//!   <font color="#D3D7CF"><b>      40 &gt;     read_file(&quot;fake_file&quot;)</b></font>
+//!   <span style="color: #D3D7CF"><b>      40 &gt;     read_file(&quot;fake_file&quot;)</b></span>
 //!         41 │         .wrap_err(&quot;Unable to read config&quot;)
 //!         42 │         .suggestion(&quot;try using a file that exists next time&quot;)
-//!    8: <font color="#F15D22">usage::main</font><font color="#88807C">::hbe443b50eac38236</font>
-//!       at <font color="#75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</font>:<font color="#75507B">11</font>
+//!    8: <span style="color: #F15D22">usage::main</span><span style="color: #88807C">::hbe443b50eac38236</span>
+//!       at <span style="color: #75507B">/home/jlusby/git/yaahc/color-eyre/examples/usage.rs</span>:<span style="color: #75507B">11</span>
 //!          9 │     color_eyre::install()?;
 //!         10 │
-//!   <font color="#D3D7CF"><b>      11 &gt;     Ok(read_config()?)</b></font>
+//!   <span style="color: #D3D7CF"><b>      11 &gt;     Ok(read_config()?)</b></span>
 //!         12 │ }
 //!         13 │
-//!   <font color="#34E2E2">                              ⋮ 10 frames hidden ⋮                              </font>
+//!   <span style="color: #34E2E2">                              ⋮ 10 frames hidden ⋮                              </span>
 //!
-//! <font color="#34E2E2">Suggestion</font>: try using a file that exists next time</pre>
+//! <span style="color: #34E2E2">Suggestion</span>: try using a file that exists next time</pre>
 //!
 //! ### Custom `Section`s for error reports via [`Help`] trait
 //!
@@ -266,27 +266,27 @@
 //! Running `cargo run --example custom_section` shows us how these sections are
 //! included in the output:
 //!
-//! <pre><font color="#06989A"><b>color-eyre</b></font> on <font color="#75507B"><b> hooked</b></font> <font color="#CC0000"><b>[$!] </b></font>is <font color="#FF8700"><b>📦 v0.5.0</b></font> via <font color="#CC0000"><b>🦀 v1.44.0</b></font> took <font color="#C4A000"><b>2s</b></font>
-//! <font color="#CC0000"><b>❯</b></font> cargo run --example custom_section
-//! <font color="#4E9A06"><b>    Finished</b></font> dev [unoptimized + debuginfo] target(s) in 0.04s
-//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/custom_section`
+//! <pre><span style="color: #06989A"><b>color-eyre</b></span> on <span style="color: #75507B"><b> hooked</b></span> <span style="color: #CC0000"><b>[$!] </b></span>is <span style="color: #FF8700"><b>📦 v0.5.0</b></span> via <span style="color: #CC0000"><b>🦀 v1.44.0</b></span> took <span style="color: #C4A000"><b>2s</b></span>
+//! <span style="color: #CC0000"><b>❯</b></span> cargo run --example custom_section
+//! <span style="color: #4E9A06"><b>    Finished</b></span> dev [unoptimized + debuginfo] target(s) in 0.04s
+//! <span style="color: #4E9A06"><b>     Running</b></span> `target/debug/examples/custom_section`
 //! Error:
-//!    0: <font color="#F15D22">Unable to read config</font>
-//!    1: <font color="#F15D22">cmd exited with non-zero status code</font>
+//!    0: <span style="color: #F15D22">Unable to read config</span>
+//!    1: <span style="color: #F15D22">cmd exited with non-zero status code</span>
 //!
 //! Stderr:
 //!    cat: fake_file: No such file or directory
 //!
 //!   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //!
-//!    0: <font color="#F15D22">custom_section::output2</font> with <font color="#34E2E2">self=&quot;cat&quot; &quot;fake_file&quot;</font>
-//!       at <font color="#75507B">examples/custom_section.rs</font>:<font color="#75507B">14</font>
-//!    1: <font color="#F15D22">custom_section::read_file</font> with <font color="#34E2E2">path=&quot;fake_file&quot;</font>
-//!       at <font color="#75507B">examples/custom_section.rs</font>:<font color="#75507B">58</font>
-//!    2: <font color="#F15D22">custom_section::read_config</font>
-//!       at <font color="#75507B">examples/custom_section.rs</font>:<font color="#75507B">63</font>
+//!    0: <span style="color: #F15D22">custom_section::output2</span> with <span style="color: #34E2E2">self=&quot;cat&quot; &quot;fake_file&quot;</span>
+//!       at <span style="color: #75507B">examples/custom_section.rs</span>:<span style="color: #75507B">14</span>
+//!    1: <span style="color: #F15D22">custom_section::read_file</span> with <span style="color: #34E2E2">path=&quot;fake_file&quot;</span>
+//!       at <span style="color: #75507B">examples/custom_section.rs</span>:<span style="color: #75507B">58</span>
+//!    2: <span style="color: #F15D22">custom_section::read_config</span>
+//!       at <span style="color: #75507B">examples/custom_section.rs</span>:<span style="color: #75507B">63</span>
 //!
-//! <font color="#34E2E2">Suggestion</font>: try using a file that exists next time</pre>
+//! <span style="color: #34E2E2">Suggestion</span>: try using a file that exists next time</pre>
 //!
 //! Only the `Stderr:` section actually gets included. The `cat` command fails,
 //! so stdout ends up being empty and is skipped in the final report. This gives
