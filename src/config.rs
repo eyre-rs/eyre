@@ -218,8 +218,11 @@ impl Frame {
     /// Heuristically determine whether a frame is likely to be part of language
     /// runtime.
     fn is_runtime_init_code(&self) -> bool {
-        const SYM_PREFIXES: &[&str] =
-            &["std::rt::lang_start::", "test::run_test::run_test_inner::"];
+        const SYM_PREFIXES: &[&str] = &[
+            "std::rt::lang_start::",
+            "test::run_test::run_test_inner::",
+            "std::sys_common::backtrace::__rust_begin_short_backtrace",
+        ];
 
         let (name, file) = match (self.name.as_ref(), self.filename.as_ref()) {
             (Some(name), Some(filename)) => (name, filename.to_string_lossy()),
