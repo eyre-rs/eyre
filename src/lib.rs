@@ -399,6 +399,7 @@ pub struct Handler {
     #[cfg(feature = "capture-spantrace")]
     span_trace: Option<SpanTrace>,
     sections: Vec<HelpInfo>,
+    display_env_section: bool,
 }
 
 static CONFIG: OnceCell<config::PanicHook> = OnceCell::new();

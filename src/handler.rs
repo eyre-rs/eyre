@@ -112,13 +112,15 @@ impl eyre::EyreHandler for Handler {
             f = h.ready();
         }
 
-        let env_section = EnvSection {
-            bt_captured: &self.backtrace.is_some(),
-            #[cfg(feature = "capture-spantrace")]
-            span_trace,
-        };
+        if self.display_env_section {
+            let env_section = EnvSection {
+                bt_captured: &self.backtrace.is_some(),
+                #[cfg(feature = "capture-spantrace")]
+                span_trace,
+            };
 
-        write!(&mut separated.ready(), "{}", env_section)?;
+            write!(&mut separated.ready(), "{}", env_section)?;
+        }
 
         Ok(())
     }

@@ -246,6 +246,7 @@ impl Frame {
 pub struct HookBuilder {
     filters: Vec<Box<FilterCallback>>,
     capture_span_trace_by_default: bool,
+    display_env_section: bool,
 }
 
 impl HookBuilder {
@@ -277,12 +278,19 @@ impl HookBuilder {
         HookBuilder {
             filters: vec![],
             capture_span_trace_by_default: false,
+            display_env_section: true,
         }
     }
 
     /// Configures the default capture mode for `SpanTraces` in error reports and panics
     pub fn capture_span_trace_by_default(mut self, cond: bool) -> Self {
         self.capture_span_trace_by_default = cond;
+        self
+    }
+
+    /// Configures the enviroment varible info section and whether or not it is displayed
+    pub fn display_env_section(mut self, cond: bool) -> Self {
+        self.display_env_section = cond;
         self
     }
 
@@ -341,11 +349,13 @@ impl HookBuilder {
             filters: self.filters.into_iter().map(Into::into).collect(),
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
+            display_env_section: self.display_env_section,
         };
 
         let eyre_hook = EyreHook {
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
+            display_env_section: self.display_env_section,
         };
 
         (panic_hook, eyre_hook)
@@ -477,13 +487,15 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
         )?;
     }
 
-    let env_section = EnvSection {
-        bt_captured: &capture_bt,
-        #[cfg(feature = "capture-spantrace")]
-        span_trace: span_trace.as_ref(),
-    };
+    if printer.display_env_section {
+        let env_section = EnvSection {
+            bt_captured: &capture_bt,
+            #[cfg(feature = "capture-spantrace")]
+            span_trace: span_trace.as_ref(),
+        };
 
-    write!(&mut separated.ready(), "{}", env_section)?;
+        write!(&mut separated.ready(), "{}", env_section)?;
+    }
 
     Ok(())
 }
@@ -492,6 +504,7 @@ pub(crate) struct PanicHook {
     filters: Vec<Arc<FilterCallback>>,
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
+    display_env_section: bool,
 }
 
 impl PanicHook {
@@ -516,6 +529,7 @@ impl PanicHook {
 pub(crate) struct EyreHook {
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
+    display_env_section: bool,
 }
 
 impl EyreHook {
@@ -541,6 +555,7 @@ impl EyreHook {
             #[cfg(feature = "capture-spantrace")]
             span_trace,
             sections: Vec::new(),
+            display_env_section: self.display_env_section,
         }
     }
 
