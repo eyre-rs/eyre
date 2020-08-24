@@ -5,6 +5,7 @@ use crate::{
     ColorExt,
 };
 use ansi_term::Color::*;
+use fmt::Display;
 use indenter::{indented, Format};
 use std::env;
 use std::fmt::Write as _;
@@ -247,6 +248,7 @@ pub struct HookBuilder {
     filters: Vec<Box<FilterCallback>>,
     capture_span_trace_by_default: bool,
     display_env_section: bool,
+    panic_section: Option<Box<dyn Display + Send + Sync + 'static>>,
 }
 
 impl HookBuilder {
@@ -279,7 +281,24 @@ impl HookBuilder {
             filters: vec![],
             capture_span_trace_by_default: false,
             display_env_section: true,
+            panic_section: None,
         }
+    }
+
+    /// Add a custom section to the panic hook that will be printed
+    /// in the panic message.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// color_eyre::config::HookBuilder::default()
+    ///     .panic_section("consider reporting the bug at https://github.com/yaahc/color-eyre")
+    ///     .install()
+    ///     .unwrap()
+    /// ```
+    pub fn panic_section<S: Display + Send + Sync + 'static>(mut self, section: S) -> Self {
+        self.panic_section = Some(Box::new(section));
+        self
     }
 
     /// Configures the default capture mode for `SpanTraces` in error reports and panics
@@ -347,6 +366,7 @@ impl HookBuilder {
     pub(crate) fn into_hooks(self) -> (PanicHook, EyreHook) {
         let panic_hook = PanicHook {
             filters: self.filters.into_iter().map(Into::into).collect(),
+            section: self.panic_section,
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
             display_env_section: self.display_env_section,
@@ -464,6 +484,10 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
 
     let mut separated = out.header("\n\n");
 
+    if let Some(ref section) = printer.section {
+        write!(&mut separated.ready(), "{}", section)?;
+    }
+
     #[cfg(feature = "capture-spantrace")]
     {
         if let Some(span_trace) = span_trace.as_ref() {
@@ -502,6 +526,7 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
 
 pub(crate) struct PanicHook {
     filters: Vec<Arc<FilterCallback>>,
+    section: Option<Box<dyn Display + Send + Sync + 'static>>,
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
     display_env_section: bool,
