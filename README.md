@@ -34,7 +34,7 @@ handlers for eyre and short summaries of what features they provide.
   out the README on [`color-eyre`] for details on the report format.
 - [`simple-eyre`]: A minimal `EyreHandler` that captures no additional
   information, for when you do not wish to capture `Backtrace`s with errors.
-- [`jane-eyre`]: A report handler crate that exists purely for the pun.
+- [`jane-eyre`]: A report handler crate that exists purely for the pun of it.
   Currently just re-exports `color-eyre`.
 
 ## Details
@@ -56,7 +56,7 @@ handlers for eyre and short summaries of what features they provide.
   ```
 
 - Wrap a lower level error with a new error created from a message to help the
-  person troubleshooting understand what the chain of failures that occured. A
+  person troubleshooting understand the chain of failures that occurred. A
   low-level error like "No such file or directory" can be annoying to debug
   without more information about what higher level step the application was in
   the middle of.
