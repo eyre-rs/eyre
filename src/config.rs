@@ -1,12 +1,9 @@
 //! Configuration options for customizing the behavior of the provided panic
 //! and error reporting hooks
-use crate::{
-    writers::{EnvSection, WriterExt},
-    ColorExt,
-};
-use ansi_term::Color::*;
+use crate::writers::{EnvSection, WriterExt};
 use fmt::Display;
 use indenter::{indented, Format};
+use owo_colors::OwoColorize;
 use std::env;
 use std::fmt::Write as _;
 use std::{fmt, path::PathBuf, sync::Arc};
@@ -53,14 +50,12 @@ impl fmt::Display for Frame {
         // Print function name.
 
         if has_hash_suffix {
-            let color = if is_dependency_code {
-                Green
+            if is_dependency_code {
+                write!(f, "{}", (&name[..name.len() - 19]).green())?;
             } else {
-                Red.make_intense()
-            };
-            write!(f, "{}", color.paint(&name[..name.len() - 19]))?;
-            let color = Black.make_intense();
-            write!(f, "{}", color.paint(&name[name.len() - 19..]))?;
+                write!(f, "{}", (&name[..name.len() - 19]).bright_red())?;
+            }
+            write!(f, "{}", (&name[name.len() - 19..]).bright_black())?;
         } else {
             write!(f, "{}", name)?;
         }
@@ -76,8 +71,8 @@ impl fmt::Display for Frame {
             write!(
                 &mut separated.ready(),
                 "    at {}:{}",
-                Purple.paint(filestr),
-                Purple.paint(lineno)
+                filestr.purple(),
+                lineno.purple()
             )?;
         } else {
             write!(&mut separated.ready(), "    at <unknown source file>")?;
@@ -121,16 +116,18 @@ impl fmt::Display for SourceSection<'_> {
         let reader = std::io::BufReader::new(file);
         let start_line = lineno - 2.min(lineno - 1);
         let surrounding_src = reader.lines().skip(start_line as usize - 1).take(5);
-        let mut buf = String::new();
         let mut separated = f.header("\n");
         let mut f = separated.in_progress();
         for (line, cur_line_no) in surrounding_src.zip(start_line..) {
             let line = line.unwrap();
             if cur_line_no == lineno {
-                let color = White.bold();
-                write!(&mut buf, "{:>8} > {}", cur_line_no, line)?;
-                write!(&mut f, "{}", color.paint(&buf))?;
-                buf.clear();
+                write!(
+                    &mut f,
+                    "{:>8} {} {}",
+                    cur_line_no.white().bold(),
+                    ">".white().bold(),
+                    line.white().bold()
+                )?;
             } else {
                 write!(&mut f, "{:>8} │ {}", cur_line_no, line)?;
             }
@@ -441,7 +438,7 @@ struct PanicMessage<'a>(&'a PanicPrinter<'a>);
 impl fmt::Display for PanicMessage<'_> {
     fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
         let pi = (self.0).0;
-        writeln!(out, "{}", Red.paint("The application panicked (crashed)."))?;
+        writeln!(out, "{}", "The application panicked (crashed).".red())?;
 
         // Print panic message.
         let payload = pi
@@ -452,14 +449,14 @@ impl fmt::Display for PanicMessage<'_> {
             .unwrap_or("<non string panic payload>");
 
         write!(out, "Message:  ")?;
-        writeln!(out, "{}", Cyan.paint(payload))?;
+        writeln!(out, "{}", payload.cyan())?;
 
         // If known, print panic location.
         write!(out, "Location: ")?;
         if let Some(loc) = pi.location() {
-            write!(out, "{}", Purple.paint(loc.file()))?;
+            write!(out, "{}", loc.file().purple())?;
             write!(out, ":")?;
-            write!(out, "{}", Purple.paint(loc.line().to_string()))?;
+            write!(out, "{}", loc.line().purple())?;
         } else {
             write!(out, "<unknown>")?;
         }
@@ -636,20 +633,21 @@ impl fmt::Display for BacktraceFormatter<'_> {
         // Don't let filters mess with the order.
         filtered_frames.sort_by_key(|x| x.n);
 
+        let mut buf = String::new();
+
         macro_rules! print_hidden {
             ($n:expr) => {
-                let color = Cyan.make_intense();
                 let n = $n;
-                let text = format!(
-                    "{:^80}",
-                    format!(
-                        "{decorator} {n} frame{plural} hidden {decorator}",
-                        n = n,
-                        plural = if n == 1 { "" } else { "s" },
-                        decorator = "⋮",
-                    )
-                );
-                write!(&mut separated.ready(), "{}", color.paint(text))?;
+                buf.clear();
+                write!(
+                    &mut buf,
+                    "{decorator} {n} frame{plural} hidden {decorator}",
+                    n = n,
+                    plural = if n == 1 { "" } else { "s" },
+                    decorator = "⋮",
+                )
+                .expect("writing to strings doesn't panic");
+                write!(&mut separated.ready(), "{:^80}", buf.bright_cyan())?;
             };
         }
 

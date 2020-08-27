@@ -1,5 +1,5 @@
-use color_eyre::{eyre::Report, eyre::WrapErr, Section};
-use tracing::{info, instrument};
+use color_eyre::eyre::Report;
+use tracing::instrument;
 
 #[instrument]
 fn main() -> Result<(), Report> {

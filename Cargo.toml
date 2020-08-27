@@ -20,7 +20,7 @@ eyre = "0.6.0"
 tracing-error = { version = "0.1.2", optional = true }
 backtrace = { version = "0.3.48", features = ["gimli-symbolize"] }
 indenter = "0.3.0"
-ansi_term = "0.12"
+owo-colors = "1.0.3"
 color-spantrace = { version = "0.1.4", optional = true }
 once_cell = "1.4.0"
 

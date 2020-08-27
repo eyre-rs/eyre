@@ -1,10 +1,10 @@
 //! Provides an extension trait for attaching `Section` to error reports.
 use crate::{
     eyre::{Report, Result},
-    ColorExt, Section,
+    Section,
 };
-use ansi_term::Color::*;
 use indenter::indented;
+use owo_colors::OwoColorize;
 use std::fmt::Write;
 use std::fmt::{self, Display};
 
@@ -189,16 +189,11 @@ pub(crate) enum HelpInfo {
 impl Display for HelpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HelpInfo::Note(note) => write!(f, "{}: {}", Cyan.make_intense().paint("Note"), note),
-            HelpInfo::Warning(warning) => {
-                write!(f, "{}: {}", Yellow.make_intense().paint("Warning"), warning)
+            HelpInfo::Note(note) => write!(f, "{}: {}", "Note".bright_cyan(), note),
+            HelpInfo::Warning(warning) => write!(f, "{}: {}", "Warning".bright_yellow(), warning),
+            HelpInfo::Suggestion(suggestion) => {
+                write!(f, "{}: {}", "Suggestion".bright_cyan(), suggestion)
             }
-            HelpInfo::Suggestion(suggestion) => write!(
-                f,
-                "{}: {}",
-                Cyan.make_intense().paint("Suggestion"),
-                suggestion
-            ),
             HelpInfo::Custom(section) => write!(f, "{}", section),
             HelpInfo::Error(error) => {
                 // a lot here
@@ -208,12 +203,9 @@ impl Display for HelpInfo {
                 );
 
                 write!(f, "Error:")?;
-                let mut buf = String::new();
                 for (n, error) in errors.enumerate() {
                     writeln!(f)?;
-                    buf.clear();
-                    write!(&mut buf, "{}", error).unwrap();
-                    write!(indented(f).ind(n), "{}", Red.make_intense().paint(&buf))?;
+                    write!(indented(f).ind(n), "{}", error.bright_red())?;
                 }
 
                 Ok(())

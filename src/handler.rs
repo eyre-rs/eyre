@@ -1,13 +1,12 @@
 use crate::config::installed_printer;
-use crate::ColorExt;
 use crate::{
     section::help::HelpInfo,
     writers::{EnvSection, WriterExt},
     Handler,
 };
-use ansi_term::Color::*;
 use backtrace::Backtrace;
 use indenter::{indented, Format};
+use owo_colors::OwoColorize;
 use std::fmt::Write;
 #[cfg(feature = "capture-spantrace")]
 use tracing_error::{ExtractSpanTrace, SpanTrace};
@@ -46,12 +45,9 @@ impl eyre::EyreHandler for Handler {
         #[cfg(not(feature = "capture-spantrace"))]
         let errors = eyre::Chain::new(error).enumerate();
 
-        let mut buf = String::new();
         for (n, error) in errors {
-            buf.clear();
-            write!(&mut buf, "{}", error).unwrap();
             writeln!(f)?;
-            write!(indented(f).ind(n), "{}", Red.make_intense().paint(&buf))?;
+            write!(indented(f).ind(n), "{}", error.bright_red())?;
         }
 
         let mut separated = f.header("\n\n");
@@ -123,34 +119,6 @@ impl eyre::EyreHandler for Handler {
         }
 
         Ok(())
-    }
-}
-
-impl ColorExt for ansi_term::Color {
-    fn make_intense(self) -> Self {
-        use ansi_term::Color::*;
-
-        match self {
-            Black => Fixed(8),
-            Red => Fixed(9),
-            Green => Fixed(10),
-            Yellow => Fixed(11),
-            Blue => Fixed(12),
-            Purple => Fixed(13),
-            Cyan => Fixed(14),
-            White => Fixed(15),
-            Fixed(color) if color < 8 => Fixed(color + 8),
-            other => other,
-        }
-    }
-}
-
-impl ColorExt for ansi_term::Style {
-    fn make_intense(mut self) -> Self {
-        if let Some(color) = self.foreground {
-            self.foreground = Some(color.make_intense());
-        }
-        self
     }
 }
 
