@@ -130,7 +130,10 @@ where
 /// sections are displayed after all other sections with no extra newlines between subsequent Help
 /// sections. They consist only of a header portion and are prepended with a colored string
 /// indicating the kind of section, e.g. `Note: This might have failed due to ..."
-pub trait Section<T>: crate::private::Sealed {
+pub trait Section: crate::private::Sealed {
+    /// The return type of each method after adding context
+    type Return;
+
     /// Add a section to an error report, to be displayed after the chain of errors.
     ///
     /// # Details
@@ -149,7 +152,7 @@ pub trait Section<T>: crate::private::Sealed {
     ///     .section("Please report bugs to https://real.url/bugs")?;
     /// # Ok::<_, Report>(())
     /// ```
-    fn section<D>(self, section: D) -> eyre::Result<T>
+    fn section<D>(self, section: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static;
 
@@ -175,7 +178,7 @@ pub trait Section<T>: crate::private::Sealed {
     /// println!("{}", output);
     /// # Ok::<_, Report>(())
     /// ```
-    fn with_section<D, F>(self, section: F) -> eyre::Result<T>
+    fn with_section<D, F>(self, section: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
@@ -198,7 +201,7 @@ pub trait Section<T>: crate::private::Sealed {
     ///     .error(StrError("got a second error"))?;
     /// # Ok::<_, Report>(())
     /// ```
-    fn error<E>(self, error: E) -> eyre::Result<T>
+    fn error<E>(self, error: E) -> Self::Return
     where
         E: std::error::Error + Send + Sync + 'static;
 
@@ -220,7 +223,7 @@ pub trait Section<T>: crate::private::Sealed {
     ///     .with_error(|| StringError("got a second error".into()))?;
     /// # Ok::<_, Report>(())
     /// ```
-    fn with_error<E, F>(self, error: F) -> eyre::Result<T>
+    fn with_error<E, F>(self, error: F) -> Self::Return
     where
         F: FnOnce() -> E,
         E: std::error::Error + Send + Sync + 'static;
@@ -250,7 +253,7 @@ pub trait Section<T>: crate::private::Sealed {
     /// # Ok(())
     /// # }
     /// ```
-    fn note<D>(self, note: D) -> eyre::Result<T>
+    fn note<D>(self, note: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static;
 
@@ -282,31 +285,31 @@ pub trait Section<T>: crate::private::Sealed {
     /// # Ok(())
     /// # }
     /// ```
-    fn with_note<D, F>(self, f: F) -> eyre::Result<T>
+    fn with_note<D, F>(self, f: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
     /// Add a Warning to an error report, to be displayed after the chain of errors.
-    fn warning<D>(self, warning: D) -> eyre::Result<T>
+    fn warning<D>(self, warning: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static;
 
     /// Add a Warning to an error report, to be displayed after the chain of errors. The closure to
     /// create the Warning is lazily evaluated only in the case of an error.
-    fn with_warning<D, F>(self, f: F) -> eyre::Result<T>
+    fn with_warning<D, F>(self, f: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
     /// Add a Suggestion to an error report, to be displayed after the chain of errors.
-    fn suggestion<D>(self, suggestion: D) -> eyre::Result<T>
+    fn suggestion<D>(self, suggestion: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static;
 
     /// Add a Suggestion to an error report, to be displayed after the chain of errors. The closure
     /// to create the Suggestion is lazily evaluated only in the case of an error.
-    fn with_suggestion<D, F>(self, f: F) -> eyre::Result<T>
+    fn with_suggestion<D, F>(self, f: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;

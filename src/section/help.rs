@@ -8,173 +8,224 @@ use owo_colors::OwoColorize;
 use std::fmt::Write;
 use std::fmt::{self, Display};
 
-impl<T, E> Section<T> for std::result::Result<T, E>
-where
-    E: Into<Report>,
-{
-    fn note<D>(self, note: D) -> Result<T>
+impl Section for Report {
+    type Return = Report;
+
+    fn note<D>(mut self, note: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            handler.sections.push(HelpInfo::Note(Box::new(note)));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                handler.sections.push(HelpInfo::Note(Box::new(note)));
-            }
-
-            e
-        })
+        self
     }
 
-    fn with_note<D, F>(self, note: F) -> Result<T>
+    fn with_note<D, F>(mut self, note: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            handler.sections.push(HelpInfo::Note(Box::new(note())));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                handler.sections.push(HelpInfo::Note(Box::new(note())));
-            }
-
-            e
-        })
+        self
     }
 
-    fn warning<D>(self, warning: D) -> Result<T>
+    fn warning<D>(mut self, warning: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            handler.sections.push(HelpInfo::Warning(Box::new(warning)));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                handler.sections.push(HelpInfo::Warning(Box::new(warning)));
-            }
-
-            e
-        })
+        self
     }
 
-    fn with_warning<D, F>(self, warning: F) -> Result<T>
+    fn with_warning<D, F>(mut self, warning: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            handler
+                .sections
+                .push(HelpInfo::Warning(Box::new(warning())));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                handler
-                    .sections
-                    .push(HelpInfo::Warning(Box::new(warning())));
-            }
-
-            e
-        })
+        self
     }
 
-    fn suggestion<D>(self, suggestion: D) -> Result<T>
+    fn suggestion<D>(mut self, suggestion: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            handler
+                .sections
+                .push(HelpInfo::Suggestion(Box::new(suggestion)));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                handler
-                    .sections
-                    .push(HelpInfo::Suggestion(Box::new(suggestion)));
-            }
-
-            e
-        })
+        self
     }
 
-    fn with_suggestion<D, F>(self, suggestion: F) -> Result<T>
+    fn with_suggestion<D, F>(mut self, suggestion: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            handler
+                .sections
+                .push(HelpInfo::Suggestion(Box::new(suggestion())));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                handler
-                    .sections
-                    .push(HelpInfo::Suggestion(Box::new(suggestion())));
-            }
-
-            e
-        })
+        self
     }
 
-    fn with_section<D, F>(self, section: F) -> Result<T>
+    fn with_section<D, F>(mut self, section: F) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            let section = Box::new(section());
+            handler.sections.push(HelpInfo::Custom(section));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                let section = Box::new(section());
-                handler.sections.push(HelpInfo::Custom(section));
-            }
-
-            e
-        })
+        self
     }
 
-    fn section<D>(self, section: D) -> Result<T>
+    fn section<D>(mut self, section: D) -> Self::Return
     where
         D: Display + Send + Sync + 'static,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            let section = Box::new(section);
+            handler.sections.push(HelpInfo::Custom(section));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                let section = Box::new(section);
-                handler.sections.push(HelpInfo::Custom(section));
-            }
-
-            e
-        })
+        self
     }
 
-    fn error<E2>(self, error: E2) -> Result<T>
+    fn error<E2>(mut self, error: E2) -> Self::Return
     where
         E2: std::error::Error + Send + Sync + 'static,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            let error = error.into();
+            handler.sections.push(HelpInfo::Error(error));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                let error = error.into();
-                handler.sections.push(HelpInfo::Error(error));
-            }
-
-            e
-        })
+        self
     }
 
-    fn with_error<E2, F>(self, error: F) -> Result<T>
+    fn with_error<E2, F>(mut self, error: F) -> Self::Return
     where
         F: FnOnce() -> E2,
         E2: std::error::Error + Send + Sync + 'static,
     {
-        self.map_err(|e| {
-            let mut e = e.into();
+        if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
+            let error = error().into();
+            handler.sections.push(HelpInfo::Error(error));
+        }
 
-            if let Some(handler) = e.handler_mut().downcast_mut::<crate::Handler>() {
-                let error = error().into();
-                handler.sections.push(HelpInfo::Error(error));
-            }
+        self
+    }
+}
 
-            e
-        })
+impl<T, E> Section for Result<T, E>
+where
+    E: Into<Report>,
+{
+    type Return = Result<T, Report>;
+
+    fn note<D>(self, note: D) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.note(note))
+    }
+
+    fn with_note<D, F>(self, note: F) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.note(note()))
+    }
+
+    fn warning<D>(self, warning: D) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.warning(warning))
+    }
+
+    fn with_warning<D, F>(self, warning: F) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.warning(warning()))
+    }
+
+    fn suggestion<D>(self, suggestion: D) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.suggestion(suggestion))
+    }
+
+    fn with_suggestion<D, F>(self, suggestion: F) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.suggestion(suggestion()))
+    }
+
+    fn with_section<D, F>(self, section: F) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.section(section()))
+    }
+
+    fn section<D>(self, section: D) -> Self::Return
+    where
+        D: Display + Send + Sync + 'static,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.section(section))
+    }
+
+    fn error<E2>(self, error: E2) -> Self::Return
+    where
+        E2: std::error::Error + Send + Sync + 'static,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.error(error))
+    }
+
+    fn with_error<E2, F>(self, error: F) -> Self::Return
+    where
+        F: FnOnce() -> E2,
+        E2: std::error::Error + Send + Sync + 'static,
+    {
+        self.map_err(|error| error.into())
+            .map_err(|report| report.error(error()))
     }
 }
 
