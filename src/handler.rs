@@ -1,4 +1,4 @@
-use crate::config::installed_printer;
+use crate::config::installed_hook;
 use crate::{
     section::help::HelpInfo,
     writers::{EnvSection, WriterExt},
@@ -86,7 +86,7 @@ impl eyre::EyreHandler for Handler {
         }
 
         if let Some(backtrace) = self.backtrace.as_ref() {
-            let fmted_bt = installed_printer().format_backtrace(&backtrace);
+            let fmted_bt = installed_hook().format_backtrace(&backtrace);
 
             write!(
                 indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),

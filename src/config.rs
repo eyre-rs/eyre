@@ -1,6 +1,9 @@
 //! Configuration options for customizing the behavior of the provided panic
 //! and error reporting hooks
-use crate::writers::{EnvSection, WriterExt};
+use crate::{
+    section::PanicMessage,
+    writers::{EnvSection, WriterExt},
+};
 use fmt::Display;
 use indenter::{indented, Format};
 use owo_colors::OwoColorize;
@@ -246,6 +249,7 @@ pub struct HookBuilder {
     capture_span_trace_by_default: bool,
     display_env_section: bool,
     panic_section: Option<Box<dyn Display + Send + Sync + 'static>>,
+    panic_message: Box<dyn PanicMessage>,
 }
 
 impl HookBuilder {
@@ -279,6 +283,7 @@ impl HookBuilder {
             capture_span_trace_by_default: false,
             display_env_section: true,
             panic_section: None,
+            panic_message: Box::new(DefaultPanicMessage),
         }
     }
 
@@ -295,6 +300,63 @@ impl HookBuilder {
     /// ```
     pub fn panic_section<S: Display + Send + Sync + 'static>(mut self, section: S) -> Self {
         self.panic_section = Some(Box::new(section));
+        self
+    }
+
+    /// Overrides the main error message printing section at the start of panic
+    /// reports
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use std::{panic::Location, fmt};
+    /// use color_eyre::section::PanicMessage;
+    /// use owo_colors::OwoColorize;
+    ///
+    /// struct MyPanicMessage;
+    ///
+    /// color_eyre::config::HookBuilder::default()
+    ///     .panic_message(MyPanicMessage)
+    ///     .install()
+    ///     .unwrap();
+    ///
+    /// impl PanicMessage for MyPanicMessage {
+    ///     fn display(&self, pi: &std::panic::PanicInfo<'_>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    ///         writeln!(f, "{}", "The application panicked (crashed).".red())?;
+    ///
+    ///         // Print panic message.
+    ///         let payload = pi
+    ///             .payload()
+    ///             .downcast_ref::<String>()
+    ///             .map(String::as_str)
+    ///             .or_else(|| pi.payload().downcast_ref::<&str>().cloned())
+    ///             .unwrap_or("<non string panic payload>");
+    ///
+    ///         write!(f, "Message:  ")?;
+    ///         writeln!(f, "{}", payload.cyan())?;
+    ///
+    ///         // If known, print panic location.
+    ///         write!(f, "Location: ")?;
+    ///         if let Some(loc) = pi.location() {
+    ///             write!(f, "{}", loc.file().purple())?;
+    ///             write!(f, ":")?;
+    ///             write!(f, "{}", loc.line().purple())?;
+    ///
+    ///             write!(f, "\n\nConsider reporting the bug at {}", custom_url(loc, payload))?;
+    ///         } else {
+    ///             write!(f, "<unknown>")?;
+    ///         }
+    ///
+    ///         Ok(())
+    ///     }
+    /// }
+    ///
+    /// fn custom_url(location: &Location<'_>, message: &str) -> impl fmt::Display {
+    ///     "todo"
+    /// }
+    /// ```
+    pub fn panic_message<S: PanicMessage>(mut self, section: S) -> Self {
+        self.panic_message = Box::new(section);
         self
     }
 
@@ -367,6 +429,7 @@ impl HookBuilder {
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
             display_env_section: self.display_env_section,
+            panic_message: self.panic_message,
         };
 
         let eyre_hook = EyreHook {
@@ -379,6 +442,7 @@ impl HookBuilder {
     }
 }
 
+#[allow(missing_docs)]
 impl Default for HookBuilder {
     fn default() -> Self {
         Self::new()
@@ -433,12 +497,11 @@ fn install_panic_hook() {
     std::panic::set_hook(Box::new(|pi| eprintln!("{}", PanicPrinter(pi))))
 }
 
-struct PanicMessage<'a>(&'a PanicPrinter<'a>);
+struct DefaultPanicMessage;
 
-impl fmt::Display for PanicMessage<'_> {
-    fn fmt(&self, out: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let pi = (self.0).0;
-        writeln!(out, "{}", "The application panicked (crashed).".red())?;
+impl PanicMessage for DefaultPanicMessage {
+    fn display(&self, pi: &std::panic::PanicInfo<'_>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{}", "The application panicked (crashed).".red())?;
 
         // Print panic message.
         let payload = pi
@@ -448,17 +511,17 @@ impl fmt::Display for PanicMessage<'_> {
             .or_else(|| pi.payload().downcast_ref::<&str>().cloned())
             .unwrap_or("<non string panic payload>");
 
-        write!(out, "Message:  ")?;
-        writeln!(out, "{}", payload.cyan())?;
+        write!(f, "Message:  ")?;
+        writeln!(f, "{}", payload.cyan())?;
 
         // If known, print panic location.
-        write!(out, "Location: ")?;
+        write!(f, "Location: ")?;
         if let Some(loc) = pi.location() {
-            write!(out, "{}", loc.file().purple())?;
-            write!(out, ":")?;
-            write!(out, "{}", loc.line().purple())?;
+            write!(f, "{}", loc.file().purple())?;
+            write!(f, ":")?;
+            write!(f, "{}", loc.line().purple())?;
         } else {
-            write!(out, "<unknown>")?;
+            write!(f, "<unknown>")?;
         }
 
         Ok(())
@@ -466,14 +529,13 @@ impl fmt::Display for PanicMessage<'_> {
 }
 
 fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(out, "{}", PanicMessage(printer))?;
+    let hook = installed_hook();
+    hook.panic_message.display(printer.0, out)?;
 
     let v = panic_verbosity();
 
-    let printer = installed_printer();
-
     #[cfg(feature = "capture-spantrace")]
-    let span_trace = if printer.spantrace_capture_enabled() {
+    let span_trace = if hook.spantrace_capture_enabled() {
         Some(tracing_error::SpanTrace::capture())
     } else {
         None
@@ -481,7 +543,7 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
 
     let mut separated = out.header("\n\n");
 
-    if let Some(ref section) = printer.section {
+    if let Some(ref section) = hook.section {
         write!(&mut separated.ready(), "{}", section)?;
     }
 
@@ -500,7 +562,7 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
 
     if capture_bt {
         let bt = backtrace::Backtrace::new();
-        let fmted_bt = printer.format_backtrace(&bt);
+        let fmted_bt = hook.format_backtrace(&bt);
         write!(
             indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),
             "{}",
@@ -508,7 +570,7 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
         )?;
     }
 
-    if printer.display_env_section {
+    if hook.display_env_section {
         let env_section = EnvSection {
             bt_captured: &capture_bt,
             #[cfg(feature = "capture-spantrace")]
@@ -524,6 +586,7 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
 pub(crate) struct PanicHook {
     filters: Vec<Arc<FilterCallback>>,
     section: Option<Box<dyn Display + Send + Sync + 'static>>,
+    panic_message: Box<dyn PanicMessage>,
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
     display_env_section: bool,
@@ -671,7 +734,7 @@ impl fmt::Display for BacktraceFormatter<'_> {
     }
 }
 
-pub(crate) fn installed_printer() -> &'static PanicHook {
+pub(crate) fn installed_hook() -> &'static PanicHook {
     crate::CONFIG.get_or_init(default_printer)
 }
 

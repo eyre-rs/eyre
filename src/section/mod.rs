@@ -314,3 +314,9 @@ pub trait Section: crate::private::Sealed {
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 }
+
+/// Trait for printing a panic error message for the given PanicInfo
+pub trait PanicMessage: Send + Sync + 'static {
+    /// Display trait equivalent for implementing the display logic
+    fn display(&self, pi: &std::panic::PanicInfo<'_>, f: &mut fmt::Formatter<'_>) -> fmt::Result;
+}
