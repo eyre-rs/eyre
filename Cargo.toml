@@ -50,7 +50,7 @@ replace="{{version}}"
 
 [[package.metadata.release.pre-release-replacements]]
 file = "src/lib.rs"
-search = "#!\\[doc\\(html_root_url"
+search = "#!\\[doc\\(html_root_url.*"
 replace = "#![doc(html_root_url = \"https://docs.rs/{{crate_name}}/{{version}}\")]"
 exactly = 1
 
