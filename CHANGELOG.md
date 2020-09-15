@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+<!-- next-header -->
+
+## [Unreleased] - ReleaseDate
 ### Added
 - add `panic_section` method to `HookBuilder` for overriding the printer for
   the panic message at the start of panic reports
@@ -20,5 +22,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - switched from ansi_term to owo-colors for colorizing output, allowing for
   better compatibility with the Display trait
 
+<!-- next-url -->
 [Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.2...HEAD
 [0.5.2]: https://github.com/yaahc/color-eyre/releases/tag/v0.5.2
