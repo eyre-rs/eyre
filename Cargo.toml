@@ -1,6 +1,6 @@
 [package]
 name = "color-eyre"
-version = "0.5.3-alpha.0"
+version = "0.5.4-alpha.0"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -39,9 +39,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [profile.dev.package.backtrace]
 opt-level = 3
-
-[package.metadata.release]
-disable-push = true
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"

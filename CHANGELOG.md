@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [0.5.3] - 2020-09-14
 ### Added
 - add `panic_section` method to `HookBuilder` for overriding the printer for
   the panic message at the start of panic reports
@@ -23,5 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   better compatibility with the Display trait
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/yaahc/color-eyre/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/yaahc/color-eyre/releases/tag/v0.5.2
