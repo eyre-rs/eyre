@@ -4,7 +4,7 @@ use std::fmt::{self, Display};
 
 pub(crate) mod help;
 
-/// An indenteted section with a header for an error report
+/// An indented section with a header for an error report
 ///
 /// # Details
 ///
