@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.4] - 2020-09-17
+### Added
+- Add new "issue-url" feature for generating issue creation links in error
+  reports pre-populated with information about the error
+
 ## [0.5.3] - 2020-09-14
 ### Added
 - add `panic_section` method to `HookBuilder` for overriding the printer for
@@ -25,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   better compatibility with the Display trait
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/yaahc/color-eyre/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/yaahc/color-eyre/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/yaahc/color-eyre/releases/tag/v0.5.2

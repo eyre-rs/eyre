@@ -334,7 +334,7 @@
 //! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.5.3")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.5.4")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_docs,
@@ -359,6 +359,7 @@
     while_true
 )]
 #![allow(clippy::try_err)]
+
 use backtrace::Backtrace;
 pub use eyre;
 #[doc(hidden)]
@@ -393,13 +394,17 @@ mod writers;
 /// [`tracing-error`]: https://docs.rs/tracing-error
 /// [`color_eyre::Report`]: type.Report.html
 /// [`color_eyre::Result`]: type.Result.html
-#[derive(Debug)]
 pub struct Handler {
     backtrace: Option<Backtrace>,
     #[cfg(feature = "capture-spantrace")]
     span_trace: Option<SpanTrace>,
     sections: Vec<HelpInfo>,
     display_env_section: bool,
+    #[cfg(feature = "issue-url")]
+    issue_url: Option<String>,
+    #[cfg(feature = "issue-url")]
+    issue_metadata:
+        std::sync::Arc<Vec<(String, Box<dyn std::fmt::Display + Send + Sync + 'static>)>>,
 }
 
 static CONFIG: OnceCell<config::PanicHook> = OnceCell::new();

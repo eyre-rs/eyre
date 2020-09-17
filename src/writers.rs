@@ -28,6 +28,27 @@ impl<W> WriterExt for W {
     }
 }
 
+pub(crate) trait DisplayExt: Sized + Display {
+    fn with_header<H: Display>(self, header: H) -> Header<Self, H>;
+    fn with_footer<F: Display>(self, footer: F) -> Footer<Self, F>;
+}
+
+impl<T> DisplayExt for T
+where
+    T: Display,
+{
+    fn with_footer<F: Display>(self, footer: F) -> Footer<Self, F> {
+        Footer { body: self, footer }
+    }
+
+    fn with_header<H: Display>(self, header: H) -> Header<Self, H> {
+        Header {
+            body: self,
+            h: header,
+        }
+    }
+}
+
 pub(crate) struct ReadyHeaderWriter<'a, 'b, H: ?Sized, W>(&'b mut HeaderWriter<'a, H, W>);
 
 impl<'a, H: ?Sized, W> HeaderWriter<'a, H, W> {
@@ -56,6 +77,77 @@ where
         }
 
         self.0.inner.write_str(s)
+    }
+}
+
+pub(crate) struct FooterWriter<W> {
+    inner: W,
+    had_output: bool,
+}
+
+impl<W> fmt::Write for FooterWriter<W>
+where
+    W: fmt::Write,
+{
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        if !self.had_output && !s.is_empty() {
+            self.had_output = true;
+        }
+
+        self.inner.write_str(s)
+    }
+}
+
+#[allow(explicit_outlives_requirements)]
+pub(crate) struct Footer<B, H>
+where
+    B: Display,
+    H: Display,
+{
+    body: B,
+    footer: H,
+}
+
+impl<B, H> fmt::Display for Footer<B, H>
+where
+    B: Display,
+    H: Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut inner_f = FooterWriter {
+            inner: &mut *f,
+            had_output: false,
+        };
+
+        write!(&mut inner_f, "{}", self.body)?;
+
+        if inner_f.had_output {
+            self.footer.fmt(f)?;
+        }
+
+        Ok(())
+    }
+}
+
+#[allow(explicit_outlives_requirements)]
+pub(crate) struct Header<B, H>
+where
+    B: Display,
+    H: Display,
+{
+    body: B,
+    h: H,
+}
+
+impl<B, H> fmt::Display for Header<B, H>
+where
+    B: Display,
+    H: Display,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f.header(&self.h).ready(), "{}", self.body)?;
+
+        Ok(())
     }
 }
 

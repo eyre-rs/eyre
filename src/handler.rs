@@ -11,6 +11,12 @@ use std::fmt::Write;
 #[cfg(feature = "capture-spantrace")]
 use tracing_error::{ExtractSpanTrace, SpanTrace};
 
+impl std::fmt::Debug for Handler {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("redacted")
+    }
+}
+
 impl Handler {
     /// Return a reference to the captured `Backtrace` type
     pub fn backtrace(&self) -> Option<&Backtrace> {
@@ -25,8 +31,6 @@ impl Handler {
     }
 }
 
-impl Handler {}
-
 impl eyre::EyreHandler for Handler {
     fn debug(
         &self,
@@ -38,14 +42,16 @@ impl eyre::EyreHandler for Handler {
         }
 
         #[cfg(feature = "capture-spantrace")]
-        let errors = eyre::Chain::new(error)
-            .filter(|e| e.span_trace().is_none())
-            .enumerate();
+        let errors = || {
+            eyre::Chain::new(error)
+                .filter(|e| e.span_trace().is_none())
+                .enumerate()
+        };
 
         #[cfg(not(feature = "capture-spantrace"))]
-        let errors = eyre::Chain::new(error).enumerate();
+        let errors = || eyre::Chain::new(error).enumerate();
 
-        for (n, error) in errors {
+        for (n, error) in errors() {
             writeln!(f)?;
             write!(indented(f).ind(n), "{}", error.bright_red())?;
         }
@@ -116,6 +122,24 @@ impl eyre::EyreHandler for Handler {
             };
 
             write!(&mut separated.ready(), "{}", env_section)?;
+        }
+
+        #[cfg(feature = "issue-url")]
+        if let Some(url) = &self.issue_url {
+            let mut payload = String::from("Error: ");
+            for (n, error) in errors() {
+                writeln!(&mut payload)?;
+                write!(indented(&mut payload).ind(n), "{}", error)?;
+            }
+
+            let issue_section = crate::section::github::IssueSection::new(url, &payload)
+                .with_backtrace(self.backtrace.as_ref())
+                .with_metadata(&**self.issue_metadata);
+
+            #[cfg(feature = "capture-spantrace")]
+            let issue_section = issue_section.with_span_trace(span_trace);
+
+            write!(&mut separated.ready(), "{}", issue_section)?;
         }
 
         Ok(())
