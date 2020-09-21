@@ -125,7 +125,8 @@ impl eyre::EyreHandler for Handler {
         }
 
         #[cfg(feature = "issue-url")]
-        if let Some(url) = &self.issue_url {
+        if self.issue_url.is_some() && (*self.issue_filter)(crate::ErrorKind::Recoverable(error)) {
+            let url = self.issue_url.as_ref().unwrap();
             let mut payload = String::from("Error: ");
             for (n, error) in errors() {
                 writeln!(&mut payload)?;

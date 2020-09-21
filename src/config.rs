@@ -254,6 +254,8 @@ pub struct HookBuilder {
     issue_url: Option<String>,
     #[cfg(feature = "issue-url")]
     issue_metadata: Vec<(String, Box<dyn Display + Send + Sync + 'static>)>,
+    #[cfg(feature = "issue-url")]
+    issue_filter: Arc<IssueFilterCallback>,
 }
 
 impl HookBuilder {
@@ -292,6 +294,8 @@ impl HookBuilder {
             issue_url: None,
             #[cfg(feature = "issue-url")]
             issue_metadata: vec![],
+            #[cfg(feature = "issue-url")]
+            issue_filter: Arc::new(|_| true),
         }
     }
 
@@ -383,7 +387,7 @@ impl HookBuilder {
     ///
     /// ```rust
     /// color_eyre::config::HookBuilder::default()
-    ///     .issue_url("https://github.com/yaahc/jane-eyre/issues/new")
+    ///     .issue_url(concat!(env!("CARGO_PKG_REPOSITORY"), "/issues/new"))
     ///     .install()
     ///     .unwrap();
     /// ```
@@ -402,8 +406,8 @@ impl HookBuilder {
     ///
     /// ```rust
     /// color_eyre::config::HookBuilder::default()
-    ///     .issue_url("https://github.com/yaahc/jane-eyre/issues/new")
-    ///     .add_issue_metadata("version", "0.1.0")
+    ///     .issue_url(concat!(env!("CARGO_PKG_REPOSITORY"), "/issues/new"))
+    ///     .add_issue_metadata("version", env!("CARGO_PKG_VERSION"))
     ///     .install()
     ///     .unwrap();
     /// ```
@@ -416,6 +420,40 @@ impl HookBuilder {
     {
         let pair = (key.to_string(), Box::new(value) as _);
         self.issue_metadata.push(pair);
+        self
+    }
+
+    /// Configures a filter for disabling issue url generation for certain kinds of errors
+    ///
+    /// If the closure returns `true`, then the issue url will be generated.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// color_eyre::config::HookBuilder::default()
+    ///     .issue_url(concat!(env!("CARGO_PKG_REPOSITORY"), "/issues/new"))
+    ///     .issue_filter(|kind| match kind {
+    ///         color_eyre::ErrorKind::NonRecoverable(payload) => {
+    ///             let payload = payload
+    ///                 .downcast_ref::<String>()
+    ///                 .map(String::as_str)
+    ///                 .or_else(|| payload.downcast_ref::<&str>().cloned())
+    ///                 .unwrap_or("<non string panic payload>");
+    ///
+    ///             !payload.contains("my irrelevant error message")
+    ///         },
+    ///         color_eyre::ErrorKind::Recoverable(error) => !error.is::<std::fmt::Error>(),
+    ///     })
+    ///     .install()
+    ///     .unwrap();
+    ///
+    #[cfg(feature = "issue-url")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
+    pub fn issue_filter<F>(mut self, predicate: F) -> Self
+    where
+        F: Fn(crate::ErrorKind<'_>) -> bool + Send + Sync + 'static,
+    {
+        self.issue_filter = Arc::new(predicate);
         self
     }
 
@@ -495,6 +533,8 @@ impl HookBuilder {
             issue_url: self.issue_url.clone(),
             #[cfg(feature = "issue-url")]
             issue_metadata: metadata.clone(),
+            #[cfg(feature = "issue-url")]
+            issue_filter: self.issue_filter.clone(),
         };
 
         let eyre_hook = EyreHook {
@@ -505,6 +545,8 @@ impl HookBuilder {
             issue_url: self.issue_url,
             #[cfg(feature = "issue-url")]
             issue_metadata: metadata,
+            #[cfg(feature = "issue-url")]
+            issue_filter: self.issue_filter,
         };
 
         (panic_hook, eyre_hook)
@@ -654,24 +696,29 @@ fn print_panic_info(printer: &PanicPrinter<'_>, out: &mut fmt::Formatter<'_>) ->
     }
 
     #[cfg(feature = "issue-url")]
-    if let Some(url) = &hook.issue_url {
-        let payload = printer
-            .0
-            .payload()
-            .downcast_ref::<String>()
-            .map(String::as_str)
-            .or_else(|| printer.0.payload().downcast_ref::<&str>().cloned())
-            .unwrap_or("<non string panic payload>");
+    {
+        let payload = printer.0.payload();
 
-        let issue_section = crate::section::github::IssueSection::new(url, payload)
-            .with_backtrace(bt.as_ref())
-            .with_location(printer.0.location())
-            .with_metadata(&**hook.issue_metadata);
+        if hook.issue_url.is_some()
+            && (*hook.issue_filter)(crate::ErrorKind::NonRecoverable(payload))
+        {
+            let url = hook.issue_url.as_ref().unwrap();
+            let payload = payload
+                .downcast_ref::<String>()
+                .map(String::as_str)
+                .or_else(|| payload.downcast_ref::<&str>().cloned())
+                .unwrap_or("<non string panic payload>");
 
-        #[cfg(feature = "capture-spantrace")]
-        let issue_section = issue_section.with_span_trace(span_trace.as_ref());
+            let issue_section = crate::section::github::IssueSection::new(url, payload)
+                .with_backtrace(bt.as_ref())
+                .with_location(printer.0.location())
+                .with_metadata(&**hook.issue_metadata);
 
-        write!(&mut separated.ready(), "{}", issue_section)?;
+            #[cfg(feature = "capture-spantrace")]
+            let issue_section = issue_section.with_span_trace(span_trace.as_ref());
+
+            write!(&mut separated.ready(), "{}", issue_section)?;
+        }
     }
 
     Ok(())
@@ -688,6 +735,8 @@ pub(crate) struct PanicHook {
     issue_url: Option<String>,
     #[cfg(feature = "issue-url")]
     issue_metadata: Arc<Vec<(String, Box<dyn Display + Send + Sync + 'static>)>>,
+    #[cfg(feature = "issue-url")]
+    issue_filter: Arc<IssueFilterCallback>,
 }
 
 impl PanicHook {
@@ -717,6 +766,8 @@ pub(crate) struct EyreHook {
     issue_url: Option<String>,
     #[cfg(feature = "issue-url")]
     issue_metadata: Arc<Vec<(String, Box<dyn Display + Send + Sync + 'static>)>>,
+    #[cfg(feature = "issue-url")]
+    issue_filter: Arc<IssueFilterCallback>,
 }
 
 impl EyreHook {
@@ -747,6 +798,8 @@ impl EyreHook {
             issue_url: self.issue_url.clone(),
             #[cfg(feature = "issue-url")]
             issue_metadata: self.issue_metadata.clone(),
+            #[cfg(feature = "issue-url")]
+            issue_filter: self.issue_filter.clone(),
         }
     }
 
@@ -874,3 +927,8 @@ pub(crate) fn lib_verbosity() -> Verbosity {
 
 /// Callback for filtering a vector of `Frame`s
 pub type FilterCallback = dyn Fn(&mut Vec<&Frame>) + Send + Sync + 'static;
+
+/// Callback for filtering issue url generation in error reports
+#[cfg(feature = "issue-url")]
+#[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
+pub type IssueFilterCallback = dyn Fn(crate::ErrorKind<'_>) -> bool + Send + Sync + 'static;

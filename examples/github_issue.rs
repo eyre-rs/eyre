@@ -10,8 +10,12 @@ fn main() -> Result<(), Report> {
     install_tracing();
 
     color_eyre::config::HookBuilder::default()
-        .issue_url("https://github.com/yaahc/jane-eyre/issues/new")
-        .add_issue_metadata("version", "0.1.0")
+        .issue_url(concat!(env!("CARGO_PKG_REPOSITORY"), "/issues/new"))
+        .add_issue_metadata("version", env!("CARGO_PKG_VERSION"))
+        .issue_filter(|kind| match kind {
+            color_eyre::ErrorKind::NonRecoverable(_) => false,
+            color_eyre::ErrorKind::Recoverable(_) => true,
+        })
         .install()?;
 
     let report = read_config().unwrap_err();
