@@ -43,11 +43,6 @@ exactly = 1
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
-search = "\\.\\.\\.HEAD"
-replace="...{{tag_name}}"
-
-[[package.metadata.release.pre-release-replacements]]
-file = "CHANGELOG.md"
 search = "ReleaseDate"
 replace="{{date}}"
 
