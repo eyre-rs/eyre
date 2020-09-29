@@ -45,7 +45,7 @@ exactly = 1
 file = "CHANGELOG.md"
 search = "\\.\\.\\.HEAD"
 replace="...{{tag_name}}"
-exactly = 1
+# exactly = 1
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
