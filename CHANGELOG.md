@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - support track_caller on rust versions where it is available
 
-
 <!-- next-url -->
 [Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.1...HEAD
 [0.6.1]: https://github.com/yaahc/eyre/releases/tag/v0.6.1

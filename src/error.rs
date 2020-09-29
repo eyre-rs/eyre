@@ -84,9 +84,9 @@ impl Report {
         };
 
         // Safety: passing vtable that operates on the right type E.
-        let handler = Some(crate::capture_handler(&error));
+        let handlers = vec![crate::capture_handler(&error)];
 
-        unsafe { Report::construct(error, vtable, handler) }
+        unsafe { Report::construct(error, vtable, handlers) }
     }
 
     #[cfg_attr(track_caller, track_caller)]
@@ -107,9 +107,9 @@ impl Report {
 
         // Safety: MessageError is repr(transparent) so it is okay for the
         // vtable to allow casting the MessageError<M> to M.
-        let handler = Some(crate::capture_handler(&error));
+        let handlers = vec![crate::capture_handler(&error)];
 
-        unsafe { Report::construct(error, vtable, handler) }
+        unsafe { Report::construct(error, vtable, handlers) }
     }
 
     #[cfg_attr(track_caller, track_caller)]
@@ -117,7 +117,7 @@ impl Report {
     where
         M: Display + Send + Sync + 'static,
     {
-        use crate::wrapper::{DisplayError, NoneError};
+        use crate::wrapper::DisplayError;
         let error: DisplayError<M> = DisplayError(message);
         let vtable = &ErrorVTable {
             object_drop: object_drop::<DisplayError<M>>,
@@ -130,9 +130,9 @@ impl Report {
 
         // Safety: DisplayError is repr(transparent) so it is okay for the
         // vtable to allow casting the DisplayError<M> to M.
-        let handler = Some(crate::capture_handler(&NoneError));
+        let handlers = vec![crate::capture_handler(&error)];
 
-        unsafe { Report::construct(error, vtable, handler) }
+        unsafe { Report::construct(error, vtable, handlers) }
     }
 
     #[cfg_attr(track_caller, track_caller)]
@@ -153,16 +153,16 @@ impl Report {
         };
 
         // Safety: passing vtable that operates on the right type.
-        let handler = Some(crate::capture_handler(&error));
+        let handlers = vec![crate::capture_handler(&error)];
 
-        unsafe { Report::construct(error, vtable, handler) }
+        unsafe { Report::construct(error, vtable, handlers) }
     }
 
     #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_boxed(error: Box<dyn StdError + Send + Sync>) -> Self {
         use crate::wrapper::BoxedError;
         let error = BoxedError(error);
-        let handler = Some(crate::capture_handler(&error));
+        let handlers = vec![crate::capture_handler(&error)];
 
         let vtable = &ErrorVTable {
             object_drop: object_drop::<BoxedError>,
@@ -175,7 +175,7 @@ impl Report {
 
         // Safety: BoxedError is repr(transparent) so it is okay for the vtable
         // to allow casting to Box<dyn StdError + Send + Sync>.
-        unsafe { Report::construct(error, vtable, handler) }
+        unsafe { Report::construct(error, vtable, handlers) }
     }
 
     // Takes backtrace as argument rather than capturing it here so that the
@@ -186,14 +186,14 @@ impl Report {
     unsafe fn construct<E>(
         error: E,
         vtable: &'static ErrorVTable,
-        handler: Option<Box<dyn EyreHandler>>,
+        handlers: Vec<Box<dyn EyreHandler>>,
     ) -> Self
     where
         E: StdError + Send + Sync + 'static,
     {
         let inner = Box::new(ErrorImpl {
             vtable,
-            handler,
+            handlers,
             _object: error,
         });
         // Erase the concrete type of E from the compile-time type system. This
@@ -264,7 +264,7 @@ impl Report {
     where
         D: Display + Send + Sync + 'static,
     {
-        let handler = self.inner.handler.take();
+        let handlers = mem::take(&mut self.inner.handlers);
         let error: ContextError<D, Report> = ContextError { msg, error: self };
 
         let vtable = &ErrorVTable {
@@ -277,7 +277,7 @@ impl Report {
         };
 
         // Safety: passing vtable that operates on the right type.
-        unsafe { Report::construct(error, vtable, handler) }
+        unsafe { Report::construct(error, vtable, handlers) }
     }
 
     /// An iterator of the chain of source errors contained by this Report.
@@ -431,24 +431,54 @@ impl Report {
 
     /// Get a reference to the Handler for this Report.
     pub fn handler(&self) -> &dyn EyreHandler {
-        self.inner.handler.as_ref().unwrap().as_ref()
+        self.inner.handlers[0].as_ref()
     }
 
     /// Get a mutable reference to the Handler for this Report.
     pub fn handler_mut(&mut self) -> &mut dyn EyreHandler {
-        self.inner.handler.as_mut().unwrap().as_mut()
+        self.inner.handlers[0].as_mut()
+    }
+
+    /// Retrieve a mutable reference to a handler by its type using the provided
+    /// function to construct it if one doesn't already exist.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// ```
+    pub fn handler_or_else<T>(
+        &mut self,
+        default: impl Fn(&(dyn std::error::Error + 'static)) -> T,
+    ) -> &mut T
+    where
+        T: EyreHandler,
+    {
+        if !self.inner.handlers.iter().any(|handler| handler.is::<T>()) {
+            let handler = default(self.inner.error());
+            self.inner.handlers.push(Box::new(handler));
+        }
+
+        for handler in &mut self.inner.handlers {
+            if let Some(handler) = handler.downcast_mut::<T>() {
+                return handler;
+            }
+        }
+
+        unreachable!(
+            "default function guarantees that one of the handlers will be the expected type"
+        )
     }
 
     /// Get a reference to the Handler for this Report.
     #[doc(hidden)]
     pub fn context(&self) -> &dyn EyreHandler {
-        self.inner.handler.as_ref().unwrap().as_ref()
+        self.handler()
     }
 
     /// Get a mutable reference to the Handler for this Report.
     #[doc(hidden)]
     pub fn context_mut(&mut self) -> &mut dyn EyreHandler {
-        self.inner.handler.as_mut().unwrap().as_mut()
+        self.handler_mut()
     }
 }
 
@@ -663,7 +693,7 @@ where
 #[repr(C)]
 pub(crate) struct ErrorImpl<E> {
     vtable: &'static ErrorVTable,
-    pub(crate) handler: Option<Box<dyn EyreHandler>>,
+    pub(crate) handlers: Vec<Box<dyn EyreHandler>>,
     // NOTE: Don't use directly. Use only through vtable. Erased type may have
     // different alignment.
     _object: E,
