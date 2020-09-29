@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.6.0" # remember to update html_root_url
+version = "0.6.2-alpha.0"
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -9,6 +9,10 @@ repository = "https://github.com/yaahc/eyre"
 documentation = "https://docs.rs/eyre"
 readme = "README.md"
 categories = ["rust-patterns"]
+
+[features]
+default = ["track-caller"]
+track-caller = []
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
@@ -25,3 +29,37 @@ once_cell = "1.4.0"
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 rustdoc-args = ["--cfg", "doc_cfg"]
+
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "Unreleased"
+replace="{{version}}"
+
+[[package.metadata.release.pre-release-replacements]]
+file = "src/lib.rs"
+search = "#!\\[doc\\(html_root_url.*"
+replace = "#![doc(html_root_url = \"https://docs.rs/{{crate_name}}/{{version}}\")]"
+exactly = 1
+
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "\\.\\.\\.HEAD"
+replace="...{{tag_name}}"
+exactly = 1
+
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "ReleaseDate"
+replace="{{date}}"
+
+[[package.metadata.release.pre-release-replacements]]
+file="CHANGELOG.md"
+search="<!-- next-header -->"
+replace="<!-- next-header -->\n\n## [Unreleased] - ReleaseDate"
+exactly=1
+
+[[package.metadata.release.pre-release-replacements]]
+file="CHANGELOG.md"
+search="<!-- next-url -->"
+replace="<!-- next-url -->\n[Unreleased]: https://github.com/yaahc/{{crate_name}}/compare/{{tag_name}}...HEAD"
+exactly=1
