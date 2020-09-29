@@ -542,6 +542,7 @@ pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
 }
 
 #[cfg_attr(track_caller, track_caller)]
+#[cfg_attr(not(track_caller), allow(unused_mut))]
 fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
     let hook = HOOK
         .get_or_init(|| Box::new(DefaultHandler::default_with))
@@ -737,9 +738,11 @@ impl EyreHandler for DefaultHandler {
         }
 
         #[cfg(all(track_caller, feature = "track-caller"))]
-        if let Some(location) = self.location {
-            write!(f, "\n\nLocation:\n")?;
-            write!(indenter::indented(f), "{}", location)?;
+        {
+            if let Some(location) = self.location {
+                write!(f, "\n\nLocation:\n")?;
+                write!(indenter::indented(f), "{}", location)?;
+            }
         }
 
         #[cfg(backtrace)]
