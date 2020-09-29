@@ -79,7 +79,7 @@ fn test_altdisplay() {
 }
 
 #[test]
-#[cfg_attr(not(backtrace), ignore)]
+#[cfg_attr(any(backtrace, track_caller), ignore)]
 fn test_debug() {
     assert_eq!(EXPECTED_DEBUG_F, format!("{:?}", f().unwrap_err()));
     assert_eq!(EXPECTED_DEBUG_G, format!("{:?}", g().unwrap_err()));
