@@ -541,12 +541,20 @@ pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
     HOOK.set(hook).map_err(|_| InstallError)
 }
 
+#[cfg_attr(track_caller, track_caller)]
 fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
     let hook = HOOK
         .get_or_init(|| Box::new(DefaultHandler::default_with))
         .as_ref();
 
-    hook(error)
+    let mut handler = hook(error);
+
+    #[cfg(track_caller)]
+    {
+        handler.track_caller(std::panic::Location::caller())
+    }
+
+    handler
 }
 
 impl dyn EyreHandler {
@@ -657,6 +665,10 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
 
         Ok(())
     }
+
+    /// Store the location of the caller who constructed this error report
+    #[allow(unused_variables)]
+    fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {}
 }
 
 /// The default provided error report handler for `eyre::Report`.
@@ -666,6 +678,8 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
 #[allow(dead_code)]
 pub struct DefaultHandler {
     backtrace: Option<Backtrace>,
+    #[cfg(track_caller)]
+    location: Option<&'static std::panic::Location<'static>>,
 }
 
 impl DefaultHandler {
@@ -673,7 +687,11 @@ impl DefaultHandler {
     fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
         let backtrace = backtrace_if_absent!(error);
 
-        Box::new(Self { backtrace })
+        Box::new(Self {
+            backtrace,
+            #[cfg(track_caller)]
+            location: None,
+        })
     }
 }
 
@@ -718,6 +736,12 @@ impl EyreHandler for DefaultHandler {
             }
         }
 
+        #[cfg(all(track_caller, feature = "track-caller"))]
+        if let Some(location) = self.location {
+            write!(f, "\n\nLocation:\n")?;
+            write!(indenter::indented(f), "{}", location)?;
+        }
+
         #[cfg(backtrace)]
         {
             use std::backtrace::BacktraceStatus;
@@ -733,6 +757,11 @@ impl EyreHandler for DefaultHandler {
         }
 
         Ok(())
+    }
+
+    #[cfg(track_caller)]
+    fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {
+        self.location = Some(location);
     }
 }
 

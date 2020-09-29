@@ -6,7 +6,7 @@ use std::process::{Command, ExitStatus};
 // This code exercises the surface area that we expect of the std Backtrace
 // type. If the current toolchain is able to compile it, we go ahead and use
 // backtrace in eyre.
-const PROBE: &str = r#"
+const BACKTRACE_PROBE: &str = r#"
     #![feature(backtrace)]
     #![allow(dead_code)]
 
@@ -34,18 +34,32 @@ const PROBE: &str = r#"
     }
 "#;
 
+const TRACK_CALLER_PROBE: &str = r#"
+    #![allow(dead_code)]
+
+    #[track_caller]
+    fn foo() {
+        let _location = std::panic::Location::caller();
+    }
+"#;
+
 fn main() {
-    match compile_probe() {
+    match compile_probe(BACKTRACE_PROBE) {
         Some(status) if status.success() => println!("cargo:rustc-cfg=backtrace"),
+        _ => {}
+    }
+
+    match compile_probe(TRACK_CALLER_PROBE) {
+        Some(status) if status.success() => println!("cargo:rustc-cfg=track_caller"),
         _ => {}
     }
 }
 
-fn compile_probe() -> Option<ExitStatus> {
+fn compile_probe(probe: &str) -> Option<ExitStatus> {
     let rustc = env::var_os("RUSTC")?;
     let out_dir = env::var_os("OUT_DIR")?;
     let probefile = Path::new(&out_dir).join("probe.rs");
-    fs::write(&probefile, PROBE).ok()?;
+    fs::write(&probefile, probe).ok()?;
     Command::new(rustc)
         .arg("--edition=2018")
         .arg("--crate-name=eyre_build")

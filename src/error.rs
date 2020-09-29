@@ -16,6 +16,7 @@ impl Report {
     ///
     /// If the error type does not provide a backtrace, a backtrace will be
     /// created here to ensure that a backtrace exists.
+    #[cfg_attr(track_caller, track_caller)]
     pub fn new<E>(error: E) -> Self
     where
         E: StdError + Send + Sync + 'static,
@@ -60,6 +61,7 @@ impl Report {
     ///         .await
     /// }
     /// ```
+    #[cfg_attr(track_caller, track_caller)]
     pub fn msg<M>(message: M) -> Self
     where
         M: Display + Debug + Send + Sync + 'static,
@@ -67,6 +69,7 @@ impl Report {
         Report::from_adhoc(message)
     }
 
+    #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_std<E>(error: E) -> Self
     where
         E: StdError + Send + Sync + 'static,
@@ -86,6 +89,7 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
+    #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_adhoc<M>(message: M) -> Self
     where
         M: Display + Debug + Send + Sync + 'static,
@@ -108,6 +112,7 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
+    #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_display<M>(message: M) -> Self
     where
         M: Display + Send + Sync + 'static,
@@ -130,6 +135,7 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
+    #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_msg<D, E>(msg: D, error: E) -> Self
     where
         D: Display + Send + Sync + 'static,
@@ -152,6 +158,7 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
+    #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_boxed(error: Box<dyn StdError + Send + Sync>) -> Self {
         use crate::wrapper::BoxedError;
         let error = BoxedError(error);
@@ -449,6 +456,7 @@ impl<E> From<E> for Report
 where
     E: StdError + Send + Sync + 'static,
 {
+    #[cfg_attr(track_caller, track_caller)]
     fn from(error: E) -> Self {
         Report::from_std(error)
     }

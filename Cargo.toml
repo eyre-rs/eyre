@@ -10,6 +10,10 @@ documentation = "https://docs.rs/eyre"
 readme = "README.md"
 categories = ["rust-patterns"]
 
+[features]
+default = ["track-caller"]
+track-caller = []
+
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
 rustversion = "1.0"
