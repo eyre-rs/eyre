@@ -588,6 +588,32 @@ impl dyn EyreHandler {
             None
         }
     }
+
+    ///
+    pub fn report<'a>(&'a self, error: &'a (dyn std::error::Error + 'static)) -> EyreReport<'a> {
+        EyreReport {
+            handler: self,
+            error,
+        }
+    }
+}
+
+///
+pub struct EyreReport<'a> {
+    handler: &'a dyn EyreHandler,
+    error: &'a (dyn std::error::Error + 'static),
+}
+
+impl std::fmt::Display for EyreReport<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.handler.display(self.error, f)
+    }
+}
+
+impl std::fmt::Debug for EyreReport<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.handler.debug(self.error, f)
+    }
 }
 
 /// Error Report Handler trait for customizing `eyre::Report`
@@ -670,6 +696,9 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
     /// Store the location of the caller who constructed this error report
     #[allow(unused_variables)]
     fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {}
+
+    /// Store type erased data
+    fn push(&mut self, _: Box<dyn std::any::Any>) {}
 }
 
 /// The default provided error report handler for `eyre::Report`.

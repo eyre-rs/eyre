@@ -439,6 +439,11 @@ impl Report {
         self.inner.handler.as_mut().unwrap().as_mut()
     }
 
+    /// Box and insert the provided context into the inner Handler.
+    pub fn push(&mut self, data: impl std::any::Any) {
+        self.inner.handler.as_mut().unwrap().push(Box::new(data));
+    }
+
     /// Get a reference to the Handler for this Report.
     #[doc(hidden)]
     pub fn context(&self) -> &dyn EyreHandler {
