@@ -58,6 +58,13 @@ impl eyre::EyreHandler for Handler {
 
         let mut separated = f.header("\n\n");
 
+        #[cfg(feature = "track-caller")]
+        write!(
+            separated.ready(),
+            "{}",
+            crate::SectionExt::header(crate::fmt::LocationSection(self.location), "Location:")
+        )?;
+
         for section in self
             .sections
             .iter()
@@ -144,6 +151,11 @@ impl eyre::EyreHandler for Handler {
         }
 
         Ok(())
+    }
+
+    #[cfg(feature = "track-caller")]
+    fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {
+        self.location = Some(location);
     }
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "color-eyre"
-version = "0.5.6-alpha.0"
+version = "0.5.7-alpha.0"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -12,12 +12,13 @@ categories = []
 keywords = []
 
 [features]
-default = ["capture-spantrace"]
+default = ["track-caller", "capture-spantrace"]
 capture-spantrace = ["tracing-error", "color-spantrace"]
 issue-url = ["url"]
+track-caller = []
 
 [dependencies]
-eyre = "0.6.0"
+eyre = "0.6.1"
 tracing-error = { version = "0.1.2", optional = true }
 backtrace = { version = "0.3.48", features = ["gimli-symbolize"] }
 indenter = "0.3.0"

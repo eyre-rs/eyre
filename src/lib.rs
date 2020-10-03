@@ -334,7 +334,7 @@
 //! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.5.5")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.5.6")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_docs,
@@ -377,6 +377,7 @@ use tracing_error::SpanTrace;
 pub use Handler as Context;
 
 pub mod config;
+mod fmt;
 mod handler;
 pub(crate) mod private;
 pub mod section;
@@ -407,6 +408,8 @@ pub struct Handler {
         std::sync::Arc<Vec<(String, Box<dyn std::fmt::Display + Send + Sync + 'static>)>>,
     #[cfg(feature = "issue-url")]
     issue_filter: std::sync::Arc<config::IssueFilterCallback>,
+    #[cfg(feature = "track-caller")]
+    location: Option<&'static std::panic::Location<'static>>,
 }
 
 /// The kind of type erased error being reported

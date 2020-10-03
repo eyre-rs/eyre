@@ -627,13 +627,7 @@ impl PanicMessage for DefaultPanicMessage {
 
         // If known, print panic location.
         write!(f, "Location: ")?;
-        if let Some(loc) = pi.location() {
-            write!(f, "{}", loc.file().purple())?;
-            write!(f, ":")?;
-            write!(f, "{}", loc.line().purple())?;
-        } else {
-            write!(f, "<unknown>")?;
-        }
+        write!(f, "{}", crate::fmt::LocationSection(pi.location()))?;
 
         Ok(())
     }
@@ -800,6 +794,8 @@ impl EyreHook {
             issue_metadata: self.issue_metadata.clone(),
             #[cfg(feature = "issue-url")]
             issue_filter: self.issue_filter.clone(),
+            #[cfg(feature = "track-caller")]
+            location: None,
         }
     }
 
