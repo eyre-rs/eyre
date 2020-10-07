@@ -18,10 +18,10 @@ error reports. For more details on customization checkout the docs on
 
 ## Custom Report Handlers
 
-The heart of this crate is it's ability to swap out the Handler type to change
+The heart of this crate is its ability to swap out the Handler type to change
 what information is carried alongside errors and how the end report is
 formatted. This crate is meant to be used alongside companion crates that
-customize it's behavior. Below is a list of known crates that export report
+customize its behavior. Below is a list of known crates that export report
 handlers for eyre and short summaries of what features they provide.
 
 - [`stable-eyre`]: Switches the backtrace type from `std`'s to `backtrace-rs`'s
