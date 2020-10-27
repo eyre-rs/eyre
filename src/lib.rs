@@ -283,7 +283,7 @@
 //! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.1")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.2")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -1117,6 +1117,7 @@ pub mod private {
         pub use crate::kind::BoxedKind;
     }
 
+    #[cfg_attr(track_caller, track_caller)]
     pub fn new_adhoc<M>(message: M) -> Report
     where
         M: Display + Debug + Send + Sync + 'static,
