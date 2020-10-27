@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Fixed
+- added missing track_caller annotation to new_adhoc function
 
 ## [0.6.1] - 2020-09-28
 ### Added

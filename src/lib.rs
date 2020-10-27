@@ -1117,6 +1117,7 @@ pub mod private {
         pub use crate::kind::BoxedKind;
     }
 
+    #[cfg_attr(track_caller, track_caller)]
     pub fn new_adhoc<M>(message: M) -> Report
     where
         M: Display + Debug + Send + Sync + 'static,
