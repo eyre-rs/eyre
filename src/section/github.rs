@@ -1,6 +1,7 @@
 use crate::writers::DisplayExt;
 use backtrace::Backtrace;
 use std::{fmt, panic::Location};
+#[cfg(feature = "capture-spantrace")]
 use tracing_error::SpanTrace;
 use url::Url;
 
@@ -11,6 +12,7 @@ pub(crate) struct IssueSection<'a> {
     msg: &'a str,
     location: Option<&'a Location<'a>>,
     backtrace: Option<&'a Backtrace>,
+    #[cfg(feature = "capture-spantrace")]
     span_trace: Option<&'a SpanTrace>,
     metadata: &'a [(String, Display<'a>)],
 }
@@ -22,6 +24,7 @@ impl<'a> IssueSection<'a> {
             msg,
             location: None,
             backtrace: None,
+            #[cfg(feature = "capture-spantrace")]
             span_trace: None,
             metadata: &[],
         }
@@ -37,6 +40,7 @@ impl<'a> IssueSection<'a> {
         self
     }
 
+    #[cfg(feature = "capture-spantrace")]
     pub(crate) fn with_span_trace(mut self, span_trace: impl Into<Option<&'a SpanTrace>>) -> Self {
         self.span_trace = span_trace.into();
         self
@@ -62,6 +66,7 @@ impl fmt::Display for IssueSection<'_> {
             body.push_section("Metadata", metadata)?;
         }
 
+        #[cfg(feature = "capture-spantrace")]
         if let Some(st) = self.span_trace {
             body.push_section(
                 "SpanTrace",

@@ -25,7 +25,7 @@ jobs:
           command: check
 
   test-features:
-    name: Test Suite
+    name: Test Features
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -44,9 +44,21 @@ jobs:
         with:
           command: test
           args: --no-default-features
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-default-features --features issue-url
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-default-features --features track-caller
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-default-features --features capture-spantrace
 
   test-versions:
-    name: Test Suite
+    name: Test Versions
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -78,7 +90,7 @@ jobs:
         if: ${{ matrix.target == 'wasm32-unknown-unknown' }}
 
   test-os:
-    name: Test Suite
+    name: Test Operating Systems
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

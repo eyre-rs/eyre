@@ -86,7 +86,7 @@ pub trait SectionExt: Sized {
     ///
     /// # Examples
     ///
-    /// ```rust
+    /// ```rust,no_run
     /// use color_eyre::{eyre::eyre, Help, SectionExt, eyre::Report};
     ///
     /// let all_in_header = "header\n   body\n   body";
