@@ -27,6 +27,15 @@ jobs:
   test-features:
     name: Test Features
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features:
+          -
+          - --all-features
+          - --no-default-features
+          - --no-default-features --features issue-url
+          - --no-default-features --features capture-spantrace
+          - --no-default-features --features track-caller
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -36,26 +45,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features --features issue-url
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features --features track-caller
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features --features capture-spantrace
+          args: ${{ matrix.features }}
 
   test-versions:
     name: Test Versions

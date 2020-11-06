@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.7] - 2020-11-05
+### Fixed
+- Added missing `cfg`s that caused compiler errors when only enabling the
+  `issue-url` feature
+
 ## [0.5.6] - 2020-10-02
 ### Added
 - Add support for track caller added in eyre 0.6.1 and print original
@@ -40,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   better compatibility with the Display trait
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.6...HEAD
+[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.7...HEAD
+[0.5.7]: https://github.com/yaahc/color-eyre/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/yaahc/color-eyre/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/yaahc/color-eyre/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/yaahc/color-eyre/compare/v0.5.3...v0.5.4
