@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Fixed
+- added missing track_caller annotation to autoref specialization functions
 
 ## [0.6.2] - 2020-10-27
 ### Fixed
