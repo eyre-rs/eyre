@@ -62,6 +62,7 @@ pub trait AdhocKind: Sized {
 impl<T> AdhocKind for &T where T: ?Sized + Display + Debug + Send + Sync + 'static {}
 
 impl Adhoc {
+    #[cfg_attr(track_caller, track_caller)]
     pub fn new<M>(self, message: M) -> Report
     where
         M: Display + Debug + Send + Sync + 'static,
@@ -82,6 +83,7 @@ pub trait TraitKind: Sized {
 impl<E> TraitKind for E where E: Into<Report> {}
 
 impl Trait {
+    #[cfg_attr(track_caller, track_caller)]
     pub fn new<E>(self, error: E) -> Report
     where
         E: Into<Report>,
@@ -102,6 +104,7 @@ pub trait BoxedKind: Sized {
 impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 
 impl Boxed {
+    #[cfg_attr(track_caller, track_caller)]
     pub fn new(self, error: Box<dyn StdError + Send + Sync>) -> Report {
         Report::from_boxed(error)
     }
