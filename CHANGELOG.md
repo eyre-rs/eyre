@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.6.3] - 2020-11-10
+### Fixed
+- added missing track_caller annotation to autoref specialization functions
+
 ## [0.6.2] - 2020-10-27
 ### Fixed
 - added missing track_caller annotation to new_adhoc function
@@ -18,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.2...HEAD
+[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.3...HEAD
+[0.6.3]: https://github.com/yaahc/eyre/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/yaahc/eyre/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/yaahc/eyre/releases/tag/v0.6.1
