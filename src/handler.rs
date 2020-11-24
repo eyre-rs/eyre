@@ -1,5 +1,5 @@
-use crate::config::installed_hook;
 use crate::{
+    config::BacktraceFormatter,
     section::help::HelpInfo,
     writers::{EnvSection, WriterExt},
     Handler,
@@ -28,6 +28,16 @@ impl Handler {
     #[cfg_attr(docsrs, doc(cfg(feature = "capture-spantrace")))]
     pub fn span_trace(&self) -> Option<&SpanTrace> {
         self.span_trace.as_ref()
+    }
+
+    pub(crate) fn format_backtrace<'a>(
+        &'a self,
+        trace: &'a backtrace::Backtrace,
+    ) -> BacktraceFormatter<'a> {
+        BacktraceFormatter {
+            filters: &self.filters,
+            inner: trace,
+        }
     }
 }
 
@@ -99,7 +109,7 @@ impl eyre::EyreHandler for Handler {
         }
 
         if let Some(backtrace) = self.backtrace.as_ref() {
-            let fmted_bt = installed_hook().format_backtrace(&backtrace);
+            let fmted_bt = self.format_backtrace(&backtrace);
 
             write!(
                 indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),

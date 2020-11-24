@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.8] - 2020-11-23
+### Added
+- Exposed internal interfaces for the panic handler so that it can be wrapped
+  by consumers to customize the behaviour of the panic hook.
+
 ## [0.5.7] - 2020-11-05
 ### Fixed
 - Added missing `cfg`s that caused compiler errors when only enabling the
@@ -45,7 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   better compatibility with the Display trait
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.7...HEAD
+[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.8...HEAD
+[0.5.8]: https://github.com/yaahc/color-eyre/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/yaahc/color-eyre/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/yaahc/color-eyre/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/yaahc/color-eyre/compare/v0.5.4...v0.5.5
