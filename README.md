@@ -206,7 +206,7 @@ For an example of how to setup custom filters, check out [`examples/custom_filte
 [`backtrace::Backtrace`]: https://docs.rs/backtrace/*/backtrace/struct.Backtrace.html
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 [`color-spantrace`]: https://github.com/yaahc/color-spantrace
-[`Section`]: https://docs.rs/color-eyre/*/color_eyre/trait.Section.html
+[`Section`]: https://docs.rs/color-eyre/*/color_eyre/section/trait.Section.html
 [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 [`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
 [`Handler`]: https://docs.rs/color-eyre/*/color_eyre/struct.Handler.html
