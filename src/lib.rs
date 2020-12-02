@@ -315,8 +315,8 @@ impl Frame<'_> {
 
         let file = match File::open(filename) {
             Ok(file) => file,
-            Err(ref e) if e.kind() == ErrorKind::NotFound => return Ok(()),
-            e @ Err(_) => e.unwrap(),
+            // ignore io errors and just don't print the source
+            Err(_) => return Ok(()),
         };
 
         use std::fmt::Write;
