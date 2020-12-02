@@ -43,6 +43,20 @@
 //! println!("{}", color_spantrace::colorize(&span_trace));
 //! ```
 //!
+//! ## Output Format
+//!
+//! Running `examples/usage.rs` from the `color-spantrace` repo produces the following output:
+//!
+//! <pre><font color="#4E9A06"><b>❯</b></font> cargo run --example usage
+//! <font color="#4E9A06"><b>    Finished</b></font> dev [unoptimized + debuginfo] target(s) in 0.04s
+//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/usage`
+//! ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//!
+//!  0: <font color="#F15D22">usage::two</font>
+//!     at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">18</font>
+//!  1: <font color="#F15D22">usage::one</font> with <font color="#34E2E2">i=42</font>
+//!     at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">13</font></pre>
+//!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.4")]
@@ -69,15 +83,108 @@
     unused_parens,
     while_true
 )]
-use ansi_term::{
-    Color::{Cyan, Purple, Red},
-    Style,
-};
+use once_cell::sync::OnceCell;
+use owo_colors::{style, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader, ErrorKind};
 use tracing_error::SpanTrace;
+
+static THEME: OnceCell<Theme> = OnceCell::new();
+
+/// A struct that represents theme that is used by `color_spantrace`
+#[derive(Debug, Copy, Clone, Default)]
+pub struct Theme {
+    file: Style,
+    line_number: Style,
+    target: Style,
+    fields: Style,
+    active_line: Style,
+}
+
+impl Theme {
+    /// Create blank theme
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// A theme for a dark background. This is the default
+    pub fn dark() -> Self {
+        Self {
+            file: style().purple(),
+            line_number: style().purple(),
+            active_line: style().white().bold(),
+            target: style().bright_red(),
+            fields: style().bright_cyan(),
+        }
+    }
+
+    // XXX same as with `light` in `color_eyre`
+    /// A theme for a light background
+    pub fn light() -> Self {
+        Self {
+            file: style().purple(),
+            line_number: style().purple(),
+            target: style().red(),
+            fields: style().blue(),
+            active_line: style().bold(),
+        }
+    }
+
+    /// Styles printed paths
+    pub fn file(mut self, style: Style) -> Self {
+        self.file = style;
+        self
+    }
+
+    /// Styles the line number of a file
+    pub fn line_number(mut self, style: Style) -> Self {
+        self.line_number = style;
+        self
+    }
+
+    /// Styles the target (i.e. the module and function name, and so on)
+    pub fn target(mut self, style: Style) -> Self {
+        self.target = style;
+        self
+    }
+
+    /// Styles fields associated with a the `tracing::Span`.
+    pub fn fields(mut self, style: Style) -> Self {
+        self.fields = style;
+        self
+    }
+
+    /// Styles the selected line of displayed code
+    pub fn active_line(mut self, style: Style) -> Self {
+        self.active_line = style;
+        self
+    }
+}
+
+/// An error returned by `set_theme` if a global theme was already set
+#[derive(Debug)]
+pub struct InstallThemeError;
+
+impl fmt::Display for InstallThemeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("could not set the provided `Theme` globally as another was already set")
+    }
+}
+
+impl std::error::Error for InstallThemeError {}
+
+/// Sets the global theme.
+///
+/// # Details
+///
+/// This can only be set once and otherwise fails.
+///
+/// **Note:** `colorize` sets the global theme implicitly, if it was not set already. So calling `colorize` and then `set_theme` fails
+pub fn set_theme(theme: Theme) -> Result<(), InstallThemeError> {
+    THEME.set(theme).map_err(|_| InstallThemeError)
+}
 
 /// Display a [`SpanTrace`] with colors and source
 ///
@@ -93,13 +200,17 @@ use tracing_error::SpanTrace;
 /// println!("{}", color_spantrace::colorize(&span_trace));
 /// ```
 ///
+/// **Note:** `colorize` sets the global theme implicitly, if it was not set already. So calling `colorize` and then `set_theme` fails
+///
 /// [`SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 pub fn colorize(span_trace: &SpanTrace) -> impl fmt::Display + '_ {
-    ColorSpanTrace { span_trace }
+    let theme = *THEME.get_or_init(Theme::dark);
+    ColorSpanTrace { span_trace, theme }
 }
 
 struct ColorSpanTrace<'a> {
     span_trace: &'a SpanTrace,
+    theme: Theme,
 }
 
 macro_rules! try_bool {
@@ -117,6 +228,7 @@ macro_rules! try_bool {
 struct Frame<'a> {
     metadata: &'a tracing_core::Metadata<'static>,
     fields: &'a str,
+    theme: Theme,
 }
 
 /// Defines how verbose the backtrace is supposed to be.
@@ -161,15 +273,15 @@ impl Frame<'_> {
             f,
             "{:>2}: {}{}{}",
             i,
-            Red.make_intense().paint(self.metadata.target()),
-            Red.make_intense().paint("::"),
-            Red.make_intense().paint(self.metadata.name()),
+            self.theme.target.style(self.metadata.target()),
+            self.theme.target.style("::"),
+            self.theme.target.style(self.metadata.name()),
         )
     }
 
     fn print_fields(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if !self.fields.is_empty() {
-            write!(f, " with {}", Cyan.make_intense().paint(self.fields))?;
+            write!(f, " with {}", self.theme.fields.style(self.fields))?;
         }
 
         Ok(())
@@ -184,8 +296,8 @@ impl Frame<'_> {
             write!(
                 f,
                 "\n    at {}:{}",
-                Purple.paint(file),
-                Purple.paint(lineno)
+                self.theme.file.style(file),
+                self.theme.line_number.style(lineno),
             )?;
         } else {
             write!(f, "\n    at <unknown source file>")?;
@@ -213,7 +325,6 @@ impl Frame<'_> {
         let reader = BufReader::new(file);
         let start_line = lineno - 2.min(lineno - 1);
         let surrounding_src = reader.lines().skip(start_line as usize - 1).take(5);
-        let bold = Style::new().bold();
         let mut buf = String::new();
         for (line, cur_line_no) in surrounding_src.zip(start_line..) {
             if cur_line_no == lineno {
@@ -223,7 +334,7 @@ impl Frame<'_> {
                     cur_line_no.to_string(),
                     line.unwrap()
                 )?;
-                write!(f, "\n{}", bold.paint(&buf))?;
+                write!(f, "\n{}", self.theme.active_line.style(&buf))?;
                 buf.clear();
             } else {
                 write!(f, "\n{:>8} │ {}", cur_line_no, line.unwrap())?;
@@ -241,7 +352,11 @@ impl fmt::Display for ColorSpanTrace<'_> {
 
         writeln!(f, "{:━^80}\n", " SPANTRACE ")?;
         self.span_trace.with_spans(|metadata, fields| {
-            let frame = Frame { metadata, fields };
+            let frame = Frame {
+                metadata,
+                fields,
+                theme: self.theme,
+            };
 
             if span > 0 {
                 try_bool!(write!(f, "\n",), err);
@@ -258,37 +373,5 @@ impl fmt::Display for ColorSpanTrace<'_> {
         });
 
         err
-    }
-}
-
-// TODO: remove when / if ansi_term merges these changes upstream
-trait ColorExt {
-    fn make_intense(self) -> Self;
-}
-
-impl ColorExt for ansi_term::Color {
-    fn make_intense(self) -> Self {
-        use ansi_term::Color::*;
-
-        match self {
-            Black => Fixed(8),
-            Red => Fixed(9),
-            Green => Fixed(10),
-            Yellow => Fixed(11),
-            Blue => Fixed(12),
-            Purple => Fixed(13),
-            Cyan => Fixed(14),
-            White => Fixed(15),
-            Fixed(color) if color < 8 => Fixed(color + 8),
-            other => other,
-        }
-    }
-}
-impl ColorExt for ansi_term::Style {
-    fn make_intense(mut self) -> Self {
-        if let Some(color) = self.foreground {
-            self.foreground = Some(color.make_intense());
-        }
-        self
     }
 }
