@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Fixed
+- Ignore all io errors when resolving source files instead of only file not
+  found errors
+
+## [v0.1.5] - 2020-12-01
 ### Added
 - Support custom color themes for spantrace format
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/color-spantrace/releases/tag/v0.1.5
+[Unreleased]: https://github.com/yaahc/color-spantrace/compare/v0.1.5...HEAD
+[v0.1.5]: https://github.com/yaahc/color-spantrace/releases/tag/v0.1.5

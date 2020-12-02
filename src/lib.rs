@@ -88,7 +88,7 @@ use owo_colors::{style, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
-use std::io::{BufRead, BufReader, ErrorKind};
+use std::io::{BufRead, BufReader};
 use tracing_error::SpanTrace;
 
 static THEME: OnceCell<Theme> = OnceCell::new();
