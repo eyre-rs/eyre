@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.5.9] - 2020-12-02
+### Fixed
+- Bumped color-spantrace dependency version to fix a panic
+
 ## [0.5.8] - 2020-11-23
 ### Added
 - Exposed internal interfaces for the panic handler so that it can be wrapped
@@ -50,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   better compatibility with the Display trait
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.8...HEAD
+[Unreleased]: https://github.com/yaahc/color-eyre/compare/v0.5.9...HEAD
+[0.5.9]: https://github.com/yaahc/color-eyre/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/yaahc/color-eyre/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/yaahc/color-eyre/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/yaahc/color-eyre/compare/v0.5.5...v0.5.6
