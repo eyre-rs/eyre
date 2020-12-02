@@ -40,6 +40,7 @@ use tracing_error::SpanTrace;
 use tracing_subscriber::{prelude::*, registry::Registry};
 
 #[instrument]
+#[allow(clippy::clippy::if_same_then_else)]
 fn test_capture(x: u8) -> SpanTrace {
     if x == 42 {
         SpanTrace::capture()

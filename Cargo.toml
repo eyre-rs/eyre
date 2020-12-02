@@ -1,6 +1,6 @@
 [package]
 name = "color-spantrace"
-version = "0.1.6-alpha.0"
+version = "0.1.6"
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -25,6 +25,9 @@ ansi-parser = "0.6.5" # used for testing color schemes
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.release]
+no-dev-version = true
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"

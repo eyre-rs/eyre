@@ -59,7 +59,7 @@
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.4")]
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.6")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -88,7 +88,7 @@ use owo_colors::{style, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
-use std::io::{BufRead, BufReader, ErrorKind};
+use std::io::{BufRead, BufReader};
 use tracing_error::SpanTrace;
 
 static THEME: OnceCell<Theme> = OnceCell::new();
@@ -315,8 +315,8 @@ impl Frame<'_> {
 
         let file = match File::open(filename) {
             Ok(file) => file,
-            Err(ref e) if e.kind() == ErrorKind::NotFound => return Ok(()),
-            e @ Err(_) => e.unwrap(),
+            // ignore io errors and just don't print the source
+            Err(_) => return Ok(()),
         };
 
         use std::fmt::Write;
