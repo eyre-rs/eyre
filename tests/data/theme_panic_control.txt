@@ -1,0 +1,21 @@
+    Finished dev [unoptimized + debuginfo] target(s) in 0.03s
+     Running `target/debug/examples/theme_test_helper`
+[31mThe application panicked (crashed).[0m
+Message:  [36m<non string panic payload>[0m
+Location: [35mexamples/theme_test_helper.rs[0m:[35m37[0m
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  
+   0: [91mtheme_test_helper[0m[91m::[0m[91mget_error[0m with [96mmsg="test"[0m
+      at [35mexamples/theme_test_helper.rs[0m:[35m34[0m
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [96m                              ⋮ 6 frames hidden ⋮                               [0m
+   7: [91mtheme_test_helper::main[0m[90m::h0f7f307e00efc098[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/examples/theme_test_helper.rs[0m:[35m37[0m
+   8: [32mcore::ops::function::FnOnce::call_once[0m[90m::hc90fd75bf8c9f979[0m
+      at [35m/home/jlusby/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core/src/ops/function.rs[0m:[35m227[0m
+  [96m                              ⋮ 11 frames hidden ⋮                              [0m
+
+Run with COLORBT_SHOW_HIDDEN=1 environment variable to disable frame filtering.
+Run with RUST_BACKTRACE=full to include source snippets.

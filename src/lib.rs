@@ -334,7 +334,7 @@
 //! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.5.9")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.5.10")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_docs,
@@ -368,6 +368,7 @@ pub use eyre;
 pub use eyre::Report;
 #[doc(hidden)]
 pub use eyre::Result;
+pub use owo_colors;
 use section::help::HelpInfo;
 #[doc(hidden)]
 pub use section::Section as Help;
@@ -410,6 +411,7 @@ pub struct Handler {
         std::sync::Arc<Vec<(String, Box<dyn std::fmt::Display + Send + Sync + 'static>)>>,
     #[cfg(feature = "issue-url")]
     issue_filter: std::sync::Arc<config::IssueFilterCallback>,
+    theme: crate::config::Theme,
     #[cfg(feature = "track-caller")]
     location: Option<&'static std::panic::Location<'static>>,
 }
@@ -436,6 +438,10 @@ pub enum ErrorKind<'a> {
 /// report handler has been installed will cause an error. **Note**: This
 /// function _must_ be called before any `eyre::Report`s are constructed to
 /// prevent the default handler from being installed.
+///
+/// Installing a global theme in `color_spantrace` manually (by calling
+/// `color_spantrace::set_theme` or `color_spantrace::colorize` before
+/// `install` is called) will result in an error if this function is called.
 ///
 /// # Examples
 ///

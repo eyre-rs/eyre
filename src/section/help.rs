@@ -1,5 +1,6 @@
 //! Provides an extension trait for attaching `Section` to error reports.
 use crate::{
+    config::Theme,
     eyre::{Report, Result},
     Section,
 };
@@ -16,7 +17,9 @@ impl Section for Report {
         D: Display + Send + Sync + 'static,
     {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
-            handler.sections.push(HelpInfo::Note(Box::new(note)));
+            handler
+                .sections
+                .push(HelpInfo::Note(Box::new(note), handler.theme));
         }
 
         self
@@ -28,7 +31,9 @@ impl Section for Report {
         F: FnOnce() -> D,
     {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
-            handler.sections.push(HelpInfo::Note(Box::new(note())));
+            handler
+                .sections
+                .push(HelpInfo::Note(Box::new(note()), handler.theme));
         }
 
         self
@@ -39,7 +44,9 @@ impl Section for Report {
         D: Display + Send + Sync + 'static,
     {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
-            handler.sections.push(HelpInfo::Warning(Box::new(warning)));
+            handler
+                .sections
+                .push(HelpInfo::Warning(Box::new(warning), handler.theme));
         }
 
         self
@@ -53,7 +60,7 @@ impl Section for Report {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
             handler
                 .sections
-                .push(HelpInfo::Warning(Box::new(warning())));
+                .push(HelpInfo::Warning(Box::new(warning()), handler.theme));
         }
 
         self
@@ -66,7 +73,7 @@ impl Section for Report {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
             handler
                 .sections
-                .push(HelpInfo::Suggestion(Box::new(suggestion)));
+                .push(HelpInfo::Suggestion(Box::new(suggestion), handler.theme));
         }
 
         self
@@ -80,7 +87,7 @@ impl Section for Report {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
             handler
                 .sections
-                .push(HelpInfo::Suggestion(Box::new(suggestion())));
+                .push(HelpInfo::Suggestion(Box::new(suggestion()), handler.theme));
         }
 
         self
@@ -117,7 +124,7 @@ impl Section for Report {
     {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
             let error = error.into();
-            handler.sections.push(HelpInfo::Error(error));
+            handler.sections.push(HelpInfo::Error(error, handler.theme));
         }
 
         self
@@ -130,7 +137,7 @@ impl Section for Report {
     {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
             let error = error().into();
-            handler.sections.push(HelpInfo::Error(error));
+            handler.sections.push(HelpInfo::Error(error, handler.theme));
         }
 
         self
@@ -230,23 +237,33 @@ where
 }
 
 pub(crate) enum HelpInfo {
-    Error(Box<dyn std::error::Error + Send + Sync + 'static>),
+    Error(Box<dyn std::error::Error + Send + Sync + 'static>, Theme),
     Custom(Box<dyn Display + Send + Sync + 'static>),
-    Note(Box<dyn Display + Send + Sync + 'static>),
-    Warning(Box<dyn Display + Send + Sync + 'static>),
-    Suggestion(Box<dyn Display + Send + Sync + 'static>),
+    Note(Box<dyn Display + Send + Sync + 'static>, Theme),
+    Warning(Box<dyn Display + Send + Sync + 'static>, Theme),
+    Suggestion(Box<dyn Display + Send + Sync + 'static>, Theme),
 }
 
 impl Display for HelpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HelpInfo::Note(note) => write!(f, "{}: {}", "Note".bright_cyan(), note),
-            HelpInfo::Warning(warning) => write!(f, "{}: {}", "Warning".bright_yellow(), warning),
-            HelpInfo::Suggestion(suggestion) => {
-                write!(f, "{}: {}", "Suggestion".bright_cyan(), suggestion)
+            HelpInfo::Note(note, theme) => {
+                write!(f, "{}: {}", "Note".style(theme.help_info_note), note)
             }
+            HelpInfo::Warning(warning, theme) => write!(
+                f,
+                "{}: {}",
+                "Warning".style(theme.help_info_warning),
+                warning
+            ),
+            HelpInfo::Suggestion(suggestion, theme) => write!(
+                f,
+                "{}: {}",
+                "Suggestion".style(theme.help_info_suggestion),
+                suggestion
+            ),
             HelpInfo::Custom(section) => write!(f, "{}", section),
-            HelpInfo::Error(error) => {
+            HelpInfo::Error(error, theme) => {
                 // a lot here
                 let errors = std::iter::successors(
                     Some(error.as_ref() as &(dyn std::error::Error + 'static)),
@@ -256,7 +273,7 @@ impl Display for HelpInfo {
                 write!(f, "Error:")?;
                 for (n, error) in errors.enumerate() {
                     writeln!(f)?;
-                    write!(indented(f).ind(n), "{}", error.bright_red())?;
+                    write!(indented(f).ind(n), "{}", error.style(theme.help_info_error))?;
                 }
 
                 Ok(())
@@ -268,23 +285,23 @@ impl Display for HelpInfo {
 impl fmt::Debug for HelpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HelpInfo::Note(note) => f
+            HelpInfo::Note(note, ..) => f
                 .debug_tuple("Note")
                 .field(&format_args!("{}", note))
                 .finish(),
-            HelpInfo::Warning(warning) => f
+            HelpInfo::Warning(warning, ..) => f
                 .debug_tuple("Warning")
                 .field(&format_args!("{}", warning))
                 .finish(),
-            HelpInfo::Suggestion(suggestion) => f
+            HelpInfo::Suggestion(suggestion, ..) => f
                 .debug_tuple("Suggestion")
                 .field(&format_args!("{}", suggestion))
                 .finish(),
-            HelpInfo::Custom(custom) => f
+            HelpInfo::Custom(custom, ..) => f
                 .debug_tuple("CustomSection")
                 .field(&format_args!("{}", custom))
                 .finish(),
-            HelpInfo::Error(error) => f.debug_tuple("Error").field(error).finish(),
+            HelpInfo::Error(error, ..) => f.debug_tuple("Error").field(error).finish(),
         }
     }
 }
