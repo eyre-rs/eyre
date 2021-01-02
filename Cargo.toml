@@ -25,6 +25,7 @@ anyhow = "1.0.28"
 [dependencies]
 indenter = "0.3.0"
 once_cell = "1.4.0"
+pyo3 = { version = "0.13", optional = true, default-features = false }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -36,7 +37,7 @@ no-dev-version = true
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
 search = "Unreleased"
-replace="{{version}}"
+replace = "{{version}}"
 
 [[package.metadata.release.pre-release-replacements]]
 file = "src/lib.rs"
@@ -47,22 +48,22 @@ exactly = 1
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
 search = "\\.\\.\\.HEAD"
-replace="...{{tag_name}}"
+replace = "...{{tag_name}}"
 exactly = 1
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
 search = "ReleaseDate"
-replace="{{date}}"
+replace = "{{date}}"
 
 [[package.metadata.release.pre-release-replacements]]
-file="CHANGELOG.md"
-search="<!-- next-header -->"
-replace="<!-- next-header -->\n\n## [Unreleased] - ReleaseDate"
-exactly=1
+file = "CHANGELOG.md"
+search = "<!-- next-header -->"
+replace = "<!-- next-header -->\n\n## [Unreleased] - ReleaseDate"
+exactly = 1
 
 [[package.metadata.release.pre-release-replacements]]
-file="CHANGELOG.md"
-search="<!-- next-url -->"
-replace="<!-- next-url -->\n[Unreleased]: https://github.com/yaahc/{{crate_name}}/compare/{{tag_name}}...HEAD"
-exactly=1
+file = "CHANGELOG.md"
+search = "<!-- next-url -->"
+replace = "<!-- next-url -->\n[Unreleased]: https://github.com/yaahc/{{crate_name}}/compare/{{tag_name}}...HEAD"
+exactly = 1
