@@ -1010,23 +1010,27 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///     ```
 pub trait WrapErr<T, E>: context::private::Sealed {
     /// Wrap the error value with a new adhoc error
+    #[cfg_attr(track_caller, track_caller)]
     fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Wrap the error value with a new adhoc error that is evaluated lazily
     /// only once an error does occur.
+    #[cfg_attr(track_caller, track_caller)]
     fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
     /// Compatibility re-export of wrap_err for interopt with `anyhow`
+    #[cfg_attr(track_caller, track_caller)]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility re-export of wrap_err_with for interopt with `anyhow`
+    #[cfg_attr(track_caller, track_caller)]
     fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
@@ -1079,23 +1083,27 @@ pub trait WrapErr<T, E>: context::private::Sealed {
 pub trait ContextCompat<T>: context::private::Sealed {
     /// Compatibility version of `wrap_err` for creating new errors with new source on `Option`
     /// when porting from `anyhow`
+    #[cfg_attr(track_caller, track_caller)]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility version of `wrap_err_with` for creating new errors with new source on `Option`
     /// when porting from `anyhow`
+    #[cfg_attr(track_caller, track_caller)]
     fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
     /// Compatibility re-export of `context` for porting from `anyhow` to `eyre`
+    #[cfg_attr(track_caller, track_caller)]
     fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility re-export of `with_context` for porting from `anyhow` to `eyre`
+    #[cfg_attr(track_caller, track_caller)]
     fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,

@@ -9,6 +9,7 @@ mod ext {
     use super::*;
 
     pub trait StdError {
+        #[cfg_attr(track_caller, track_caller)]
         fn ext_report<D>(self, msg: D) -> Report
         where
             D: Display + Send + Sync + 'static;
@@ -44,7 +45,10 @@ where
     where
         D: Display + Send + Sync + 'static,
     {
-        self.map_err(|error| error.ext_report(msg))
+        match self {
+            Ok(t) => Ok(t),
+            Err(e) => Err(e.ext_report(msg)),
+        }
     }
 
     fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report>
@@ -52,7 +56,10 @@ where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.map_err(|error| error.ext_report(msg()))
+        match self {
+            Ok(t) => Ok(t),
+            Err(e) => Err(e.ext_report(msg())),
+        }
     }
 
     fn context<D>(self, msg: D) -> Result<T, Report>
@@ -91,7 +98,10 @@ impl<T> ContextCompat<T> for Option<T> {
     where
         D: Display + Send + Sync + 'static,
     {
-        self.ok_or_else(|| Report::from_display(msg))
+        match self {
+            Some(t) => Ok(t),
+            None => Err(Report::from_display(msg)),
+        }
     }
 
     fn with_context<D, F>(self, msg: F) -> Result<T, Report>
@@ -99,7 +109,10 @@ impl<T> ContextCompat<T> for Option<T> {
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.ok_or_else(|| Report::from_display(msg()))
+        match self {
+            Some(t) => Ok(t),
+            None => Err(Report::from_display(msg())),
+        }
     }
 }
 
