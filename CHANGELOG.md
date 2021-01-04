@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Fixed
+- added missing track_caller annotations to `wrap_err` related trait methods
 
 ## [0.6.3] - 2020-11-10
 ### Fixed

@@ -30,6 +30,9 @@ once_cell = "1.4.0"
 targets = ["x86_64-unknown-linux-gnu"]
 rustdoc-args = ["--cfg", "doc_cfg"]
 
+[package.metadata.release]
+no-dev-version = true
+
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
 search = "Unreleased"
