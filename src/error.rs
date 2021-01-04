@@ -8,6 +8,9 @@ use core::ptr::{self, NonNull};
 
 use core::ops::{Deref, DerefMut};
 
+#[cfg(feature = "pyo3")]
+mod pyo3_compat;
+
 impl Report {
     /// Create a new error object from any error type.
     ///
@@ -762,12 +765,5 @@ impl AsRef<dyn StdError + Send + Sync> for Report {
 impl AsRef<dyn StdError> for Report {
     fn as_ref(&self) -> &(dyn StdError + 'static) {
         &**self
-    }
-}
-
-#[cfg(feature = "pyo3")]
-impl From<Report> for pyo3::PyErr {
-    fn from(error: Report) -> Self {
-        pyo3::exceptions::PyRuntimeError::new_err(format!("{:?}", error))
     }
 }

@@ -19,7 +19,7 @@ fn h() -> Result<()> {
 
 #[test]
 fn test_pyo3_exception_contents() {
-    use pyo3::types::{IntoPyDict, PyDict};
+    use pyo3::types::IntoPyDict;
 
     let err = h().unwrap_err();
     let expected_contents = format!("{:?}", err);

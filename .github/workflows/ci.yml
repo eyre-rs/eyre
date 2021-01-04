@@ -24,7 +24,7 @@ jobs:
         with:
           command: check
 
-  test-versions:
+  test-matrix:
     name: Test Suite
     runs-on: ubuntu-latest
     strategy:
@@ -33,10 +33,12 @@ jobs:
           - stable
           - beta
           - nightly
-          - 1.39.0
         features:
-          - --all-features
+          - # default
           - --no-default-features
+          - --features track-caller
+          - --features pyo3
+          - --all-features
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -47,6 +49,26 @@ jobs:
         with:
           command: test
           args: ${{ matrix.features }}
+
+  test-msrv:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features:
+          - # default
+          - --no-default-features
+          - --features track-caller
+          # skip `--features pyo3` and `--all-features` because pyo3 doesn't support this msrv
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.39
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
 
   test-os:
     name: Test Suite
