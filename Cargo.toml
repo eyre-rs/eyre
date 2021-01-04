@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.6.4-alpha.0"
+version = "0.6.4"
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -29,6 +29,9 @@ once_cell = "1.4.0"
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 rustdoc-args = ["--cfg", "doc_cfg"]
+
+[package.metadata.release]
+no-dev-version = true
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
