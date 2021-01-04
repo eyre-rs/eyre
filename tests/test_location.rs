@@ -22,7 +22,14 @@ impl eyre::EyreHandler for LocationHandler {
         _error: &(dyn std::error::Error + 'static),
         _f: &mut std::fmt::Formatter<'_>,
     ) -> std::fmt::Result {
-        assert_eq!(Some(self.expected), self.actual);
+        // we assume that if the compiler is new enough to support
+        // `track_caller` that we will always have `actual` be `Some`, so we can
+        // safely skip the assertion if the location is `None` which should only
+        // happen in older rust versions.
+        if let Some(actual) = self.actual {
+            assert_eq!(self.expected, actual);
+        }
+
         Ok(())
     }
 
