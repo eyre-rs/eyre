@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Added
+- add optional support for converting into `pyo3` exceptions
 
 ## [0.6.4] - 2021-01-04
 ### Fixed
