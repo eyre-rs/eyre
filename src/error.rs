@@ -8,6 +8,9 @@ use core::ptr::{self, NonNull};
 
 use core::ops::{Deref, DerefMut};
 
+#[cfg(feature = "pyo3")]
+mod pyo3_compat;
+
 impl Report {
     /// Create a new error object from any error type.
     ///
