@@ -214,7 +214,7 @@ impl fmt::Display for SpanTraceOmited<'_> {
                 writeln!(f, "Warning: SpanTrace capture is Unsupported.")?;
                 write!(
                     f,
-                    "Ensure that you've setup an error layer and the versions match"
+                    "Ensure that you've setup a tracing-error ErrorLayer and the semver versions are compatible"
                 )?;
             }
         }
