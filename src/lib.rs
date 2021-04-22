@@ -83,7 +83,7 @@ impl EyreHandler for Handler {
             write!(f, "\n\nCaused by:")?;
 
             let multiple = cause.source().is_some();
-            let errors = std::iter::successors(Some(cause), |e| e.source());
+            let errors = std::iter::successors(Some(cause), |e| (*e).source());
 
             for (n, error) in errors.enumerate() {
                 writeln!(f)?;
