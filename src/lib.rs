@@ -545,7 +545,7 @@ pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
 #[cfg_attr(not(track_caller), allow(unused_mut))]
 fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
     #[cfg(feature = "must-install")]
-    let hook = HOOK.get().unwrap().as_ref();
+    let hook = HOOK.get().expect("a handler must always be installed if the `must-install` feature is enabled").as_ref();
 
     #[cfg(not(feature = "must-install"))]
     let hook = HOOK
