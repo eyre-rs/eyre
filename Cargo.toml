@@ -12,6 +12,7 @@ categories = ["rust-patterns"]
 
 [features]
 default = ["track-caller"]
+must-install = []
 track-caller = []
 
 [dev-dependencies]
