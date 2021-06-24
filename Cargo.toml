@@ -47,11 +47,11 @@ replace="<!-- next-header -->\n\n## [Unreleased] - ReleaseDate"
 exactly=1
 
 # Disable this replacement on the very first release
-# [[package.metadata.release.pre-release-replacements]]
-# file = "CHANGELOG.md"
-# search = "\\.\\.\\.HEAD"
-# replace="...{{tag_name}}"
-# exactly = 1
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "\\.\\.\\.HEAD"
+replace="...{{tag_name}}"
+exactly = 1
 # END SECTION, do not comment out the replacement below this, and do not reorder them
 
 [[package.metadata.release.pre-release-replacements]]
