@@ -21,6 +21,7 @@ thiserror = "1.0"
 trybuild = { version = "1.0.19", features = ["diff"] }
 backtrace = "0.3.46"
 anyhow = "1.0.28"
+syn = { version = "1.0", features = ["full"] }
 
 [dependencies]
 indenter = "0.3.0"
