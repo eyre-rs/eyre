@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.6.5] - 2021-01-05
+### Added
+- add optional support for converting into `pyo3` exceptions
+
 ## [0.6.4] - 2021-01-04
 ### Fixed
 - added missing track_caller annotations to `wrap_err` related trait methods
@@ -26,7 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.4...HEAD
+[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.5...HEAD
+[0.6.5]: https://github.com/yaahc/eyre/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/yaahc/eyre/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/yaahc/eyre/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/yaahc/eyre/compare/v0.6.1...v0.6.2

@@ -283,7 +283,7 @@
 //! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.4")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.5")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -519,7 +519,7 @@ impl StdError for InstallError {}
 ///             return fmt::Debug::fmt(error, f);
 ///         }
 ///
-///         let errors = iter::successors(Some(error), |error| error.source());
+///         let errors = iter::successors(Some(error), |error| (*error).source());
 ///
 ///         for (ind, error) in errors.enumerate() {
 ///             write!(f, "\n{:>4}: {}", ind, error)?;
