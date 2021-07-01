@@ -4,7 +4,7 @@ error[E0599]: the method `eyre_kind` exists for reference `&Error`, but its trai
 4 | struct Error;
   | -------------
   | |
-  | doesn't satisfy `Error: Into<Report>`
+  | doesn't satisfy `Error: Into<ErrReport>`
   | doesn't satisfy `Error: eyre::private::kind::TraitKind`
   | doesn't satisfy `Error: std::fmt::Display`
 ...
@@ -12,10 +12,10 @@ error[E0599]: the method `eyre_kind` exists for reference `&Error`, but its trai
   |             ^^^^^^^^^^^^ method cannot be called on `&Error` due to unsatisfied trait bounds
   |
   = note: the following trait bounds were not satisfied:
-          `Error: Into<Report>`
+          `Error: Into<ErrReport>`
           which is required by `Error: eyre::private::kind::TraitKind`
           `Error: std::fmt::Display`
           which is required by `&Error: eyre::private::kind::AdhocKind`
-          `&Error: Into<Report>`
+          `&Error: Into<ErrReport>`
           which is required by `&Error: eyre::private::kind::TraitKind`
   = note: this error originates in the macro `eyre` (in Nightly builds, run with -Z macro-backtrace for more info)
