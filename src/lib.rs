@@ -221,7 +221,7 @@
 //!
 //! <span style="color: #34E2E2">Suggestion</span>: try using a file that exists next time</pre>
 //!
-//! ### Custom `Section`s for error reports via [`Help`] trait
+//! ### Custom `Section`s for error reports via [`Section`] trait
 //!
 //! The `section` module provides helpers for adding extra sections to error
 //! reports. Sections are disinct from error messages and are displayed
@@ -230,7 +230,7 @@
 //! [`examples/custom_section.rs`]:
 //!
 //! ```rust
-//! use color_eyre::{eyre::eyre, SectionExt, Help, eyre::Report};
+//! use color_eyre::{eyre::eyre, SectionExt, Section, eyre::Report};
 //! use std::process::Command;
 //! use tracing::instrument;
 //!
@@ -302,7 +302,7 @@
 //!
 //! For now however one way to work around this is to compose errors outside the
 //! error trait. `color-eyre` supports such composition in its error reports via
-//! the `Help` trait.
+//! the `Section` trait.
 //!
 //! For an example of how to aggregate errors check out [`examples/multiple_errors.rs`].
 //!
@@ -326,7 +326,7 @@
 //! [`backtrace::Backtrace`]: https://docs.rs/backtrace/*/backtrace/struct.Backtrace.html
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
-//! [`Help`]: https://docs.rs/color-eyre/*/color_eyre/trait.Help.html
+//! [`Section`]: https://docs.rs/color-eyre/*/color_eyre/trait.Section.html
 //! [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
 //! [`Handler`]: https://docs.rs/color-eyre/*/color_eyre/struct.Handler.html
