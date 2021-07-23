@@ -18,7 +18,7 @@
 //!   so that it can be captured on stable. The report format is identical to
 //!   `DefaultHandler`'s report format.
 //! - [`color-eyre`]: Captures a `backtrace::Backtrace` and a
-//!   `tracing_error::SpanTrace`. Provides a `Help` trait for attaching warnings
+//!   `tracing_error::SpanTrace`. Provides a `Section` trait for attaching warnings
 //!   and suggestions to error reports. The end report is then pretty printed with
 //!   the help of [`color-backtrace`], [`color-spantrace`], and `ansi_term`. Check
 //!   out the README on [`color-eyre`] for details on the report format.
