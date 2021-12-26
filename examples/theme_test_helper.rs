@@ -34,7 +34,7 @@ fn main() {
     let span = tracing::info_span!("get_error", msg);
     let _guard = span.enter();
     let error = get_error(msg);
-    panic!(error)
+    std::panic::panic_any(error)
 }
 
 fn setup() {
