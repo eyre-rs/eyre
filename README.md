@@ -17,10 +17,10 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-color-spantrace = "0.1"
-tracing = "0.1.13"
-tracing-error = "0.1.2"
-tracing-subscriber = "0.2.5"
+color-spantrace = "0.2"
+tracing = "0.1"
+tracing-error = "0.2"
+tracing-subscriber = "0.3"
 ```
 
 Setup a tracing subscriber with an `ErrorLayer`:
