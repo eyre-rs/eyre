@@ -72,7 +72,7 @@ fn test_backwards_compatibility() {
     let colored_spantrace_control =
         String::from_utf8(fs::read(control_file_path).unwrap()).unwrap();
 
-    fn get_ansi<'a>(s: &'a str) -> impl Iterator<Item = AnsiSequence> + 'a {
+    fn get_ansi(s: &str) -> impl Iterator<Item = AnsiSequence> + '_ {
         s.ansi_parse().filter_map(|x| {
             if let Output::Escape(ansi) = x {
                 Some(ansi)
@@ -80,14 +80,14 @@ fn test_backwards_compatibility() {
                 None
             }
         })
-    };
+    }
 
     let colored_spantrace_ansi = get_ansi(&colored_spantrace);
     let colored_spantrace_control_ansi = get_ansi(&colored_spantrace_control);
 
     assert!(
         colored_spantrace_ansi.eq(colored_spantrace_control_ansi),
-        format!("\x1b[0mANSI escape sequences are not identical to control!\n\nCONTROL:\n\n{}\n\n\n\n{:?}\n\nCURRENT:\n\n{}\n\n\n\n{:?}\n\n", &colored_spantrace_control, &colored_spantrace_control, &colored_spantrace, &colored_spantrace)
+        "\x1b[0mANSI escape sequences are not identical to control!\n\nCONTROL:\n\n{}\n\n\n\n{:?}\n\nCURRENT:\n\n{}\n\n\n\n{:?}\n\n", &colored_spantrace_control, &colored_spantrace_control, &colored_spantrace, &colored_spantrace
         // `\x1b[0m` clears previous ANSI escape sequences
     );
 }
