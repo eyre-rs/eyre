@@ -12,7 +12,6 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
 tracing-error = "0.2.0"
 tracing-core = "0.1.21"
 owo-colors = "3.2.0"
