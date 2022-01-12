@@ -4,6 +4,6 @@
     at [35mtests/themes.rs[0m:[35m42[0m
       40 │ use tracing_subscriber::{prelude::*, registry::Registry};
       41 │ 
-[37m[1m      42 > #[instrument][0m
+[37;1m      42 > #[instrument][0m
       43 │ fn test_capture(x: u8) -> SpanTrace {
-      44 │     if x == 42 {
+      44 │     #[allow(clippy::if_same_then_else)]
