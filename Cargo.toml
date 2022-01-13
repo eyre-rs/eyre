@@ -45,7 +45,7 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.release]
-no-dev-version = true
+dev-version = false
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
