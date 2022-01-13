@@ -7,10 +7,10 @@
 //!
 //! ```toml
 //! [dependencies]
-//! color-spantrace = "0.1"
-//! tracing = "0.1.13"
-//! tracing-error = "0.1.2"
-//! tracing-subscriber = "0.2.5"
+//! color-spantrace = "0.2"
+//! tracing = "0.1"
+//! tracing-error = "0.2"
+//! tracing-subscriber = "0.3"
 //! ```
 //!
 //! Setup a tracing subscriber with an `ErrorLayer`:
@@ -59,7 +59,7 @@
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.1.6")]
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.0")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
