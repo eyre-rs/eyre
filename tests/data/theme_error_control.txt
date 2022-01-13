@@ -14,19 +14,19 @@ Error:
 
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   [96m                              ⋮ 5 frames hidden ⋮                               [0m
-   6: [91mtheme::get_error::create_report[0m[90m::hd9d97e4e76dee44c[0m
-      at [35m/home/asonix/Development/rust/color-eyre/tests/theme.rs[0m:[35m17[0m
-   7: [91mtheme::get_error::{{closure}}[0m[90m::h4cc7ce7893f295cb[0m
-      at [35m/home/asonix/Development/rust/color-eyre/tests/theme.rs[0m:[35m25[0m
-   8: [32mcore::option::Option<T>::ok_or_else[0m[90m::hc00ef515ea43ef82[0m
+   6: [91mtheme::get_error::create_report[0m[90m::hdb41452bef3fc05d[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/tests/theme.rs[0m:[35m17[0m
+   7: [91mtheme::get_error::{{closure}}[0m[90m::h739c7fe800e2d03f[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/tests/theme.rs[0m:[35m25[0m
+   8: [32mcore::option::Option<T>::ok_or_else[0m[90m::hd8e670bbca63e94a[0m
       at [35m/rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/option.rs[0m:[35m954[0m
-   9: [91mtheme::get_error[0m[90m::haf4b483cac8d076b[0m
-      at [35m/home/asonix/Development/rust/color-eyre/tests/theme.rs[0m:[35m25[0m
-  10: [91mtheme::test_error_backwards_compatibility[0m[90m::hf4c9eaf012b11366[0m
-      at [35m/home/asonix/Development/rust/color-eyre/tests/theme.rs[0m:[35m43[0m
-  11: [91mtheme::test_error_backwards_compatibility::{{closure}}[0m[90m::h972249b6ebd599cb[0m
-      at [35m/home/asonix/Development/rust/color-eyre/tests/theme.rs[0m:[35m41[0m
-  12: [32mcore::ops::function::FnOnce::call_once[0m[90m::h8855848bc65b81ec[0m
+   9: [91mtheme::get_error[0m[90m::h2f751f4927c6fecb[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/tests/theme.rs[0m:[35m25[0m
+  10: [91mtheme::test_error_backwards_compatibility[0m[90m::hfc4be9f22c32535c[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/tests/theme.rs[0m:[35m43[0m
+  11: [91mtheme::test_error_backwards_compatibility::{{closure}}[0m[90m::hb001a9a908f0f5a4[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/tests/theme.rs[0m:[35m41[0m
+  12: [32mcore::ops::function::FnOnce::call_once[0m[90m::he26938a69d361bf6[0m
       at [35m/rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/ops/function.rs[0m:[35m227[0m
   13: [32mcore::ops::function::FnOnce::call_once[0m[90m::h83cc023b85256d97[0m
       at [35m/rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/ops/function.rs[0m:[35m227[0m

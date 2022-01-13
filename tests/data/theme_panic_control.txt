@@ -1,4 +1,4 @@
-    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
+    Finished dev [unoptimized + debuginfo] target(s) in 0.03s
      Running `target/debug/examples/theme_test_helper`
 [31mThe application panicked (crashed).[0m
 Message:  [36m<non string panic payload>[0m
@@ -11,11 +11,11 @@ Location: [35mexamples/theme_test_helper.rs[0m:[35m37[0m
 
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   [96m                              ⋮ 6 frames hidden ⋮                               [0m
-   7: [32mstd::panic::panic_any[0m[90m::hdb02375f91faf2b1[0m
+   7: [32mstd::panic::panic_any[0m[90m::hd76a7f826307234c[0m
       at [35m/rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/std/src/panic.rs[0m:[35m57[0m
-   8: [91mtheme_test_helper::main[0m[90m::hc643d5b602546a09[0m
-      at [35m/home/asonix/Development/rust/color-eyre/examples/theme_test_helper.rs[0m:[35m37[0m
-   9: [32mcore::ops::function::FnOnce::call_once[0m[90m::hb05b32a2aa2386ee[0m
+   8: [91mtheme_test_helper::main[0m[90m::h767d3fd6c45048c8[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/examples/theme_test_helper.rs[0m:[35m37[0m
+   9: [32mcore::ops::function::FnOnce::call_once[0m[90m::hc5a1cd4127189dad[0m
       at [35m/rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/ops/function.rs[0m:[35m227[0m
   [96m                              ⋮ 15 frames hidden ⋮                              [0m
 
