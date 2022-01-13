@@ -257,7 +257,7 @@ impl<'a> fmt::Display for StyledFrame<'a> {
 
         // Maybe print source.
         if v >= Verbosity::Full {
-            write!(&mut separated.ready(), "{}", SourceSection(&frame, *theme))?;
+            write!(&mut separated.ready(), "{}", SourceSection(frame, *theme))?;
         }
 
         Ok(())
@@ -859,7 +859,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
     }
 
     if let Some(bt) = report.backtrace.as_ref() {
-        let fmted_bt = report.hook.format_backtrace(&bt);
+        let fmted_bt = report.hook.format_backtrace(bt);
         write!(
             indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),
             "{}",

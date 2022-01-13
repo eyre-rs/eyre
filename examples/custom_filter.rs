@@ -26,7 +26,7 @@ fn main() -> Result<(), Report> {
         .install()
         .unwrap();
 
-    Ok(read_config()?)
+    read_config()
 }
 
 #[cfg(feature = "capture-spantrace")]

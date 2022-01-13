@@ -34,7 +34,7 @@ fn main() -> Result<(), Report> {
     install_tracing();
     color_eyre::install()?;
 
-    Ok(read_config().map(drop)?)
+    read_config().map(drop)
 }
 
 #[cfg(feature = "capture-spantrace")]
