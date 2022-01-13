@@ -338,7 +338,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_docs,
-    missing_doc_code_examples,
+    rustdoc::missing_doc_code_examples,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
