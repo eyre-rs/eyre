@@ -100,6 +100,7 @@ static PANIC_FILE_NAME: &str = "theme_panic_control.txt";
 // The following tests the installed panic handler
 #[test]
 #[allow(unused_mut)]
+#[allow(clippy::vec_init_then_push)]
 fn test_panic_backwards_compatibility() {
     let mut features: Vec<&str> = vec![];
     #[cfg(feature = "capture-spantrace")]
@@ -160,7 +161,7 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
             })
             .collect();
         (all, ansi)
-    };
+    }
 
     let (_control_tokens, control_ansi) = f(&control);
     let (_target_tokens, target_ansi) = f(&target);

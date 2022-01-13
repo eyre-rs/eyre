@@ -8,7 +8,7 @@ fn main() -> Result<(), Report> {
 
     color_eyre::install()?;
 
-    Ok(read_config()?)
+    read_config()
 }
 
 #[cfg(feature = "capture-spantrace")]
