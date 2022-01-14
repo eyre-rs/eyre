@@ -315,6 +315,8 @@
     clippy::wrong_self_convention
 )]
 
+extern crate alloc;
+
 #[macro_use]
 mod backtrace;
 mod chain;
@@ -1114,8 +1116,11 @@ pub trait ContextCompat<T>: context::private::Sealed {
 #[doc(hidden)]
 pub mod private {
     use crate::Report;
-    use core::fmt::{Debug, Display};
+    use alloc::fmt;
+    use core::fmt::{Arguments, Debug, Display};
 
+    pub use alloc::format;
+    pub use core::format_args;
     pub use core::result::Result::Err;
 
     #[doc(hidden)]
@@ -1131,5 +1136,22 @@ pub mod private {
         M: Display + Debug + Send + Sync + 'static,
     {
         Report::from_adhoc(message)
+    }
+
+    #[doc(hidden)]
+    #[cold]
+    pub fn format_err(args: Arguments<'_>) -> Report {
+        #[cfg(anyhow_no_fmt_arguments_as_str)]
+        let fmt_arguments_as_str: Option<&str> = None;
+        #[cfg(not(anyhow_no_fmt_arguments_as_str))]
+        let fmt_arguments_as_str = args.as_str();
+
+        if let Some(message) = fmt_arguments_as_str {
+            // eyre!("literal"), can downcast to &'static str
+            Report::msg(message)
+        } else {
+            // eyre!("interpolate {var}"), can downcast to String
+            Report::msg(fmt::format(args))
+        }
     }
 }
