@@ -1141,9 +1141,9 @@ pub mod private {
     #[doc(hidden)]
     #[cold]
     pub fn format_err(args: Arguments<'_>) -> Report {
-        #[cfg(anyhow_no_fmt_arguments_as_str)]
+        #[cfg(eyre_no_fmt_arguments_as_str)]
         let fmt_arguments_as_str: Option<&str> = None;
-        #[cfg(not(anyhow_no_fmt_arguments_as_str))]
+        #[cfg(not(eyre_no_fmt_arguments_as_str))]
         let fmt_arguments_as_str = args.as_str();
 
         if let Some(message) = fmt_arguments_as_str {

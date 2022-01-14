@@ -63,6 +63,10 @@ fn main() {
     if rustc < 52 {
         println!("cargo:rustc-cfg=eyre_no_fmt_arguments_as_str");
     }
+
+    if rustc < 58 {
+        println!("cargo:rustc-cfg=eyre_no_fmt_args_capture");
+    }
 }
 
 fn compile_probe(probe: &str) -> Option<ExitStatus> {
