@@ -2,7 +2,11 @@
 mod common;
 
 use self::common::*;
-use eyre::{ensure, Result};
+use eyre::{ensure, eyre, Result};
+use std::cell::Cell;
+use std::future::Future;
+use std::pin::Pin;
+use std::task::Poll;
 
 #[test]
 fn test_messages() {
@@ -31,4 +35,51 @@ fn test_ensure() {
         Ok(())
     };
     assert!(f().is_err());
+}
+
+#[test]
+fn test_temporaries() {
+    struct Ready<T>(Option<T>);
+
+    impl<T> Unpin for Ready<T> {}
+
+    impl<T> Future for Ready<T> {
+        type Output = T;
+
+        fn poll(mut self: Pin<&mut Self>, _cx: &mut std::task::Context<'_>) -> Poll<T> {
+            Poll::Ready(self.0.take().unwrap())
+        }
+    }
+
+    fn require_send_sync(_: impl Send + Sync) {}
+
+    require_send_sync(async {
+        // If eyre hasn't dropped any temporary format_args it creates by the
+        // time it's done evaluating, those will stick around until the
+        // semicolon, which is on the other side of the await point, making the
+        // enclosing future non-Send.
+        Ready(Some(eyre!("..."))).await;
+    });
+
+    fn message(cell: Cell<&str>) -> &str {
+        cell.get()
+    }
+
+    require_send_sync(async {
+        Ready(Some(eyre!(message(Cell::new("..."))))).await;
+    });
+}
+
+#[test]
+#[cfg(not(eyre_no_fmt_args_capture))]
+fn test_capture_format_args() {
+    let var = 42;
+    let err = eyre!("interpolate {var}");
+    assert_eq!("interpolate 42", err.to_string());
+}
+
+#[test]
+fn test_brace_escape() {
+    let err = eyre!("unterminated ${{..}} expression");
+    assert_eq!("unterminated ${..} expression", err.to_string());
 }

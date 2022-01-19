@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, ExitStatus};
+use std::str;
 
 // This code exercises the surface area that we expect of the std Backtrace
 // type. If the current toolchain is able to compile it, we go ahead and use
@@ -53,6 +54,19 @@ fn main() {
         Some(status) if status.success() => println!("cargo:rustc-cfg=track_caller"),
         _ => {}
     }
+
+    let rustc = match rustc_minor_version() {
+        Some(rustc) => rustc,
+        None => return,
+    };
+
+    if rustc < 52 {
+        println!("cargo:rustc-cfg=eyre_no_fmt_arguments_as_str");
+    }
+
+    if rustc < 58 {
+        println!("cargo:rustc-cfg=eyre_no_fmt_args_capture");
+    }
 }
 
 fn compile_probe(probe: &str) -> Option<ExitStatus> {
@@ -70,4 +84,15 @@ fn compile_probe(probe: &str) -> Option<ExitStatus> {
         .arg(probefile)
         .status()
         .ok()
+}
+
+fn rustc_minor_version() -> Option<u32> {
+    let rustc = env::var_os("RUSTC")?;
+    let output = Command::new(rustc).arg("--version").output().ok()?;
+    let version = str::from_utf8(&output.stdout).ok()?;
+    let mut pieces = version.split('.');
+    if pieces.next() != Some("rustc 1") {
+        return None;
+    }
+    pieces.next()?.parse().ok()
 }

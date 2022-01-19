@@ -148,17 +148,18 @@ macro_rules! ensure {
 /// ```
 #[macro_export]
 macro_rules! eyre {
-    ($msg:literal $(,)?) => {
-        // Handle $:literal as a special case to make cargo-expanded code more
-        // concise in the common case.
-        $crate::private::new_adhoc($msg)
-    };
+    ($msg:literal $(,)?) => ({
+        let error = $crate::private::format_err($crate::private::format_args!($msg));
+        error
+    });
     ($err:expr $(,)?) => ({
         use $crate::private::kind::*;
-        let error = $err;
-        (&error).eyre_kind().new(error)
+        let error = match $err {
+            error => (&error).eyre_kind().new(error),
+        };
+        error
     });
     ($fmt:expr, $($arg:tt)*) => {
-        $crate::private::new_adhoc(format!($fmt, $($arg)*))
+        $crate::private::new_adhoc($crate::private::format!($fmt, $($arg)*))
     };
 }

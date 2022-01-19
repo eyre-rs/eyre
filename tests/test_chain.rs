@@ -1,7 +1,7 @@
 use eyre::{eyre, Report};
 
 fn error() -> Report {
-    eyre!(0).wrap_err(1).wrap_err(2).wrap_err(3)
+    eyre!({ 0 }).wrap_err(1).wrap_err(2).wrap_err(3)
 }
 
 #[test]
