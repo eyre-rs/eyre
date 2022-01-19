@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [0.6.6] - 2022-01-19
 ### Added
 - add support for format arguments capture on 1.58 and later
 
@@ -32,7 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.5...HEAD
+[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.6...HEAD
+[0.6.6]: https://github.com/yaahc/eyre/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/yaahc/eyre/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/yaahc/eyre/compare/v0.6.3...v0.6.4
 [0.6.3]: https://github.com/yaahc/eyre/compare/v0.6.2...v0.6.3
