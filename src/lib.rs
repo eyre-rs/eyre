@@ -193,6 +193,19 @@
 //!   #     Ok(())
 //!   # }
 //!   ```
+//! - On newer versions of the compiler (e.g. 1.58 and later) this macro also
+//!   supports format args captures.
+//!
+//!   ```rust
+//!   # use eyre::{eyre, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   # #[cfg(not(eyre_no_fmt_args_capture))]
+//!   return Err(eyre!("Missing attribute: {missing}"));
+//!   #     Ok(())
+//!   # }
+//!   ```
 //!
 //! ## No-std support
 //!
@@ -283,7 +296,7 @@
 //! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.5")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.6")]
 #![warn(
     missing_debug_implementations,
     missing_docs,

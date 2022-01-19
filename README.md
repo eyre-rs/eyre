@@ -136,6 +136,13 @@ handlers for eyre and short summaries of what features they provide.
   return Err(eyre!("Missing attribute: {}", missing));
   ```
 
+- On newer versions of the compiler (e.g. 1.58 and later) this macro also
+  supports format args captures.
+
+  ```rust
+  return Err(eyre!("Missing attribute: {missing}"));
+  ```
+
 ## No-std support
 
 **NOTE**: tests are currently broken for `no_std` so I cannot guarantee that
