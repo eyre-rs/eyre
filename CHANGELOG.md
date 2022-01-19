@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Added
+- add support for format arguments capture on 1.58 and later
 
 ## [0.6.5] - 2021-01-05
 ### Added
