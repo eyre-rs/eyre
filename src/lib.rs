@@ -201,6 +201,7 @@
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
+//!   # #[cfg(not(eyre_no_fmt_args_capture))]
 //!   return Err(eyre!("Missing attribute: {missing}"));
 //!   #     Ok(())
 //!   # }
