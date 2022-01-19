@@ -193,6 +193,18 @@
 //!   #     Ok(())
 //!   # }
 //!   ```
+//! - On newer versions of the compiler (e.g. 1.58 and later) this macro also
+//!   supports format args captures.
+//!
+//!   ```rust
+//!   # use eyre::{eyre, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   return Err(eyre!("Missing attribute: {missing}"));
+//!   #     Ok(())
+//!   # }
+//!   ```
 //!
 //! ## No-std support
 //!
