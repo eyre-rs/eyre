@@ -35,6 +35,15 @@ mod ext {
             self.wrap_err(msg)
         }
     }
+
+    impl StdError for Box<dyn std::error::Error + Send + Sync + 'static> {
+        fn ext_report<D>(self, msg: D) -> Report
+        where
+            D: Display + Send + Sync + 'static,
+        {
+            self.wrap_err(msg)
+        }
+    }
 }
 
 impl<T, E> WrapErr<T, E> for Result<T, E>
