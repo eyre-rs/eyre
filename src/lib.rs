@@ -820,7 +820,7 @@ pub struct Chain<'a> {
 ///
 /// # const IGNORE: &str = stringify! {
 /// fn demo1() -> Result<T> {...}
-///            // ^ equivalent to std::result::Result<T, eyre::Error>
+///            // ^ equivalent to std::result::Result<T, eyre::Report>
 ///
 /// fn demo2() -> Result<T, OtherError> {...}
 ///            // ^ equivalent to std::result::Result<T, OtherError>
@@ -936,7 +936,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 /// # Effect on downcasting
 ///
 /// After attaching a message of type `D` onto an error of type `E`, the resulting
-/// `eyre::Error` may be downcast to `D` **or** to `E`.
+/// `eyre::Report` may be downcast to `D` **or** to `E`.
 ///
 /// That is, in codebases that rely on downcasting, Eyre's wrap_err supports
 /// both of the following use cases:
