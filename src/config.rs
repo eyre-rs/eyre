@@ -767,8 +767,7 @@ fn default_frame_filter(frames: &mut Vec<&Frame>) {
 
     let bottom_cutoff = frames
         .iter()
-        .position(|x| x.is_runtime_init_code())
-        .unwrap_or_else(|| frames.len());
+        .position(|x| x.is_runtime_init_code()).unwrap_or(frames.len());
 
     let rng = top_cutoff..=bottom_cutoff;
     frames.retain(|x| rng.contains(&x.n))
