@@ -1153,6 +1153,7 @@ pub mod private {
 
     #[doc(hidden)]
     #[cold]
+    #[cfg_attr(track_caller, track_caller)]
     pub fn format_err(args: Arguments<'_>) -> Report {
         #[cfg(eyre_no_fmt_arguments_as_str)]
         let fmt_arguments_as_str: Option<&str> = None;
