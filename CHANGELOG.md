@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.6.7] - 2022-02-24
+### Fixed
+- added missing track_caller annotation to new format arg capture constructor
+
 ## [0.6.6] - 2022-01-19
 ### Added
 - add support for format arguments capture on 1.58 and later
@@ -34,7 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.6...HEAD
+[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.7...HEAD
+[0.6.7]: https://github.com/yaahc/eyre/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/yaahc/eyre/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/yaahc/eyre/compare/v0.6.4...v0.6.5
 [0.6.4]: https://github.com/yaahc/eyre/compare/v0.6.3...v0.6.4
