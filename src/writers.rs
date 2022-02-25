@@ -229,10 +229,9 @@ impl fmt::Display for BacktraceOmited {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Print some info on how to increase verbosity.
         if self.0 {
-            writeln!(f, "Backtrace omitted.")?;
             write!(
                 f,
-                "Run with RUST_BACKTRACE=1 environment variable to display it."
+                "Backtrace omitted. Run with RUST_BACKTRACE=1 environment variable to display it."
             )?;
         } else {
             // This text only makes sense if frames are displayed.
