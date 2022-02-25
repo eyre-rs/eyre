@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Fixed
+- added missing track_caller annotation to new format arg capture constructor
 
 ## [0.6.6] - 2022-01-19
 ### Added
