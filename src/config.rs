@@ -418,6 +418,8 @@ pub struct HookBuilder {
     filters: Vec<Box<FilterCallback>>,
     capture_span_trace_by_default: bool,
     display_env_section: bool,
+    #[cfg(feature = "track-caller")]
+    display_location_section: bool,
     panic_section: Option<Box<dyn Display + Send + Sync + 'static>>,
     panic_message: Option<Box<dyn PanicMessage>>,
     theme: Theme,
@@ -459,6 +461,8 @@ impl HookBuilder {
             filters: vec![],
             capture_span_trace_by_default: false,
             display_env_section: true,
+            #[cfg(feature = "track-caller")]
+            display_location_section: true,
             panic_section: None,
             panic_message: None,
             theme: Theme::dark(),
@@ -649,6 +653,18 @@ impl HookBuilder {
         self
     }
 
+    /// Configures the location info section and whether or not it is displayed.
+    ///
+    /// # Notes
+    ///
+    /// This will not disable the location section in a panic message.
+    #[cfg(feature = "track-caller")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "track-caller")))]
+    pub fn display_location_section(mut self, cond: bool) -> Self {
+        self.display_location_section = cond;
+        self
+    }
+
     /// Add a custom filter to the set of frame filters
     ///
     /// # Examples
@@ -723,6 +739,8 @@ impl HookBuilder {
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
             display_env_section: self.display_env_section,
+            #[cfg(feature = "track-caller")]
+            display_location_section: self.display_location_section,
             theme,
             #[cfg(feature = "issue-url")]
             issue_url: self.issue_url,
@@ -1000,6 +1018,8 @@ pub struct EyreHook {
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
     display_env_section: bool,
+    #[cfg(feature = "track-caller")]
+    display_location_section: bool,
     theme: Theme,
     #[cfg(feature = "issue-url")]
     issue_url: Option<String>,
@@ -1034,6 +1054,8 @@ impl EyreHook {
             span_trace,
             sections: Vec::new(),
             display_env_section: self.display_env_section,
+            #[cfg(feature = "track-caller")]
+            display_location_section: self.display_location_section,
             #[cfg(feature = "issue-url")]
             issue_url: self.issue_url.clone(),
             #[cfg(feature = "issue-url")]

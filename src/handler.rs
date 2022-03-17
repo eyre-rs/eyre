@@ -69,14 +69,16 @@ impl eyre::EyreHandler for Handler {
         let mut separated = f.header("\n\n");
 
         #[cfg(feature = "track-caller")]
-        write!(
-            separated.ready(),
-            "{}",
-            crate::SectionExt::header(
-                crate::fmt::LocationSection(self.location, self.theme),
-                "Location:"
-            )
-        )?;
+        if self.display_location_section {
+            write!(
+                separated.ready(),
+                "{}",
+                crate::SectionExt::header(
+                    crate::fmt::LocationSection(self.location, self.theme),
+                    "Location:"
+                )
+            )?;
+        }
 
         for section in self
             .sections
