@@ -10,10 +10,18 @@ use std::io;
 
 #[test]
 fn test_downcast() {
+    #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
         bail_literal().unwrap_err().downcast::<&str>().unwrap(),
     );
+
+    #[cfg(eyre_no_fmt_arguments_as_str)]
+    assert_eq!(
+        "oh no!",
+        bail_literal().unwrap_err().downcast::<String>().unwrap(),
+    );
+
     assert_eq!(
         "oh no!",
         bail_fmt().unwrap_err().downcast::<String>().unwrap(),
@@ -30,10 +38,21 @@ fn test_downcast() {
 
 #[test]
 fn test_downcast_ref() {
+    #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
         *bail_literal().unwrap_err().downcast_ref::<&str>().unwrap(),
     );
+
+    #[cfg(eyre_no_fmt_arguments_as_str)]
+    assert_eq!(
+        "oh no!",
+        *bail_literal()
+            .unwrap_err()
+            .downcast_ref::<String>()
+            .unwrap(),
+    );
+
     assert_eq!(
         "oh no!",
         bail_fmt().unwrap_err().downcast_ref::<String>().unwrap(),
@@ -50,10 +69,21 @@ fn test_downcast_ref() {
 
 #[test]
 fn test_downcast_mut() {
+    #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
         *bail_literal().unwrap_err().downcast_mut::<&str>().unwrap(),
     );
+
+    #[cfg(eyre_no_fmt_arguments_as_str)]
+    assert_eq!(
+        "oh no!",
+        *bail_literal()
+            .unwrap_err()
+            .downcast_mut::<String>()
+            .unwrap(),
+    );
+
     assert_eq!(
         "oh no!",
         bail_fmt().unwrap_err().downcast_mut::<String>().unwrap(),

@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.6.6"
+version = "0.6.7"
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -22,6 +22,8 @@ thiserror = "1.0"
 trybuild = { version = "1.0.19", features = ["diff"] }
 backtrace = "0.3.46"
 anyhow = "1.0.28"
+syn = { version = "1.0", features = ["full"] }
+pyo3 = { version = "0.13", default-features = false, features = ["auto-initialize"] }
 
 [dependencies]
 indenter = "0.3.0"
@@ -33,7 +35,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 rustdoc-args = ["--cfg", "doc_cfg"]
 
 [package.metadata.release]
-no-dev-version = true
+dev-version = false
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"

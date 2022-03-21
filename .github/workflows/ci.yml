@@ -64,7 +64,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.39
+          toolchain: 1.42
           override: true
       - uses: actions-rs/cargo@v1
         with:

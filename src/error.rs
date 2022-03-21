@@ -8,9 +8,6 @@ use core::ptr::{self, NonNull};
 
 use core::ops::{Deref, DerefMut};
 
-#[cfg(feature = "pyo3")]
-mod pyo3_compat;
-
 impl Report {
     /// Create a new error object from any error type.
     ///
@@ -622,13 +619,12 @@ unsafe fn context_chain_downcast<D>(e: &ErrorImpl<()>, target: TypeId) -> Option
 where
     D: 'static,
 {
+    let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<D, Report>>;
     if TypeId::of::<D>() == target {
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<D, Report>>;
         let addr = &(*unerased)._object.msg as *const D as *mut ();
         Some(NonNull::new_unchecked(addr))
     } else {
         // Recurse down the context chain per the inner error's vtable.
-        let unerased = e as *const ErrorImpl<()> as *const ErrorImpl<ContextError<D, Report>>;
         let source = &(*unerased)._object.error;
         (source.inner.vtable.object_downcast)(&source.inner, target)
     }
@@ -767,3 +763,6 @@ impl AsRef<dyn StdError> for Report {
         &**self
     }
 }
+
+#[cfg(feature = "pyo3")]
+mod pyo3_compat;

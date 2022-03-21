@@ -18,7 +18,7 @@
 //!   so that it can be captured on stable. The report format is identical to
 //!   `DefaultHandler`'s report format.
 //! - [`color-eyre`]: Captures a `backtrace::Backtrace` and a
-//!   `tracing_error::SpanTrace`. Provides a `Help` trait for attaching warnings
+//!   `tracing_error::SpanTrace`. Provides a `Section` trait for attaching warnings
 //!   and suggestions to error reports. The end report is then pretty printed with
 //!   the help of [`color-backtrace`], [`color-spantrace`], and `ansi_term`. Check
 //!   out the README on [`color-eyre`] for details on the report format.
@@ -193,6 +193,19 @@
 //!   #     Ok(())
 //!   # }
 //!   ```
+//! - On newer versions of the compiler (e.g. 1.58 and later) this macro also
+//!   supports format args captures.
+//!
+//!   ```rust
+//!   # use eyre::{eyre, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   # #[cfg(not(eyre_no_fmt_args_capture))]
+//!   return Err(eyre!("Missing attribute: {missing}"));
+//!   #     Ok(())
+//!   # }
+//!   ```
 //!
 //! ## No-std support
 //!
@@ -283,7 +296,7 @@
 //! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.4")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.7")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -314,6 +327,8 @@
     clippy::new_ret_no_self,
     clippy::wrong_self_convention
 )]
+
+extern crate alloc;
 
 #[macro_use]
 mod backtrace;
@@ -519,7 +534,7 @@ impl StdError for InstallError {}
 ///             return fmt::Debug::fmt(error, f);
 ///         }
 ///
-///         let errors = iter::successors(Some(error), |error| error.source());
+///         let errors = iter::successors(Some(error), |error| (*error).source());
 ///
 ///         for (ind, error) in errors.enumerate() {
 ///             write!(f, "\n{:>4}: {}", ind, error)?;
@@ -810,7 +825,7 @@ pub struct Chain<'a> {
 ///
 /// # const IGNORE: &str = stringify! {
 /// fn demo1() -> Result<T> {...}
-///            // ^ equivalent to std::result::Result<T, eyre::Error>
+///            // ^ equivalent to std::result::Result<T, eyre::Report>
 ///
 /// fn demo2() -> Result<T, OtherError> {...}
 ///            // ^ equivalent to std::result::Result<T, OtherError>
@@ -926,7 +941,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 /// # Effect on downcasting
 ///
 /// After attaching a message of type `D` onto an error of type `E`, the resulting
-/// `eyre::Error` may be downcast to `D` **or** to `E`.
+/// `eyre::Report` may be downcast to `D` **or** to `E`.
 ///
 /// That is, in codebases that rely on downcasting, Eyre's wrap_err supports
 /// both of the following use cases:
@@ -1119,8 +1134,11 @@ pub trait ContextCompat<T>: context::private::Sealed {
 #[doc(hidden)]
 pub mod private {
     use crate::Report;
-    use core::fmt::{Debug, Display};
+    use alloc::fmt;
+    use core::fmt::{Arguments, Debug, Display};
 
+    pub use alloc::format;
+    pub use core::format_args;
     pub use core::result::Result::Err;
 
     #[doc(hidden)]
@@ -1136,5 +1154,23 @@ pub mod private {
         M: Display + Debug + Send + Sync + 'static,
     {
         Report::from_adhoc(message)
+    }
+
+    #[doc(hidden)]
+    #[cold]
+    #[cfg_attr(track_caller, track_caller)]
+    pub fn format_err(args: Arguments<'_>) -> Report {
+        #[cfg(eyre_no_fmt_arguments_as_str)]
+        let fmt_arguments_as_str: Option<&str> = None;
+        #[cfg(not(eyre_no_fmt_arguments_as_str))]
+        let fmt_arguments_as_str = args.as_str();
+
+        if let Some(message) = fmt_arguments_as_str {
+            // eyre!("literal"), can downcast to &'static str
+            Report::msg(message)
+        } else {
+            // eyre!("interpolate {var}"), can downcast to String
+            Report::msg(fmt::format(args))
+        }
     }
 }
