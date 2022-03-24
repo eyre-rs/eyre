@@ -445,7 +445,7 @@ type ErrorHook =
 static HOOK: OnceCell<ErrorHook> = OnceCell::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct InstallError;
 
 impl core::fmt::Display for InstallError {
@@ -705,7 +705,7 @@ pub struct DefaultHandler {
 impl DefaultHandler {
     #[allow(unused_variables)]
     #[cfg_attr(not(feature = "auto-install"), allow(dead_code))]
-    fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
+    pub fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
         let backtrace = backtrace_if_absent!(error);
 
         Box::new(Self {
