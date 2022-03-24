@@ -132,6 +132,9 @@
 //!   #
 //!   # const REDACTED_CONTENT: () = ();
 //!   #
+//!   # #[cfg(not(feature = "auto-install"))]
+//!   # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
+//!   #
 //!   # let error: Report = eyre!("...");
 //!   # let root_cause = &error;
 //!   #
@@ -276,6 +279,9 @@
 //! ```rust
 //! use eyre::{eyre, Result};
 //!
+//! # #[cfg(not(feature = "auto-install"))]
+//! # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
+//! #
 //! let opt: Option<()> = None;
 //! let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
 //! ```
@@ -703,6 +709,32 @@ pub struct DefaultHandler {
 }
 
 impl DefaultHandler {
+    /// Manual hook which constructs `DefaultHandler`s.
+    ///
+    /// # Details
+    ///
+    /// When supplied to the `set_hook` function, `default_with` will cause `eyre::Report` to use
+    /// `DefaultHandler` as the error report handler.
+    ///
+    /// If the `auto-install` feature is enabled, and a user-provided hook for constructing
+    /// `EyreHandlers` was not installed using `set_hook`, `DefaultHandler::default_with`
+    /// is automatically installed as the hook.
+    ///
+    /// # Example
+    ///
+    /// ```rust,should_panic
+    /// use eyre::{DefaultHandler, eyre, InstallError, Result, set_hook};
+    ///
+    /// fn main() -> Result<()> {
+    ///     install_default().expect("default handler inexplicably already installed");
+    ///     Err(eyre!("hello from default error city!"))
+    /// }
+    ///
+    /// fn install_default() -> Result<(), InstallError> {
+    ///     set_hook(Box::new(DefaultHandler::default_with))
+    /// }
+    ///
+    /// ```
     #[allow(unused_variables)]
     #[cfg_attr(not(feature = "auto-install"), allow(dead_code))]
     pub fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
@@ -978,6 +1010,8 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///     }
 ///
 ///     fn main() {
+///         # #[cfg(not(feature = "auto-install"))]
+///         # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 ///         let err = do_it().unwrap_err();
 ///         if let Some(e) = err.downcast_ref::<SuspiciousError>() {
 ///             // If helper() returned SuspiciousError, this downcast will
@@ -1018,6 +1052,8 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///     }
 ///
 ///     fn main() {
+///         # #[cfg(not(feature = "auto-install"))]
+///         # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 ///         let err = do_it().unwrap_err();
 ///         if let Some(e) = err.downcast_ref::<HelperFailed>() {
 ///             // If helper failed, this downcast will succeed because
