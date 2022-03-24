@@ -11,8 +11,8 @@ readme = "README.md"
 categories = ["rust-patterns"]
 
 [features]
-default = ["track-caller"]
-must-install = []
+default = ["auto-install", "track-caller"]
+auto-install = []
 track-caller = []
 
 [dev-dependencies]

@@ -559,10 +559,10 @@ pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
 #[cfg_attr(track_caller, track_caller)]
 #[cfg_attr(not(track_caller), allow(unused_mut))]
 fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
-    #[cfg(feature = "must-install")]
-    let hook = HOOK.get().expect("a handler must always be installed if the `must-install` feature is enabled").as_ref();
+    #[cfg(not(feature = "auto-install"))]
+    let hook = HOOK.get().expect("a handler must always be installed if the `auto-install` feature is disabled").as_ref();
 
-    #[cfg(not(feature = "must-install"))]
+    #[cfg(feature = "auto-install")]
     let hook = HOOK
         .get_or_init(|| Box::new(DefaultHandler::default_with))
         .as_ref();
@@ -704,7 +704,7 @@ pub struct DefaultHandler {
 
 impl DefaultHandler {
     #[allow(unused_variables)]
-    #[cfg_attr(feature = "must-install", allow(dead_code))]
+    #[cfg_attr(not(feature = "auto-install"), allow(dead_code))]
     fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
         let backtrace = backtrace_if_absent!(error);
 
