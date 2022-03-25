@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use eyre::{bail, DefaultHandler, InstallError, Result, set_hook};
 use once_cell::sync::OnceCell;
 use std::io;

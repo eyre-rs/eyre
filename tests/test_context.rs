@@ -1,5 +1,7 @@
+mod common;
 mod drop;
 
+use crate::common::maybe_install_handler;
 use crate::drop::{DetectDrop, Flag};
 use eyre::{Report, Result, WrapErr};
 use std::fmt::{self, Display};
@@ -89,6 +91,8 @@ fn make_chain() -> (Report, Dropped) {
 
 #[test]
 fn test_downcast_ref() {
+    maybe_install_handler().unwrap();
+
     let (err, dropped) = make_chain();
 
     assert!(!err.is::<String>());
@@ -113,6 +117,8 @@ fn test_downcast_ref() {
 
 #[test]
 fn test_downcast_high() {
+    maybe_install_handler().unwrap();
+
     let (err, dropped) = make_chain();
 
     let err = err.downcast::<HighLevel>().unwrap();
@@ -125,6 +131,8 @@ fn test_downcast_high() {
 
 #[test]
 fn test_downcast_mid() {
+    maybe_install_handler().unwrap();
+
     let (err, dropped) = make_chain();
 
     let err = err.downcast::<MidLevel>().unwrap();
@@ -137,6 +145,8 @@ fn test_downcast_mid() {
 
 #[test]
 fn test_downcast_low() {
+    maybe_install_handler().unwrap();
+
     let (err, dropped) = make_chain();
 
     let err = err.downcast::<LowLevel>().unwrap();
@@ -149,6 +159,8 @@ fn test_downcast_low() {
 
 #[test]
 fn test_unsuccessful_downcast() {
+    maybe_install_handler().unwrap();
+
     let (err, dropped) = make_chain();
 
     let err = err.downcast::<String>().unwrap_err();

@@ -1,3 +1,6 @@
+mod common;
+
+use self::common::maybe_install_handler;
 use eyre::{eyre, Report};
 
 fn error() -> Report {
@@ -6,6 +9,8 @@ fn error() -> Report {
 
 #[test]
 fn test_iter() {
+    maybe_install_handler().unwrap();
+
     let e = error();
     let mut chain = e.chain();
     assert_eq!("3", chain.next().unwrap().to_string());
@@ -18,6 +23,8 @@ fn test_iter() {
 
 #[test]
 fn test_rev() {
+    maybe_install_handler().unwrap();
+
     let e = error();
     let mut chain = e.chain().rev();
     assert_eq!("0", chain.next().unwrap().to_string());
@@ -30,6 +37,8 @@ fn test_rev() {
 
 #[test]
 fn test_len() {
+    maybe_install_handler().unwrap();
+
     let e = error();
     let mut chain = e.chain();
     assert_eq!(4, chain.len());

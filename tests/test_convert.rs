@@ -1,11 +1,15 @@
+mod common;
 mod drop;
 
+use self::common::maybe_install_handler;
 use self::drop::{DetectDrop, Flag};
 use eyre::{Report, Result};
 use std::error::Error as StdError;
 
 #[test]
 fn test_convert() {
+    maybe_install_handler().unwrap();
+
     let has_dropped = Flag::new();
     let error: Report = Report::new(DetectDrop::new(&has_dropped));
     let box_dyn = Box::<dyn StdError + Send + Sync>::from(error);

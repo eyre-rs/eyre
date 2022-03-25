@@ -10,6 +10,8 @@ use std::task::Poll;
 
 #[test]
 fn test_messages() {
+    maybe_install_handler().unwrap();
+
     assert_eq!("oh no!", bail_literal().unwrap_err().to_string());
     assert_eq!("oh no!", bail_fmt().unwrap_err().to_string());
     assert_eq!("oh no!", bail_error().unwrap_err().to_string());
@@ -17,6 +19,8 @@ fn test_messages() {
 
 #[test]
 fn test_ensure() {
+    maybe_install_handler().unwrap();
+
     let f = || -> Result<()> {
         ensure!(1 + 1 == 2, "This is correct");
         Ok(())
@@ -73,6 +77,8 @@ fn test_temporaries() {
 #[test]
 #[cfg(not(eyre_no_fmt_args_capture))]
 fn test_capture_format_args() {
+    maybe_install_handler().unwrap();
+
     let var = 42;
     let err = eyre!("interpolate {var}");
     assert_eq!("interpolate 42", err.to_string());
@@ -80,6 +86,8 @@ fn test_capture_format_args() {
 
 #[test]
 fn test_brace_escape() {
+    maybe_install_handler().unwrap();
+
     let err = eyre!("unterminated ${{..}} expression");
     assert_eq!("unterminated ${..} expression", err.to_string());
 }
