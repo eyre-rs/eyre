@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use eyre::{bail, DefaultHandler, InstallError, Result, set_hook};
+use eyre::{bail, set_hook, DefaultHandler, InstallError, Result};
 use once_cell::sync::OnceCell;
 use std::io;
 
