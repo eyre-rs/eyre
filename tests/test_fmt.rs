@@ -1,3 +1,6 @@
+mod common;
+
+use self::common::maybe_install_handler;
 use eyre::{bail, Result, WrapErr};
 use std::io;
 
@@ -68,11 +71,15 @@ Error {
 
 #[test]
 fn test_display() {
+    maybe_install_handler().unwrap();
+
     assert_eq!("g failed", h().unwrap_err().to_string());
 }
 
 #[test]
 fn test_altdisplay() {
+    maybe_install_handler().unwrap();
+
     assert_eq!(EXPECTED_ALTDISPLAY_F, format!("{:#}", f().unwrap_err()));
     assert_eq!(EXPECTED_ALTDISPLAY_G, format!("{:#}", g().unwrap_err()));
     assert_eq!(EXPECTED_ALTDISPLAY_H, format!("{:#}", h().unwrap_err()));
@@ -81,6 +88,8 @@ fn test_altdisplay() {
 #[test]
 #[cfg_attr(any(backtrace, track_caller), ignore)]
 fn test_debug() {
+    maybe_install_handler().unwrap();
+
     assert_eq!(EXPECTED_DEBUG_F, format!("{:?}", f().unwrap_err()));
     assert_eq!(EXPECTED_DEBUG_G, format!("{:?}", g().unwrap_err()));
     assert_eq!(EXPECTED_DEBUG_H, format!("{:?}", h().unwrap_err()));
@@ -88,6 +97,8 @@ fn test_debug() {
 
 #[test]
 fn test_altdebug() {
+    maybe_install_handler().unwrap();
+
     assert_eq!(EXPECTED_ALTDEBUG_F, format!("{:#?}", f().unwrap_err()));
     assert_eq!(EXPECTED_ALTDEBUG_G, format!("{:#?}", g().unwrap_err()));
     assert_eq!(EXPECTED_ALTDEBUG_H, format!("{:#?}", h().unwrap_err()));

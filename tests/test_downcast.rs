@@ -10,6 +10,8 @@ use std::io;
 
 #[test]
 fn test_downcast() {
+    maybe_install_handler().unwrap();
+
     #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
@@ -38,6 +40,8 @@ fn test_downcast() {
 
 #[test]
 fn test_downcast_ref() {
+    maybe_install_handler().unwrap();
+
     #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
@@ -69,6 +73,8 @@ fn test_downcast_ref() {
 
 #[test]
 fn test_downcast_mut() {
+    maybe_install_handler().unwrap();
+
     #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
@@ -100,6 +106,8 @@ fn test_downcast_mut() {
 
 #[test]
 fn test_drop() {
+    maybe_install_handler().unwrap();
+
     let has_dropped = Flag::new();
     let error: Report = Report::new(DetectDrop::new(&has_dropped));
     drop(error.downcast::<DetectDrop>().unwrap());
@@ -108,6 +116,8 @@ fn test_drop() {
 
 #[test]
 fn test_large_alignment() {
+    maybe_install_handler().unwrap();
+
     #[repr(align(64))]
     #[derive(Debug)]
     struct LargeAlignedError(&'static str);
@@ -129,6 +139,8 @@ fn test_large_alignment() {
 
 #[test]
 fn test_unsuccessful_downcast() {
+    maybe_install_handler().unwrap();
+
     let mut error = bail_error().unwrap_err();
     assert!(error.downcast_ref::<&str>().is_none());
     assert!(error.downcast_mut::<&str>().is_none());

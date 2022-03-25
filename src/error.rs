@@ -390,6 +390,9 @@ impl Report {
     /// #
     /// # const REDACTED_CONTENT: () = ();
     /// #
+    /// # #[cfg(not(feature = "auto-install"))]
+    /// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
+    /// #
     /// # let error: Report = eyre!("...");
     /// # let root_cause = &error;
     /// #

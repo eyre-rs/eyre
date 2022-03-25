@@ -1,5 +1,7 @@
+mod common;
 mod drop;
 
+use self::common::maybe_install_handler;
 use self::drop::{DetectDrop, Flag};
 use eyre::Report;
 use std::marker::Unpin;
@@ -26,6 +28,8 @@ fn test_autotraits() {
 
 #[test]
 fn test_drop() {
+    maybe_install_handler().unwrap();
+
     let has_dropped = Flag::new();
     drop(Report::new(DetectDrop::new(&has_dropped)));
     assert!(has_dropped.get());
