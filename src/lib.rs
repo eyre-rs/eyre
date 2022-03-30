@@ -441,6 +441,7 @@ pub use WrapErr as Context;
 ///
 /// [`EyreHandler`]: trait.EyreHandler.html
 /// [`hook`]: fn.set_hook.html
+#[must_use]
 pub struct Report {
     inner: ManuallyDrop<Box<ErrorImpl<()>>>,
 }
