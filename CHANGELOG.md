@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Added
+- Add `#[must_use]` to `Report`
+- Add `must-install` feature to help reduce binary sizes when using a custom `EyreHandler`
 
 ## [0.6.7] - 2022-02-24
 ### Fixed
