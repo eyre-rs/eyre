@@ -327,7 +327,7 @@
 //! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
 //! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.7")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.8")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
