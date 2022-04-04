@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.6.8] - 2022-04-04
+### Added
+- Add `#[must_use]` to `Report`
+- Add `must-install` feature to help reduce binary sizes when using a custom `EyreHandler`
+
 ## [0.6.7] - 2022-02-24
 ### Fixed
 - added missing track_caller annotation to new format arg capture constructor
@@ -38,7 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.7...HEAD
+[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.8...HEAD
+[0.6.8]: https://github.com/yaahc/eyre/compare/v0.6.7...v0.6.8
 [0.6.7]: https://github.com/yaahc/eyre/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/yaahc/eyre/compare/v0.6.5...v0.6.6
 [0.6.5]: https://github.com/yaahc/eyre/compare/v0.6.4...v0.6.5

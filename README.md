@@ -37,6 +37,29 @@ handlers for eyre and short summaries of what features they provide.
 - [`jane-eyre`]: A report handler crate that exists purely for the pun of it.
   Currently just re-exports `color-eyre`.
 
+## Usage Recommendations and Stability Considerations
+
+**We recommend users do not re-export types from this library as part their own
+public API for libraries with external users.** The main reason for this is
+that it will make your library API break if we ever bump the major version
+number on eyre and your users upgrade the eyre version they use in their
+application code before you upgrade your own eyre dep version[^1].
+
+However, even beyond this API stability hazard, there are other good reasons to
+avoid using `eyre::Report` as your public error type.
+
+- You export an undocumented error interface that is otherwise still accessible
+  via downcast, making it hard for users to react to specific errors while not
+  preventing them from depending on details you didn't mean to make part of
+  your public API.
+  - This in turn makes the error types of all libraries you use a part of your
+    public API as well, and makes changing any of those libraries into an
+    undetectable runtime breakage.
+- If many of your errors are constructed from strings you encourage your users
+  to use string comparision for reacting to specific errors which is brittle
+  and turns updating error messages into a potentially undetectable runtime
+  breakage.
+
 ## Details
 
 - Use `Result<T, eyre::Report>`, or equivalently `eyre::Result<T>`, as the
@@ -233,6 +256,7 @@ implements `context` for options which you can import to make existing
 [`color-spantrace`]: https://github.com/yaahc/color-spantrace
 [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 
+[^1]: example and explanation of breakage https://github.com/yaahc/eyre/issues/30#issuecomment-647650361
 
 #### License
 
