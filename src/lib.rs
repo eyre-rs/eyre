@@ -46,7 +46,7 @@
 //!   your public API as well, and makes changing any of those libraries into an
 //!   undetectable runtime breakage.
 //! - If many of your errors are constructed from strings you encourage your
-//! users to use string comparision for reacting to specific errors which is
+//! users to use string comparison for reacting to specific errors which is
 //! brittle and turns updating error messages into a potentially undetectable
 //! runtime breakage.
 //!
