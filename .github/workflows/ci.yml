@@ -66,6 +66,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           override: true
+          component: miri
       - uses: actions-rs/cargo@v1
         with:
           command: miri
