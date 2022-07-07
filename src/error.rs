@@ -564,7 +564,8 @@ where
     E: StdError + Send + Sync + 'static,
 {
     // Attach ErrorImpl<E>'s native StdError vtable. The StdError impl is below.
-    mem::transmute::<Box<ErrorImpl<()>>, Box<ErrorImpl<E>>>(e)
+    let unerased: Box<ErrorImpl<E>> = Box::from_raw(Box::into_raw(e).cast());
+    unerased
 }
 
 // Safety: requires layout of *e to match ErrorImpl<E>.
@@ -611,16 +612,10 @@ where
     // Called after downcasting by value to either the D or the E and doing a
     // ptr::read to take ownership of that value.
     if TypeId::of::<D>() == target {
-        let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<ManuallyDrop<D>, E>>>,
-        >(e);
+        let unerased: Box<ErrorImpl<ContextError<ManuallyDrop<D>, E>>> = Box::from_raw(Box::into_raw(e).cast());
         drop(unerased);
     } else {
-        let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<D, ManuallyDrop<E>>>>,
-        >(e);
+        let unerased: Box<ErrorImpl<ContextError<D, ManuallyDrop<E>>>> = Box::from_raw(Box::into_raw(e).cast());
         drop(unerased);
     }
 }
@@ -649,17 +644,11 @@ where
     // Called after downcasting by value to either the D or one of the causes
     // and doing a ptr::read to take ownership of that value.
     if TypeId::of::<D>() == target {
-        let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<ManuallyDrop<D>, Report>>>,
-        >(e);
+        let unerased: Box<ErrorImpl<ContextError<ManuallyDrop<D>, Report>>> = Box::from_raw(Box::into_raw(e).cast());
         // Drop the entire rest of the data structure rooted in the next Report.
         drop(unerased);
     } else {
-        let unerased = mem::transmute::<
-            Box<ErrorImpl<()>>,
-            Box<ErrorImpl<ContextError<D, ManuallyDrop<Report>>>>,
-        >(e);
+        let unerased: Box<ErrorImpl<ContextError<D, ManuallyDrop<Report>>>> = Box::from_raw(Box::into_raw(e).cast());
         // Read out a ManuallyDrop<Box<ErrorImpl<()>>> from the next error.
         let inner = ptr::read(&unerased._object.error.inner);
         drop(unerased);
