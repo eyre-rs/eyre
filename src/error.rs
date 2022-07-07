@@ -518,7 +518,11 @@ struct ErrorVTable {
 unsafe fn object_drop<E>(e: Box<ErrorImpl<()>>) {
     // Cast back to ErrorImpl<E> so that the allocator receives the correct
     // Layout to deallocate the Box's memory.
-    let unerased = mem::transmute::<Box<ErrorImpl<()>>, Box<ErrorImpl<E>>>(e);
+    // Note: This must not use `mem::transmute` because it tries to reborrow the `Unique`
+    //   contained in `Box`, which must not be done. In practice this probably won't make any
+    //   difference by now, but technically it's unsound.
+    //   see: https://github.com/rust-lang/unsafe-code-guidelines/blob/master/wip/stacked-borrows.md
+    let unerased: Box<ErrorImpl<E>> = Box::from_raw(Box::into_raw(e).cast());
     drop(unerased);
 }
 
@@ -528,7 +532,11 @@ unsafe fn object_drop_front<E>(e: Box<ErrorImpl<()>>, target: TypeId) {
     // without dropping E itself. This is used by downcast after doing a
     // ptr::read to take ownership of the E.
     let _ = target;
-    let unerased = mem::transmute::<Box<ErrorImpl<()>>, Box<ErrorImpl<ManuallyDrop<E>>>>(e);
+    // Note: This must not use `mem::transmute` because it tries to reborrow the `Unique`
+    //   contained in `Box`, which must not be done. In practice this probably won't make any
+    //   difference by now, but technically it's unsound.
+    //   see: https://github.com/rust-lang/unsafe-code-guidelines/blob/master/wip/stacked-borrows.m
+    let unerased: Box<ErrorImpl<ManuallyDrop<E>>> = Box::from_raw(Box::into_raw(e).cast());
     drop(unerased);
 }
 
