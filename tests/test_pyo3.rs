@@ -17,6 +17,7 @@ fn h() -> Result<()> {
     g().wrap_err("g failed")
 }
 
+#[cfg_attr(miri, ignore)]
 #[test]
 fn test_pyo3_exception_contents() {
     use pyo3::types::IntoPyDict;

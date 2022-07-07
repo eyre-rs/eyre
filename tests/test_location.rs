@@ -39,6 +39,7 @@ impl eyre::EyreHandler for LocationHandler {
     }
 }
 
+#[cfg_attr(miri, ignore)]
 #[test]
 fn test_wrap_err() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -54,6 +55,7 @@ fn test_wrap_err() {
     println!("{:?}", err);
 }
 
+#[cfg_attr(miri, ignore)]
 #[test]
 fn test_wrap_err_with() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -69,6 +71,7 @@ fn test_wrap_err_with() {
     println!("{:?}", err);
 }
 
+#[cfg_attr(miri, ignore)]
 #[test]
 fn test_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -84,6 +87,7 @@ fn test_context() {
     println!("{:?}", err);
 }
 
+#[cfg_attr(miri, ignore)]
 #[test]
 fn test_with_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
