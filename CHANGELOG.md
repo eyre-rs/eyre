@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Added
+- Option to disable display of location section in error reports
 
 ## [0.6.1] - 2022-02-24
 ### Changed
