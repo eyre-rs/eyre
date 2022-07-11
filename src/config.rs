@@ -207,7 +207,9 @@ impl<'a> fmt::Display for StyledFrame<'a> {
         let name = frame.name.as_deref().unwrap_or("<unknown>");
         let has_hash_suffix = name.len() > 19
             && &name[name.len() - 19..name.len() - 16] == "::h"
-            && name[name.len() - 16..].chars().all(|x| x.is_digit(16));
+            && name[name.len() - 16..]
+                .chars()
+                .all(|x| x.is_ascii_hexdigit());
 
         let hash_suffix = if has_hash_suffix {
             &name[name.len() - 19..]
@@ -924,7 +926,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
     Ok(())
 }
 
-impl<'a, 'b> fmt::Display for PanicReport<'a> {
+impl fmt::Display for PanicReport<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         print_panic_info(self, f)
     }
