@@ -404,6 +404,8 @@ pub struct Handler {
     span_trace: Option<SpanTrace>,
     sections: Vec<HelpInfo>,
     display_env_section: bool,
+    #[cfg(feature = "track-caller")]
+    display_location_section: bool,
     #[cfg(feature = "issue-url")]
     issue_url: Option<String>,
     #[cfg(feature = "issue-url")]
