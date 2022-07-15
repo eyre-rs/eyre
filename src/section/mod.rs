@@ -315,6 +315,12 @@ pub trait Section: crate::private::Sealed {
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
+
+    /// Whether to suppress printing of collected backtrace (if any).
+    ///
+    /// Useful for reporting "unexceptional" errors for which a backtrace
+    /// isn't really necessary.
+    fn suppress_backtrace(self, suppress: bool) -> Self::Return;
 }
 
 /// Trait for printing a panic error message for the given PanicInfo
