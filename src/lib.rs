@@ -334,7 +334,7 @@
 //! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.6.1")]
+#![doc(html_root_url = "https://docs.rs/color-eyre/0.6.2")]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     missing_docs,
@@ -405,6 +405,8 @@ pub struct Handler {
     span_trace: Option<SpanTrace>,
     sections: Vec<HelpInfo>,
     display_env_section: bool,
+    #[cfg(feature = "track-caller")]
+    display_location_section: bool,
     #[cfg(feature = "issue-url")]
     issue_url: Option<String>,
     #[cfg(feature = "issue-url")]
