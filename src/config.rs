@@ -4,6 +4,7 @@ use crate::{
     section::PanicMessage,
     writers::{EnvSection, WriterExt},
 };
+use eyre::WrapErr;
 use fmt::Display;
 use indenter::{indented, Format};
 use owo_colors::{style, OwoColorize, Style};
@@ -700,7 +701,7 @@ impl HookBuilder {
 
     /// Install the given Hook as the global error report hook
     pub fn install(self) -> Result<(), crate::eyre::Report> {
-        let (panic_hook, eyre_hook) = self.into_hooks();
+        let (panic_hook, eyre_hook) = self.into_hooks()?;
         eyre_hook.install()?;
         panic_hook.install();
         Ok(())
@@ -714,7 +715,7 @@ impl HookBuilder {
 
     /// Create a `PanicHook` and `EyreHook` from this `HookBuilder`.
     /// This can be used if you want to combine these handlers with other handlers.
-    pub fn into_hooks(self) -> (PanicHook, EyreHook) {
+    pub fn into_hooks(self) -> Result<(PanicHook, EyreHook), crate::eyre::Report> {
         let theme = self.theme;
         #[cfg(feature = "issue-url")]
         let metadata = Arc::new(self.issue_metadata);
@@ -753,9 +754,9 @@ impl HookBuilder {
         };
 
         #[cfg(feature = "capture-spantrace")]
-        color_spantrace::set_theme(self.theme.into()).expect("could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set");
+        color_spantrace::set_theme(self.theme.into()).wrap_err("could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set")?;
 
-        (panic_hook, eyre_hook)
+        Ok((panic_hook, eyre_hook))
     }
 }
 
