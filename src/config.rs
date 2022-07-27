@@ -701,7 +701,7 @@ impl HookBuilder {
 
     /// Install the given Hook as the global error report hook
     pub fn install(self) -> Result<(), crate::eyre::Report> {
-        let (panic_hook, eyre_hook) = self.into_hooks()?;
+        let (panic_hook, eyre_hook) = self.try_into_hooks()?;
         eyre_hook.install()?;
         panic_hook.install();
         Ok(())
@@ -715,7 +715,13 @@ impl HookBuilder {
 
     /// Create a `PanicHook` and `EyreHook` from this `HookBuilder`.
     /// This can be used if you want to combine these handlers with other handlers.
-    pub fn into_hooks(self) -> Result<(PanicHook, EyreHook), crate::eyre::Report> {
+    pub fn into_hooks(self) -> (PanicHook, EyreHook) {
+        self.try_into_hooks().expect("failed to turn into hooks")
+    }
+
+    /// Create a `PanicHook` and `EyreHook` from this `HookBuilder`.
+    /// This can be used if you want to combine these handlers with other handlers.
+    pub fn try_into_hooks(self) -> Result<(PanicHook, EyreHook), crate::eyre::Report> {
         let theme = self.theme;
         #[cfg(feature = "issue-url")]
         let metadata = Arc::new(self.issue_metadata);
