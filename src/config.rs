@@ -716,7 +716,7 @@ impl HookBuilder {
     /// Create a `PanicHook` and `EyreHook` from this `HookBuilder`.
     /// This can be used if you want to combine these handlers with other handlers.
     pub fn into_hooks(self) -> (PanicHook, EyreHook) {
-        self.try_into_hooks().expect("failed to turn into hooks")
+        self.try_into_hooks().expect("into_hooks should only be called when no `color_spantrace` themes have previously been set")
     }
 
     /// Create a `PanicHook` and `EyreHook` from this `HookBuilder`.
