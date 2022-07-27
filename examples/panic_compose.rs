@@ -6,7 +6,9 @@ fn main() -> Result<(), Report> {
     #[cfg(feature = "capture-spantrace")]
     install_tracing();
 
-    let (panic_hook, eyre_hook) = color_eyre::config::HookBuilder::default().into_hooks();
+    let (panic_hook, eyre_hook) = color_eyre::config::HookBuilder::default()
+        .into_hooks()
+        .expect("failed to setup hooks");
 
     eyre_hook.install()?;
 
