@@ -33,7 +33,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! color-eyre = "0.5"
+//! color-eyre = "0.6"
 //! ```
 //!
 //! And install the panic and error report handlers:
@@ -56,7 +56,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! color-eyre = { version = "0.5", default-features = false }
+//! color-eyre = { version = "0.6", default-features = false }
 //! ```
 //!
 //! ### Disabling SpanTrace capture by default
