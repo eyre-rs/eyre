@@ -118,7 +118,8 @@ impl eyre::EyreHandler for Handler {
                 let fmted_bt = self.format_backtrace(backtrace);
 
                 write!(
-                    indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),
+                    indented(&mut separated.ready())
+                        .with_format(Format::Uniform { indentation: "  " }),
                     "{}",
                     fmted_bt
                 )?;
