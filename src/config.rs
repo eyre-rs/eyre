@@ -1059,6 +1059,7 @@ impl EyreHook {
         crate::Handler {
             filters: self.filters.clone(),
             backtrace,
+            suppress_backtrace: false,
             #[cfg(feature = "capture-spantrace")]
             span_trace,
             sections: Vec::new(),

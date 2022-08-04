@@ -400,6 +400,7 @@ mod writers;
 pub struct Handler {
     filters: Arc<[Box<config::FilterCallback>]>,
     backtrace: Option<Backtrace>,
+    suppress_backtrace: bool,
     #[cfg(feature = "capture-spantrace")]
     span_trace: Option<SpanTrace>,
     sections: Vec<HelpInfo>,
