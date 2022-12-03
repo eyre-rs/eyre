@@ -379,7 +379,7 @@ use core::mem::ManuallyDrop;
 use std::error::Error as StdError;
 
 pub use eyre as format_err;
-/// Compatibility re-export of `eyre` for interopt with `anyhow`
+/// Compatibility re-export of `eyre` for interop with `anyhow`
 pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
 #[doc(hidden)]
@@ -388,9 +388,9 @@ pub use DefaultHandler as DefaultContext;
 pub use EyreHandler as EyreContext;
 #[doc(hidden)]
 pub use Report as ErrReport;
-/// Compatibility re-export of `Report` for interopt with `anyhow`
+/// Compatibility re-export of `Report` for interop with `anyhow`
 pub use Report as Error;
-/// Compatibility re-export of `WrapErr` for interopt with `anyhow`
+/// Compatibility re-export of `WrapErr` for interop with `anyhow`
 pub use WrapErr as Context;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
@@ -1108,13 +1108,13 @@ pub trait WrapErr<T, E>: context::private::Sealed {
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
-    /// Compatibility re-export of wrap_err for interopt with `anyhow`
+    /// Compatibility re-export of wrap_err for interop with `anyhow`
     #[cfg_attr(track_caller, track_caller)]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
-    /// Compatibility re-export of wrap_err_with for interopt with `anyhow`
+    /// Compatibility re-export of wrap_err_with for interop with `anyhow`
     #[cfg_attr(track_caller, track_caller)]
     fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
