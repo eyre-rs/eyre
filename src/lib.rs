@@ -2,16 +2,16 @@
 //! error handling type for easy idiomatic error handling and reporting in Rust
 //! applications.
 //!
-//! This crate is a fork of [`anyhow`]  with a support for customized
-//! error reports. For more details on customization checkout the docs on
+//! This crate is a fork of [`anyhow`]  with support for customized
+//! error reports. For more details on customization, check out the docs on
 //! [`eyre::EyreHandler`].
 //!
 //! ## Custom Report Handlers
 //!
-//! The heart of this crate is it's ability to swap out the Handler type to change
+//! The heart of this crate is its ability to swap out the Handler type to change
 //! what information is carried alongside errors and how the end report is
 //! formatted. This crate is meant to be used alongside companion crates that
-//! customize it's behavior. Below is a list of known crates that export report
+//! customize its behavior. Below is a list of known crates that export report
 //! handlers for eyre and short summaries of what features they provide.
 //!
 //! - [`stable-eyre`]: Switches the backtrace type from `std`'s to `backtrace-rs`'s
@@ -43,11 +43,11 @@
 //! errors while not preventing them from depending on details you didn't mean
 //! to make part of your public API.
 //!   - This in turn makes the error types of all libraries you use a part of
-//!   your public API as well, and makes changing any of those libraries into an
+//!   your public API as well, and makes changing any of those libraries into
 //!   undetectable runtime breakage.
-//! - If many of your errors are constructed from strings you encourage your
-//! users to use string comparision for reacting to specific errors which is
-//! brittle and turns updating error messages into a potentially undetectable
+//! - If many of your errors are constructed from strings, you encourage your
+//! users to use string comparison for reacting to specific errors, which is
+//! brittle and turns updating error messages into potentially undetectable
 //! runtime breakage.
 //!
 //! ## Details
@@ -86,7 +86,7 @@
 //!   ```
 //!
 //! - Wrap a lower level error with a new error created from a message to help the
-//!   person troubleshooting understand what the chain of failures that occured. A
+//!   person troubleshooting understand the chain of failures that occurred. A
 //!   low-level error like "No such file or directory" can be annoying to debug
 //!   without more information about what higher level step the application was in
 //!   the middle of.
@@ -132,7 +132,7 @@
 //!       No such file or directory (os error 2)
 //!   ```
 //!
-//! - Downcasting is supported and can be by value, by shared reference, or by
+//! - Downcasting is supported and can be done by value, by shared reference, or by
 //!   mutable reference as needed.
 //!
 //!   ```rust
@@ -219,7 +219,8 @@
 //!   #     Ok(())
 //!   # }
 //!   ```
-//! - On newer versions of the compiler (e.g. 1.58 and later) this macro also
+//!
+//! - On newer versions of the compiler (i.e. 1.58 and later) this macro also
 //!   supports format args captures.
 //!
 //!   ```rust
@@ -239,7 +240,7 @@
 //! everything works still. I'm waiting for upstream fixes to be merged rather than
 //! fixing them myself, so bear with me.
 //!
-//! In no_std mode, the same API is almost all available and works the same way. To
+//! In no_std mode, almost all the API is available and works the same way. To
 //! depend on Eyre in no_std mode, disable our default enabled "std" feature in
 //! Cargo.toml. A global allocator is required.
 //!
@@ -275,7 +276,7 @@
 //! ## Compatibility with `anyhow`
 //!
 //! This crate does its best to be usable as a drop in replacement of `anyhow` and
-//! vice-versa by `re-exporting` all of the renamed APIs with the names used in
+//! vice-versa by re-exporting all of the renamed APIs with the names used in
 //! `anyhow`, though there are some differences still.
 //!
 //! #### `Context` and `Option`
@@ -379,7 +380,7 @@ use core::mem::ManuallyDrop;
 use std::error::Error as StdError;
 
 pub use eyre as format_err;
-/// Compatibility re-export of `eyre` for interopt with `anyhow`
+/// Compatibility re-export of `eyre` for interop with `anyhow`
 pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
 #[doc(hidden)]
@@ -388,9 +389,9 @@ pub use DefaultHandler as DefaultContext;
 pub use EyreHandler as EyreContext;
 #[doc(hidden)]
 pub use Report as ErrReport;
-/// Compatibility re-export of `Report` for interopt with `anyhow`
+/// Compatibility re-export of `Report` for interop with `anyhow`
 pub use Report as Error;
-/// Compatibility re-export of `WrapErr` for interopt with `anyhow`
+/// Compatibility re-export of `WrapErr` for interop with `anyhow`
 pub use WrapErr as Context;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
@@ -1108,13 +1109,13 @@ pub trait WrapErr<T, E>: context::private::Sealed {
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
 
-    /// Compatibility re-export of wrap_err for interopt with `anyhow`
+    /// Compatibility re-export of wrap_err for interop with `anyhow`
     #[cfg_attr(track_caller, track_caller)]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
-    /// Compatibility re-export of wrap_err_with for interopt with `anyhow`
+    /// Compatibility re-export of wrap_err_with for interop with `anyhow`
     #[cfg_attr(track_caller, track_caller)]
     fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
