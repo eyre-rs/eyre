@@ -37,7 +37,6 @@ jobs:
           - # default
           - --no-default-features
           - --features track-caller
-          - --features pyo3
           - --features auto-install
           - --all-features
     steps:
@@ -61,7 +60,7 @@ jobs:
           - --no-default-features
           - --features track-caller
           - --features auto-install
-          # skip `--features pyo3` and `--all-features` because pyo3 doesn't support this msrv
+          - --all-features
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1

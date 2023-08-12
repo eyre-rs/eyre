@@ -23,12 +23,10 @@ trybuild = { version = "1.0.19", features = ["diff"] }
 backtrace = "0.3.46"
 anyhow = "1.0.28"
 syn = { version = "1.0", features = ["full"] }
-pyo3 = { version = "0.13", default-features = false, features = ["auto-initialize"] }
 
 [dependencies]
 indenter = "0.3.0"
 once_cell = "1.4.0"
-pyo3 = { version = "0.13", optional = true, default-features = false }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

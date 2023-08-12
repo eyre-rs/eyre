@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Removed
+- Remove `pyo3` feature (`pyo3` upstream now supports `eyre` as an optional feature instead)
 
 ## [0.6.8] - 2022-04-04
 ### Added
