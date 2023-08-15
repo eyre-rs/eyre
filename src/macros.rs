@@ -40,7 +40,6 @@
 ///
 /// # fn main() -> Result<()> {
 /// #     let depth = 0;
-/// #     let err: &'static dyn std::error::Error = &ScienceError::RecursionLimitExceeded;
 /// #
 /// if depth > MAX_DEPTH {
 ///     bail!(ScienceError::RecursionLimitExceeded);

@@ -22,7 +22,7 @@ thiserror = "1.0"
 trybuild = { version = "1.0.19", features = ["diff"] }
 backtrace = "0.3.46"
 anyhow = "1.0.28"
-syn = { version = "1.0", features = ["full"] }
+syn = { version = "2.0", features = ["full"] }
 pyo3 = { version = "0.13", default-features = false, features = ["auto-initialize"] }
 
 [dependencies]
