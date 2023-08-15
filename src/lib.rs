@@ -332,7 +332,8 @@
 #![warn(
     missing_debug_implementations,
     missing_docs,
-    missing_doc_code_examples,
+    // FIXME: this lint is currently nightly only
+    rustdoc::missing_doc_code_examples,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
