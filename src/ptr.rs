@@ -68,14 +68,14 @@ impl<T> OwnedPtr<T> {
         self.ptr.as_mut()
     }
 
-    pub(crate) const fn as_ptr<'a>(&'a self) -> RefPtr<'a, T> {
+    pub(crate) const fn as_ptr(&self) -> RefPtr<'_, T> {
         RefPtr {
             ptr: self.ptr,
             _marker: PhantomData,
         }
     }
 
-    pub(crate) fn as_mut_ptr<'a>(&'a self) -> MutPtr<'a, T> {
+    pub(crate) fn as_mut_ptr(&mut self) -> MutPtr<'_, T> {
         MutPtr {
             ptr: self.ptr,
             _marker: PhantomData,

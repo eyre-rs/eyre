@@ -82,6 +82,7 @@ impl Report {
             object_mut: object_mut::<E>,
             object_boxed: object_boxed::<E>,
             object_downcast: object_downcast::<E>,
+            object_downcast_mut: object_downcast_mut::<E>,
             object_drop_rest: object_drop_front::<E>,
         };
 
@@ -104,6 +105,7 @@ impl Report {
             object_mut: object_mut::<MessageError<M>>,
             object_boxed: object_boxed::<MessageError<M>>,
             object_downcast: object_downcast::<M>,
+            object_downcast_mut: object_downcast_mut::<M>,
             object_drop_rest: object_drop_front::<M>,
         };
 
@@ -127,6 +129,7 @@ impl Report {
             object_mut: object_mut::<DisplayError<M>>,
             object_boxed: object_boxed::<DisplayError<M>>,
             object_downcast: object_downcast::<M>,
+            object_downcast_mut: object_downcast_mut::<M>,
             object_drop_rest: object_drop_front::<M>,
         };
 
@@ -151,6 +154,7 @@ impl Report {
             object_mut: object_mut::<ContextError<D, E>>,
             object_boxed: object_boxed::<ContextError<D, E>>,
             object_downcast: context_downcast::<D, E>,
+            object_downcast_mut: context_downcast_mut::<D, E>,
             object_drop_rest: context_drop_rest::<D, E>,
         };
 
@@ -172,6 +176,7 @@ impl Report {
             object_mut: object_mut::<BoxedError>,
             object_boxed: object_boxed::<BoxedError>,
             object_downcast: object_downcast::<Box<dyn StdError + Send + Sync>>,
+            object_downcast_mut: object_downcast_mut::<Box<dyn StdError + Send + Sync>>,
             object_drop_rest: object_drop_front::<Box<dyn StdError + Send + Sync>>,
         };
 
@@ -283,6 +288,7 @@ impl Report {
             object_mut: object_mut::<ContextError<D, Report>>,
             object_boxed: object_boxed::<ContextError<D, Report>>,
             object_downcast: context_chain_downcast::<D>,
+            object_downcast_mut: context_chain_downcast_mut::<D>,
             object_drop_rest: context_chain_drop_rest::<D>,
         };
 
@@ -441,7 +447,7 @@ impl Report {
             // Use vtable to find NonNull<()> which points to a value of type E
             // somewhere inside the data structure.
             let addr = (self.vtable().object_downcast)(self.inner.as_ptr(), target)?;
-            Some(&*addr.cast::<E>().as_ptr())
+            Some(addr.cast::<E>().as_ref())
         }
     }
 
@@ -454,8 +460,8 @@ impl Report {
         unsafe {
             // Use vtable to find NonNull<()> which points to a value of type E
             // somewhere inside the data structure.
-            let addr = (self.vtable().object_downcast)(self.inner.as_ptr(), target)?;
-            Some(&mut *addr.cast::<E>().as_ptr())
+            let addr = (self.vtable().object_downcast_mut)(self.inner.as_mut_ptr(), target)?;
+            Some(addr.cast::<E>().as_mut())
         }
     }
 
@@ -544,6 +550,7 @@ struct ErrorVTable {
     #[allow(clippy::type_complexity)]
     object_boxed: unsafe fn(OwnedPtr<ErrorImpl<()>>) -> Box<dyn StdError + Send + Sync + 'static>,
     object_downcast: unsafe fn(RefPtr<'_, ErrorImpl<()>>, TypeId) -> Option<NonNull<()>>,
+    object_downcast_mut: unsafe fn(MutPtr<'_, ErrorImpl<()>>, TypeId) -> Option<NonNull<()>>,
     object_drop_rest: unsafe fn(OwnedPtr<ErrorImpl<()>>, TypeId),
 }
 
@@ -557,7 +564,6 @@ unsafe fn object_drop<E>(e: OwnedPtr<ErrorImpl<()>>) {
     //   contained in `Box`, which must not be done. In practice this probably won't make any
     //   difference by now, but technically it's unsound.
     //   see: https://github.com/rust-lang/unsafe-code-guidelines/blob/master/wip/stacked-borrows.md
-    eprintln!("Dropping");
     let unerased = e.cast::<ErrorImpl<E>>().into_box();
     drop(unerased);
 }
@@ -622,9 +628,28 @@ where
     if TypeId::of::<E>() == target {
         // Caller is looking for an E pointer and e is ErrorImpl<E>, take a
         // pointer to its E field.
-        let unerased = e.cast::<ErrorImpl<E>>();
-        let addr = &(unerased.as_ref()._object) as *const E as *mut ();
-        Some(NonNull::new_unchecked(addr))
+        let unerased = e.cast::<ErrorImpl<E>>().as_ref();
+        Some(NonNull::from(&(unerased._object)).cast::<()>())
+    } else {
+        None
+    }
+}
+
+/// # Safety
+///
+/// Requires layout of *e to match ErrorImpl<E>.
+unsafe fn object_downcast_mut<E>(
+    e: MutPtr<'_, ErrorImpl<()>>,
+    target: TypeId,
+) -> Option<NonNull<()>>
+where
+    E: 'static,
+{
+    if TypeId::of::<E>() == target {
+        // Caller is looking for an E pointer and e is ErrorImpl<E>, take a
+        // pointer to its E field.
+        let unerased = e.cast::<ErrorImpl<E>>().into_mut();
+        Some(NonNull::from(&mut (unerased._object)).cast::<()>())
     } else {
         None
     }
@@ -642,18 +667,41 @@ where
     E: 'static,
 {
     if TypeId::of::<D>() == target {
-        let unerased = e.cast::<ErrorImpl<ContextError<D, E>>>();
-        let addr = (&unerased.as_ref()._object.msg as *const D) as *mut ();
-        Some(NonNull::new_unchecked(addr))
+        let unerased = e.cast::<ErrorImpl<ContextError<D, E>>>().as_ref();
+        let addr = NonNull::from(&unerased._object.msg).cast::<()>();
+        Some(addr)
     } else if TypeId::of::<E>() == target {
-        let unerased = e.cast::<ErrorImpl<ContextError<D, E>>>();
-        let addr = (&unerased.as_ref()._object.error as *const E) as *mut ();
-        Some(NonNull::new_unchecked(addr))
+        let unerased = e.cast::<ErrorImpl<ContextError<D, E>>>().as_ref();
+        let addr = NonNull::from(&unerased._object.error).cast::<()>();
+        Some(addr)
     } else {
         None
     }
 }
 
+/// # Safety
+///
+/// Requires layout of *e to match ErrorImpl<ContextError<D, E>>.
+unsafe fn context_downcast_mut<D, E>(
+    e: MutPtr<'_, ErrorImpl<()>>,
+    target: TypeId,
+) -> Option<NonNull<()>>
+where
+    D: 'static,
+    E: 'static,
+{
+    if TypeId::of::<D>() == target {
+        let unerased = e.cast::<ErrorImpl<ContextError<D, E>>>().into_mut();
+        let addr = NonNull::from(&unerased._object.msg).cast::<()>();
+        Some(addr)
+    } else if TypeId::of::<E>() == target {
+        let unerased = e.cast::<ErrorImpl<ContextError<D, E>>>().into_mut();
+        let addr = NonNull::from(&mut unerased._object.error).cast::<()>();
+        Some(addr)
+    } else {
+        None
+    }
+}
 /// # Safety
 ///
 /// Requires layout of *e to match ErrorImpl<ContextError<D, E>>.
@@ -684,14 +732,35 @@ unsafe fn context_chain_downcast<D>(
 where
     D: 'static,
 {
-    let unerased = e.cast::<ErrorImpl<ContextError<D, Report>>>();
+    let unerased = e.cast::<ErrorImpl<ContextError<D, Report>>>().as_ref();
     if TypeId::of::<D>() == target {
-        let addr = &(unerased.as_ref()._object.msg) as *const D as *mut ();
-        Some(NonNull::new_unchecked(addr))
+        let addr = NonNull::from(&unerased._object.msg).cast::<()>();
+        Some(addr)
     } else {
         // Recurse down the context chain per the inner error's vtable.
-        let source = &unerased.as_ref()._object.error;
+        let source = &unerased._object.error;
         (source.vtable().object_downcast)(source.inner.as_ptr(), target)
+    }
+}
+
+/// # Safety
+///
+/// Requires layout of *e to match ErrorImpl<ContextError<D, Report>>.
+unsafe fn context_chain_downcast_mut<D>(
+    e: MutPtr<'_, ErrorImpl<()>>,
+    target: TypeId,
+) -> Option<NonNull<()>>
+where
+    D: 'static,
+{
+    let unerased = e.cast::<ErrorImpl<ContextError<D, Report>>>().into_mut();
+    if TypeId::of::<D>() == target {
+        let addr = NonNull::from(&unerased._object.msg).cast::<()>();
+        Some(addr)
+    } else {
+        // Recurse down the context chain per the inner error's vtable.
+        let source = &mut unerased._object.error;
+        (source.vtable().object_downcast_mut)(source.inner.as_mut_ptr(), target)
     }
 }
 
