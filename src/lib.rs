@@ -370,6 +370,7 @@ mod error;
 mod fmt;
 mod kind;
 mod macros;
+mod ptr;
 mod wrapper;
 
 use crate::backtrace::Backtrace;
@@ -383,6 +384,7 @@ pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
+use ptr::OwnedPtr;
 #[doc(hidden)]
 pub use DefaultHandler as DefaultContext;
 #[doc(hidden)]
@@ -469,7 +471,7 @@ pub use WrapErr as Context;
 /// [`hook`]: fn.set_hook.html
 #[must_use]
 pub struct Report {
-    inner: ManuallyDrop<Box<ErrorImpl<()>>>,
+    inner: OwnedPtr<ErrorImpl<()>>,
 }
 
 type ErrorHook =
