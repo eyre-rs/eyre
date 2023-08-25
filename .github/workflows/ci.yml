@@ -6,6 +6,9 @@ on:
 
 name: Continuous integration
 
+env:
+  MIRIFLAGS: -Zmiri-strict-provenance
+
 jobs:
   check:
     name: Check
@@ -126,3 +129,17 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+  miri:
+    name: Miri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          components: miri
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: miri
+          args: test
