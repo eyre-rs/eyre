@@ -376,7 +376,6 @@ mod wrapper;
 use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::Display;
-use core::mem::ManuallyDrop;
 
 use std::error::Error as StdError;
 

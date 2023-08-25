@@ -199,8 +199,7 @@ impl Report {
         E: StdError + Send + Sync + 'static,
     {
         let inner = ErrorImpl {
-            vtable,
-            handler,
+            header: ErrorHeader { vtable, handler },
             _object: error,
         };
 
@@ -279,7 +278,7 @@ impl Report {
         //
         // As the generic is at the end of the struct and the struct is `repr(C)` this reference
         // will be within bounds of the original pointer, and the field will have the same offset
-        let handler = self.inner_mut().handler.take();
+        let handler = header_mut(self.inner.as_mut()).handler.take();
         let error: ContextError<D, Report> = ContextError { msg, error: self };
 
         let vtable = &ErrorVTable {
@@ -297,21 +296,8 @@ impl Report {
     }
 
     /// Access the vtable for the current error object.
-    const fn vtable(&self) -> &'static ErrorVTable {
-        vtable(self.inner.ptr)
-    }
-
-    // Safety: this access a `ErrorImpl<unknown>` as a valid reference to a `ErrorImpl<()>`
-    //
-    // As the generic is at the end of the struct and the struct is `repr(C)` this reference
-    // will be within bounds of the original pointer, and the field will have the same offset
-    const fn inner_ref(&self) -> &ErrorImpl<()> {
-        unsafe { self.inner.as_ref() }
-    }
-
-    /// See: [Self::inner_ref]
-    fn inner_mut(&mut self) -> &mut ErrorImpl<()> {
-        unsafe { self.inner.as_mut() }
+    fn vtable(&self) -> &'static ErrorVTable {
+        header(self.inner.as_ref()).vtable
     }
 
     /// An iterator of the chain of source errors contained by this Report.
@@ -336,7 +322,7 @@ impl Report {
     /// }
     /// ```
     pub fn chain(&self) -> Chain<'_> {
-        ErrorImpl::chain(self.inner.as_ptr())
+        ErrorImpl::chain(self.inner.as_ref())
     }
 
     /// The lowest level cause of this error &mdash; this error's cause's
@@ -376,7 +362,7 @@ impl Report {
         unsafe {
             // Use vtable to find NonNull<()> which points to a value of type E
             // somewhere inside the data structure.
-            let addr = match (self.vtable().object_downcast)(self.inner.as_ptr(), target) {
+            let addr = match (self.vtable().object_downcast)(self.inner.as_ref(), target) {
                 Some(addr) => addr,
                 None => return Err(self),
             };
@@ -446,7 +432,7 @@ impl Report {
         unsafe {
             // Use vtable to find NonNull<()> which points to a value of type E
             // somewhere inside the data structure.
-            let addr = (self.vtable().object_downcast)(self.inner.as_ptr(), target)?;
+            let addr = (self.vtable().object_downcast)(self.inner.as_ref(), target)?;
             Some(addr.cast::<E>().as_ref())
         }
     }
@@ -460,21 +446,23 @@ impl Report {
         unsafe {
             // Use vtable to find NonNull<()> which points to a value of type E
             // somewhere inside the data structure.
-            let addr = (self.vtable().object_downcast_mut)(self.inner.as_mut_ptr(), target)?;
+            let addr = (self.vtable().object_downcast_mut)(self.inner.as_mut(), target)?;
             Some(addr.cast::<E>().as_mut())
         }
     }
 
     /// Get a reference to the Handler for this Report.
     pub fn handler(&self) -> &dyn EyreHandler {
-        // TODO: find better ways of doing this without creating a reference to ErrorImpl as it
-        // creates a valid reference to a pointer of a mismatched layout
-        self.inner_ref().handler.as_ref().unwrap().as_ref()
+        header(self.inner.as_ref())
+            .handler
+            .as_ref()
+            .unwrap()
+            .as_ref()
     }
 
     /// Get a mutable reference to the Handler for this Report.
     pub fn handler_mut(&mut self) -> &mut dyn EyreHandler {
-        unsafe { self.inner.as_mut() }
+        header_mut(self.inner.as_mut())
             .handler
             .as_mut()
             .unwrap()
@@ -484,13 +472,17 @@ impl Report {
     /// Get a reference to the Handler for this Report.
     #[doc(hidden)]
     pub fn context(&self) -> &dyn EyreHandler {
-        self.inner_ref().handler.as_ref().unwrap().as_ref()
+        header(self.inner.as_ref())
+            .handler
+            .as_ref()
+            .unwrap()
+            .as_ref()
     }
 
     /// Get a mutable reference to the Handler for this Report.
     #[doc(hidden)]
     pub fn context_mut(&mut self) -> &mut dyn EyreHandler {
-        unsafe { self.inner.as_mut() }
+        header_mut(self.inner.as_mut())
             .handler
             .as_mut()
             .unwrap()
@@ -512,25 +504,25 @@ impl Deref for Report {
     type Target = dyn StdError + Send + Sync + 'static;
 
     fn deref(&self) -> &Self::Target {
-        ErrorImpl::error(self.inner.as_ptr())
+        ErrorImpl::error(self.inner.as_ref())
     }
 }
 
 impl DerefMut for Report {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        ErrorImpl::error_mut(self.inner.as_mut_ptr())
+        ErrorImpl::error_mut(self.inner.as_mut())
     }
 }
 
 impl Display for Report {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        ErrorImpl::display(self.inner.as_ptr(), formatter)
+        ErrorImpl::display(self.inner.as_ref(), formatter)
     }
 }
 
 impl Debug for Report {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        ErrorImpl::debug(self.inner.as_ptr(), formatter)
+        ErrorImpl::debug(self.inner.as_ref(), formatter)
     }
 }
 
@@ -739,7 +731,7 @@ where
     } else {
         // Recurse down the context chain per the inner error's vtable.
         let source = &unerased._object.error;
-        (source.vtable().object_downcast)(source.inner.as_ptr(), target)
+        (source.vtable().object_downcast)(source.inner.as_ref(), target)
     }
 }
 
@@ -760,7 +752,7 @@ where
     } else {
         // Recurse down the context chain per the inner error's vtable.
         let source = &mut unerased._object.error;
-        (source.vtable().object_downcast_mut)(source.inner.as_mut_ptr(), target)
+        (source.vtable().object_downcast_mut)(source.inner.as_mut(), target)
     }
 }
 
@@ -787,15 +779,20 @@ where
         let inner = ptr::read(&unerased.as_ref()._object.error.inner);
         drop(unerased);
         // Recursively drop the next error using the same target typeid.
-        (inner.as_ref().vtable.object_drop_rest)(inner, target);
+        (header(inner.as_ref()).vtable.object_drop_rest)(inner, target);
     }
+}
+
+#[repr(C)]
+pub(crate) struct ErrorHeader {
+    vtable: &'static ErrorVTable,
+    pub(crate) handler: Option<Box<dyn EyreHandler>>,
 }
 
 // repr C to ensure that E remains in the final position.
 #[repr(C)]
 pub(crate) struct ErrorImpl<E = ()> {
-    vtable: &'static ErrorVTable,
-    pub(crate) handler: Option<Box<dyn EyreHandler>>,
+    header: ErrorHeader,
     // NOTE: Don't use directly. Use only through vtable. Erased type may have
     // different alignment.
     _object: E,
@@ -819,28 +816,38 @@ impl<E> ErrorImpl<E> {
     }
 }
 
-// Reads the vtable out of `p`. This is the same as `p.as_ref().vtable`, but
-// avoids converting `p` into a reference.
-const fn vtable(p: NonNull<ErrorImpl<()>>) -> &'static ErrorVTable {
-    // Safety: `ErrorVTable` is the first field of `ErrorImpl` and `ErrorImpl` is `repr(C)`.
-    unsafe { *(p.as_ptr() as *const &'static ErrorVTable) }
+// Reads the header out of `p`. This is the same as `p.as_ref().header`, but
+// avoids converting `p` into a reference of a shrunk provenance with a type different than the
+// allocation.
+fn header(p: RefPtr<'_, ErrorImpl<()>>) -> &'_ ErrorHeader {
+    // Safety: `ErrorHeader` is the first field of repr(C) `ErrorImpl`
+    unsafe { p.cast().as_ref() }
+}
+
+fn header_mut(p: MutPtr<'_, ErrorImpl<()>>) -> &mut ErrorHeader {
+    // Safety: `ErrorHeader` is the first field of repr(C) `ErrorImpl`
+    unsafe { p.cast().into_mut() }
 }
 
 impl ErrorImpl<()> {
     pub(crate) fn error(this: RefPtr<'_, Self>) -> &(dyn StdError + Send + Sync + 'static) {
         // Use vtable to attach E's native StdError vtable for the right
         // original type E.
-        unsafe { (vtable(this.ptr).object_ref)(this) }
+        unsafe { (header(this).vtable.object_ref)(this) }
     }
 
     pub(crate) fn error_mut(this: MutPtr<'_, Self>) -> &mut (dyn StdError + Send + Sync + 'static) {
         // Use vtable to attach E's native StdError vtable for the right
         // original type E.
-        unsafe { (vtable(this.ptr).object_mut)(this) }
+        unsafe { (header_mut(this).vtable.object_mut)(this) }
     }
 
     pub(crate) fn chain(this: RefPtr<'_, Self>) -> Chain<'_> {
         Chain::new(Self::error(this))
+    }
+
+    pub(crate) fn header(this: RefPtr<'_, ErrorImpl>) -> &ErrorHeader {
+        header(this)
     }
 }
 
@@ -879,7 +886,7 @@ impl From<Report> for Box<dyn StdError + Send + Sync + 'static> {
             // Report has a Drop impl which we want to not run.
             // Use vtable to attach ErrorImpl<E>'s native StdError vtable for
             // the right original type E.
-            (vtable(outer.inner.ptr).object_boxed)(outer.inner)
+            (header(outer.inner.as_ref()).vtable.object_boxed)(outer.inner)
         }
     }
 }

@@ -158,7 +158,7 @@ where
     D: Display,
 {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
-        Some(ErrorImpl::error(self.error.inner.as_ptr()))
+        Some(ErrorImpl::error(self.error.inner.as_ref()))
     }
 }
 

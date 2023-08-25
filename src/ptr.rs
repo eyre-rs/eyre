@@ -4,7 +4,7 @@ use std::{marker::PhantomData, ptr::NonNull};
 ///
 /// **NOTE**: Does not deallocate when dropped
 pub(crate) struct OwnedPtr<T: ?Sized> {
-    pub(crate) ptr: NonNull<T>,
+    ptr: NonNull<T>,
 }
 
 impl<T: ?Sized> Copy for OwnedPtr<T> {}
@@ -48,34 +48,14 @@ impl<T> OwnedPtr<T> {
         Box::from_raw(self.ptr.as_ptr())
     }
 
-    /// Returns a shared reference to the owned value
-    ///
-    /// # Safety
-    ///
-    /// See: [`NonNull::as_ref`]
-    #[inline]
-    pub(crate) const unsafe fn as_ref(&self) -> &T {
-        self.ptr.as_ref()
-    }
-
-    /// Returns a mutable reference to the owned value
-    ///
-    /// # Safety
-    ///
-    /// See: [`NonNull::as_mut`]
-    #[inline]
-    pub(crate) unsafe fn as_mut(&mut self) -> &mut T {
-        self.ptr.as_mut()
-    }
-
-    pub(crate) const fn as_ptr(&self) -> RefPtr<'_, T> {
+    pub(crate) const fn as_ref(&self) -> RefPtr<'_, T> {
         RefPtr {
             ptr: self.ptr,
             _marker: PhantomData,
         }
     }
 
-    pub(crate) fn as_mut_ptr(&mut self) -> MutPtr<'_, T> {
+    pub(crate) fn as_mut(&mut self) -> MutPtr<'_, T> {
         MutPtr {
             ptr: self.ptr,
             _marker: PhantomData,
@@ -149,39 +129,12 @@ impl<'a, T: ?Sized> Clone for MutPtr<'a, T> {
 }
 
 impl<'a, T: ?Sized> MutPtr<'a, T> {
-    pub(crate) fn new(ptr: &'a mut T) -> Self {
-        Self {
-            ptr: NonNull::from(ptr),
-            _marker: PhantomData,
-        }
-    }
-
     /// Convert the pointer to another type
     pub(crate) fn cast<U>(self) -> MutPtr<'a, U> {
         MutPtr {
             ptr: self.ptr.cast(),
             _marker: PhantomData,
         }
-    }
-
-    /// Returns a shared reference to the owned value
-    ///
-    /// # Safety
-    ///
-    /// See: [`NonNull::as_ref`]
-    #[inline]
-    pub(crate) unsafe fn as_ref(&self) -> &'a T {
-        self.ptr.as_ref()
-    }
-
-    /// Returns a mutable reference to the owned value
-    ///
-    /// # Safety
-    ///
-    /// See: [`NonNull::as_mut`]
-    #[inline]
-    pub(crate) unsafe fn as_mut(&'a mut self) -> &'a mut T {
-        self.ptr.as_mut()
     }
 
     /// Returns a mutable reference to the owned value with the lifetime decoupled from self
