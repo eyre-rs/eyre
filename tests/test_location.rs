@@ -60,7 +60,7 @@ fn read_path(path: &str) -> Result<String, std::io::Error> {
 }
 
 #[cfg(miri)]
-fn read_path(path: &str) -> Result<String, std::io::Error> {
+fn read_path(_path: &str) -> Result<String, std::io::Error> {
     // Miri doesn't support reading files, so we just return an error
     Err(std::io::Error::new(
         std::io::ErrorKind::Other,

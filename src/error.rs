@@ -203,13 +203,10 @@ impl Report {
             _object: error,
         };
 
-        // Erase the concrete type of E from the compile-time type system. This
-        // is equivalent to the safe unsize coersion from Box<ErrorImpl<E>> to
-        // Box<ErrorImpl<dyn StdError + Send + Sync + 'static>> except that the
-        // result is a thin pointer. The necessary behavior for manipulating the
-        // underlying ErrorImpl<E> is preserved in the vtable provided by the
-        // caller rather than a builtin fat pointer vtable.
-        // let erased = mem::transmute::<Box<ErrorImpl<E>>, Box<ErrorImpl<()>>>(inner);
+        // Construct a new owned allocation through a raw pointer
+        //
+        // This does not keep the allocation around as a `Box` which would invalidate an
+        // references when moved
         let ptr = OwnedPtr::<ErrorImpl<E>>::new(inner);
 
         // Safety: the type
@@ -550,12 +547,7 @@ struct ErrorVTable {
 ///
 /// Requires layout of *e to match ErrorImpl<E>.
 unsafe fn object_drop<E>(e: OwnedPtr<ErrorImpl<()>>) {
-    // Cast back to ErrorImpl<E> so that the allocator receives the correct
-    // Layout to deallocate the Box's memory.
-    // Note: This must not use `mem::transmute` because it tries to reborrow the `Unique`
-    //   contained in `Box`, which must not be done. In practice this probably won't make any
-    //   difference by now, but technically it's unsound.
-    //   see: https://github.com/rust-lang/unsafe-code-guidelines/blob/master/wip/stacked-borrows.md
+    // Cast to a context type and drop the Box allocation.
     let unerased = unsafe { e.cast::<ErrorImpl<E>>().into_box() };
     drop(unerased);
 }
