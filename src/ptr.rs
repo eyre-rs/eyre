@@ -45,7 +45,7 @@ impl<T> OwnedPtr<T> {
     ///
     /// A cast pointer must therefore be cast back to the original type before calling this method.
     pub(crate) unsafe fn into_box(self) -> Box<T> {
-        Box::from_raw(self.ptr.as_ptr())
+        unsafe { Box::from_raw(self.ptr.as_ptr()) }
     }
 
     pub(crate) const fn as_ref(&self) -> RefPtr<'_, T> {
@@ -105,7 +105,7 @@ impl<'a, T: ?Sized> RefPtr<'a, T> {
     /// See: [`NonNull::as_ref`]
     #[inline]
     pub(crate) unsafe fn as_ref(&self) -> &'a T {
-        self.ptr.as_ref()
+        unsafe { self.ptr.as_ref() }
     }
 }
 
@@ -144,6 +144,6 @@ impl<'a, T: ?Sized> MutPtr<'a, T> {
     /// See: [`NonNull::as_mut`]
     #[inline]
     pub(crate) unsafe fn into_mut(mut self) -> &'a mut T {
-        self.ptr.as_mut()
+        unsafe { self.ptr.as_mut() }
     }
 }

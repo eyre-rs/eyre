@@ -334,6 +334,7 @@
     missing_docs,
     // FIXME: this lint is currently nightly only
     rustdoc::missing_doc_code_examples,
+    unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
