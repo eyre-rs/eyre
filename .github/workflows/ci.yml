@@ -28,7 +28,7 @@ jobs:
           command: check
 
   test-matrix:
-    name: Test Suite
+    name: Test Suite Matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -55,7 +55,7 @@ jobs:
           args: ${{ matrix.features }}
 
   test-msrv:
-    name: Test Suite
+    name: Test MSRV
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -76,7 +76,7 @@ jobs:
           command: test
 
   test-os:
-    name: Test Suite
+    name: Test Platform Matrix
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
