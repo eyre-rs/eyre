@@ -5,6 +5,9 @@ use core::fmt::{self, Debug, Display};
 pub(crate) struct DisplayError<M>(pub(crate) M);
 
 #[repr(transparent)]
+/// Wraps a Debug + Display type as an error.
+///
+/// Its Debug and Display impls are the same as the wrapped type.
 pub(crate) struct MessageError<M>(pub(crate) M);
 
 pub(crate) struct NoneError;
