@@ -1,13 +1,17 @@
 on:
   push:
     branches:
-    - master
+      - master
   pull_request: {}
 
 name: Continuous integration
 
 env:
   MIRIFLAGS: -Zmiri-strict-provenance
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.run_number }}
+  cancel-in-progress: true
 
 jobs:
   check:
@@ -26,6 +30,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
+          args: --all
 
   test-matrix:
     name: Test Suite
@@ -52,7 +57,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: ${{ matrix.features }}
+          args: --all ${{ matrix.features }}
 
   test-msrv:
     name: Test Suite
@@ -74,6 +79,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --all ${{ matrix.features }}
 
   test-os:
     name: Test Suite
@@ -91,6 +97,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --all
 
   fmt:
     name: Rustfmt
@@ -109,7 +116,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all -- --check
+          args: --check
 
   clippy:
     name: Clippy
@@ -128,7 +135,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: -- -D warnings
+          args: --all-targets --all-features -- -D warnings
   miri:
     name: Miri
     runs-on: ubuntu-latest
