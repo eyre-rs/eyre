@@ -21,7 +21,7 @@ macro_rules! context_type {
         #[derive(Debug)]
         struct $name {
             message: &'static str,
-            drop: DetectDrop,
+            _drop: DetectDrop,
         }
 
         impl Display for $name {
@@ -74,7 +74,7 @@ fn make_chain() -> (Report, Dropped) {
     let mid = Err::<(), LowLevel>(low)
         .wrap_err(MidLevel {
             message: "failed to load config",
-            drop: DetectDrop::new(&dropped.mid),
+            _drop: DetectDrop::new(&dropped.mid),
         })
         .unwrap_err();
 
@@ -82,7 +82,7 @@ fn make_chain() -> (Report, Dropped) {
     let high = Err::<(), Report>(mid)
         .wrap_err(HighLevel {
             message: "failed to start server",
-            drop: DetectDrop::new(&dropped.high),
+            _drop: DetectDrop::new(&dropped.high),
         })
         .unwrap_err();
 
