@@ -5,8 +5,8 @@ color-spantrace
 [![Latest Version](https://img.shields.io/crates/v/color-spantrace.svg)](https://crates.io/crates/color-spantrace)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/color-spantrace)
 
-[actions-badge]: https://github.com/yaahc/color-spantrace/workflows/Continuous%20integration/badge.svg
-[actions-url]: https://github.com/yaahc/color-spantrace/actions?query=workflow%3A%22Continuous+integration%22
+[actions-badge]: https://github.com/eyre-rs/color-spantrace/workflows/Continuous%20integration/badge.svg
+[actions-url]: https://github.com/eyre-rs/color-spantrace/actions?query=workflow%3A%22Continuous+integration%22
 
 A rust library for colorizing [`tracing_error::SpanTrace`] objects in the style
 of [`color-backtrace`].
