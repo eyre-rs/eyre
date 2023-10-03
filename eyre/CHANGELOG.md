@@ -43,12 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/eyre/compare/v0.6.8...HEAD
-[0.6.8]: https://github.com/yaahc/eyre/compare/v0.6.7...v0.6.8
-[0.6.7]: https://github.com/yaahc/eyre/compare/v0.6.6...v0.6.7
-[0.6.6]: https://github.com/yaahc/eyre/compare/v0.6.5...v0.6.6
-[0.6.5]: https://github.com/yaahc/eyre/compare/v0.6.4...v0.6.5
-[0.6.4]: https://github.com/yaahc/eyre/compare/v0.6.3...v0.6.4
-[0.6.3]: https://github.com/yaahc/eyre/compare/v0.6.2...v0.6.3
-[0.6.2]: https://github.com/yaahc/eyre/compare/v0.6.1...v0.6.2
-[0.6.1]: https://github.com/yaahc/eyre/releases/tag/v0.6.1
+[Unreleased]: https://github.com/eyre-rs/eyre/compare/v0.6.8...HEAD
+[0.6.8]: https://github.com/eyre-rs/eyre/compare/v0.6.7...v0.6.8
+[0.6.7]: https://github.com/eyre-rs/eyre/compare/v0.6.6...v0.6.7
+[0.6.6]: https://github.com/eyre-rs/eyre/compare/v0.6.5...v0.6.6
+[0.6.5]: https://github.com/eyre-rs/eyre/compare/v0.6.4...v0.6.5
+[0.6.4]: https://github.com/eyre-rs/eyre/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/eyre-rs/eyre/compare/v0.6.2...v0.6.3
+[0.6.2]: https://github.com/eyre-rs/eyre/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/eyre-rs/eyre/releases/tag/v0.6.1

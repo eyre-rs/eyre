@@ -314,7 +314,7 @@
 //! implements `context` for options which you can import to make existing
 //! `.context` calls compile.
 //!
-//! [^1]: example and explanation of breakage https://github.com/yaahc/eyre/issues/30#issuecomment-647650361
+//! [^1]: example and explanation of breakage https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361
 //!
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
@@ -322,11 +322,11 @@
 //! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
-//! [`stable-eyre`]: https://github.com/yaahc/stable-eyre
-//! [`color-eyre`]: https://github.com/yaahc/color-eyre
+//! [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
+//! [`color-eyre`]: https://github.com/eyre-rs/color-eyre
 //! [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-//! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
-//! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
+//! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
+//! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/eyre/0.6.8")]
 #![warn(
