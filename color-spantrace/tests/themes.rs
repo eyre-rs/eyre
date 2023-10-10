@@ -52,19 +52,27 @@ fn test_capture(x: u8) -> SpanTrace {
 #[test]
 fn test_backwards_compatibility() {
     std::env::set_var("RUST_LIB_BACKTRACE", "full");
+
+    // This integration is ran by cargo with cwd="color-spantrace", but the string literals for
+    // `file!` are relative to the workspace root. This changes the cwd to the workspace root.
+    //
+    // The behavior of file! when invoked from a workspace is not document, as non-member path
+    // dependencies will get an absolute path.
+    std::env::set_current_dir("..").unwrap();
+
     Registry::default().with(ErrorLayer::default()).init();
 
     let spantrace = test_capture(42);
     let colored_spantrace = format!("{}", color_spantrace::colorize(&spantrace));
 
     let control_file_name = "theme_control.txt";
-    let control_file_path = ["tests/data/", control_file_name].concat();
+    let control_file_path = ["color-spantrace/tests/data/", control_file_name].concat();
 
     // If `control_file_path` is missing, save corresponding file to current working directory, and panic with the request to move these files to `control_file_path`, and to commit them to Git. Being explicit (instead of saving directly to `control_file_path` to make sure `control_file_path` is committed to Git. These files anyway should never be missing.
 
     if !Path::new(&control_file_path).is_file() {
         std::fs::write(control_file_name, &colored_spantrace)
-            .expect("\n\nError saving `colored_spanntrace` to a file");
+            .expect("\n\nError saving `colored_spantrace` to a file");
         panic!("Required test data missing! Fix this, by moving '{}' to '{}', and commit it to Git.\n\nNote: '{0}' was just generated in the current working directory.\n\n", control_file_name, control_file_path);
     }
 
