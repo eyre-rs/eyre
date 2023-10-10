@@ -32,12 +32,8 @@
 
 */
 
-use ansi_parser::{AnsiParser, AnsiSequence, Output};
-use std::{fs, path::Path};
 use tracing::instrument;
-use tracing_error::ErrorLayer;
 use tracing_error::SpanTrace;
-use tracing_subscriber::{prelude::*, registry::Registry};
 
 #[instrument]
 fn test_capture(x: u8) -> SpanTrace {
@@ -52,6 +48,10 @@ fn test_capture(x: u8) -> SpanTrace {
 #[cfg(not(miri))]
 #[test]
 fn test_backwards_compatibility() {
+    use ansi_parser::{AnsiParser, AnsiSequence, Output};
+    use std::{fs, path::Path};
+    use tracing_error::ErrorLayer;
+    use tracing_subscriber::{prelude::*, registry::Registry};
     std::env::set_var("RUST_LIB_BACKTRACE", "full");
 
     // This integration is ran by cargo with cwd="color-spantrace", but the string literals for
