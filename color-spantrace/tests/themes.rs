@@ -57,8 +57,10 @@ fn test_backwards_compatibility() {
     // This integration is ran by cargo with cwd="color-spantrace", but the string literals for
     // `file!` are relative to the workspace root. This changes the cwd to the workspace root.
     //
-    // The behavior of file! when invoked from a workspace is not document, as non-member path
-    // dependencies will get an absolute path.
+    // The behavior of file! when invoked from a workspace is not documented. See: <https://doc.rust-lang.org/std/macro.file.html>.
+    //
+    // Noteworthy: non-member path dependencies will get an absolute path, as will registry and git
+    // dependencies.
     std::env::set_current_dir("..").unwrap();
 
     Registry::default().with(ErrorLayer::default()).init();
