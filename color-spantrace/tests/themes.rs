@@ -49,6 +49,7 @@ fn test_capture(x: u8) -> SpanTrace {
     }
 }
 
+#[cfg(not(miri))]
 #[test]
 fn test_backwards_compatibility() {
     std::env::set_var("RUST_LIB_BACKTRACE", "full");
