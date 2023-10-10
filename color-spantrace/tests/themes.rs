@@ -32,12 +32,8 @@
 
 */
 
-use ansi_parser::{AnsiParser, AnsiSequence, Output};
-use std::{fs, path::Path};
 use tracing::instrument;
-use tracing_error::ErrorLayer;
 use tracing_error::SpanTrace;
-use tracing_subscriber::{prelude::*, registry::Registry};
 
 #[instrument]
 fn test_capture(x: u8) -> SpanTrace {
@@ -49,22 +45,37 @@ fn test_capture(x: u8) -> SpanTrace {
     }
 }
 
+#[cfg(not(miri))]
 #[test]
 fn test_backwards_compatibility() {
+    use ansi_parser::{AnsiParser, AnsiSequence, Output};
+    use std::{fs, path::Path};
+    use tracing_error::ErrorLayer;
+    use tracing_subscriber::{prelude::*, registry::Registry};
     std::env::set_var("RUST_LIB_BACKTRACE", "full");
+
+    // This integration is ran by cargo with cwd="color-spantrace", but the string literals for
+    // `file!` are relative to the workspace root. This changes the cwd to the workspace root.
+    //
+    // The behavior of file! when invoked from a workspace is not documented. See: <https://doc.rust-lang.org/std/macro.file.html>.
+    //
+    // Noteworthy: non-member path dependencies will get an absolute path, as will registry and git
+    // dependencies.
+    std::env::set_current_dir("..").unwrap();
+
     Registry::default().with(ErrorLayer::default()).init();
 
     let spantrace = test_capture(42);
     let colored_spantrace = format!("{}", color_spantrace::colorize(&spantrace));
 
     let control_file_name = "theme_control.txt";
-    let control_file_path = ["tests/data/", control_file_name].concat();
+    let control_file_path = ["color-spantrace/tests/data/", control_file_name].concat();
 
     // If `control_file_path` is missing, save corresponding file to current working directory, and panic with the request to move these files to `control_file_path`, and to commit them to Git. Being explicit (instead of saving directly to `control_file_path` to make sure `control_file_path` is committed to Git. These files anyway should never be missing.
 
     if !Path::new(&control_file_path).is_file() {
         std::fs::write(control_file_name, &colored_spantrace)
-            .expect("\n\nError saving `colored_spanntrace` to a file");
+            .expect("\n\nError saving `colored_spantrace` to a file");
         panic!("Required test data missing! Fix this, by moving '{}' to '{}', and commit it to Git.\n\nNote: '{0}' was just generated in the current working directory.\n\n", control_file_name, control_file_path);
     }
 
