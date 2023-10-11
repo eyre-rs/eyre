@@ -23,7 +23,8 @@ fn get_error(msg: &'static str) -> Report {
             .error(TestError("error"))
     }
 
-    // Using `Option` to add dependency code. See https://github.com/yaahc/color-eyre/blob/4ddaeb2126ed8b14e4e6aa03d7eef49eb8561cf0/src/config.rs#L56
+    // Using `Option` to add dependency code.
+    // See https://github.com/eyre-rs/color-eyre/blob/4ddaeb2126ed8b14e4e6aa03d7eef49eb8561cf0/src/config.rs#L56
     None::<Option<()>>
         .ok_or_else(|| create_report(msg))
         .unwrap_err()

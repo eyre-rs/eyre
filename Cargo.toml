@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "color-eyre",
   "color-spantrace",
   "eyre"
 ]
@@ -15,3 +16,4 @@ rust-version = "1.65.0"
 [workspace.dependencies]
 indenter = "0.3.0"
 once_cell = "1.18.0"
+owo-colors = "3.2.0"

@@ -493,7 +493,7 @@ impl HookBuilder {
     ///
     /// ```rust
     /// color_eyre::config::HookBuilder::default()
-    ///     .panic_section("consider reporting the bug at https://github.com/yaahc/color-eyre")
+    ///     .panic_section("consider reporting the bug at https://github.com/eyre-rs/eyre")
     ///     .install()
     ///     .unwrap()
     /// ```
