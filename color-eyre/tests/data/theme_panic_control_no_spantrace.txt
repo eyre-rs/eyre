@@ -1,0 +1,18 @@
+    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
+     Running `target/debug/examples/theme_test_helper`
+[31mThe application panicked (crashed).[0m
+Message:  [36m<non string panic payload>[0m
+Location: [35mexamples/theme_test_helper.rs[0m:[35m37[0m
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [96m                              ⋮ 6 frames hidden ⋮                               [0m
+   7: [32mstd::panic::panic_any[0m[90m::hb5351c0843c6c4aa[0m
+      at [35m/rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/std/src/panic.rs[0m:[35m57[0m
+   8: [91mtheme_test_helper::main[0m[90m::h22b568e997946766[0m
+      at [35m/home/jlusby/git/yaahc/color-eyre/examples/theme_test_helper.rs[0m:[35m37[0m
+   9: [32mcore::ops::function::FnOnce::call_once[0m[90m::hab7662216a7cf3dc[0m
+      at [35m/rustc/f1edd0429582dd29cccacaf50fd134b05593bd9c/library/core/src/ops/function.rs[0m:[35m227[0m
+  [96m                              ⋮ 15 frames hidden ⋮                              [0m
+
+Run with COLORBT_SHOW_HIDDEN=1 environment variable to disable frame filtering.
+Run with RUST_BACKTRACE=full to include source snippets.
