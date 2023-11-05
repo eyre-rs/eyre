@@ -171,23 +171,9 @@ avoid using `eyre::Report` as your public error type.
 
 ## No-std support
 
-**NOTE**: tests are currently broken for `no_std` so I cannot guarantee that
-everything works still. I'm waiting for upstream fixes to be merged rather than
-fixing them myself, so bear with me.
-
-In no_std mode, the same API is almost all available and works the same way. To
-depend on Eyre in no_std mode, disable our default enabled "std" feature in
-Cargo.toml. A global allocator is required.
-
-```toml
-[dependencies]
-eyre = { version = "0.6", default-features = false }
-```
-
-Since the `?`-based error conversions would normally rely on the
-`std::error::Error` trait which is only available through std, no_std mode will
-require an explicit `.map_err(Report::msg)` when working with a non-Eyre error
-type inside a function that returns Eyre's error type.
+No-std support was removed in 2020 in [commit 608a16a] due to unaddressed upstream breakages.
+[commit 608a16a]:
+https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c6973c18f1d5
 
 ## Comparison to failure
 
