@@ -315,11 +315,14 @@
 //! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/eyre/0.6.8")]
+#![cfg_attr(
+    nightly_features,
+    feature(rustdoc_missing_doc_code_examples),
+    warn(rustdoc::missing_doc_code_examples)
+)]
 #![warn(
     missing_debug_implementations,
     missing_docs,
-    // FIXME: this lint is currently nightly only
-    rustdoc::missing_doc_code_examples,
     unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,

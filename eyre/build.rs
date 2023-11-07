@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsString;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, ExitStatus};
@@ -55,16 +56,20 @@ fn main() {
         _ => {}
     }
 
-    let rustc = match rustc_minor_version() {
-        Some(rustc) => rustc,
+    let version = match rustc_version_info() {
+        Some(version) => version,
         None => return,
     };
 
-    if rustc < 52 {
+    if version.is_nightly {
+        println!("cargo:rustc-cfg=nightly_features");
+    }
+
+    if version.minor < 52 {
         println!("cargo:rustc-cfg=eyre_no_fmt_arguments_as_str");
     }
 
-    if rustc < 58 {
+    if version.minor < 58 {
         println!("cargo:rustc-cfg=eyre_no_fmt_args_capture");
     }
 }
@@ -86,13 +91,23 @@ fn compile_probe(probe: &str) -> Option<ExitStatus> {
         .ok()
 }
 
-fn rustc_minor_version() -> Option<u32> {
-    let rustc = env::var_os("RUSTC")?;
+struct VersionInfo {
+    minor: u32,
+    is_nightly: bool,
+}
+
+fn rustc_version_info() -> Option<VersionInfo> {
+    let rustc = env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
     let output = Command::new(rustc).arg("--version").output().ok()?;
     let version = str::from_utf8(&output.stdout).ok()?;
-    let mut pieces = version.split('.');
-    if pieces.next() != Some("rustc 1") {
+    let mut pieces = version.split(['.', ' ', '-']);
+    if pieces.next() != Some("rustc") {
         return None;
     }
-    pieces.next()?.parse().ok()
+    let _major: u32 = pieces.next()?.parse().ok()?;
+    let minor = pieces.next()?.parse().ok()?;
+    let _patch: u32 = pieces.next()?.parse().ok()?;
+    let is_nightly = pieces.next() == Some("nightly");
+    let version = VersionInfo { minor, is_nightly };
+    Some(version)
 }
