@@ -1038,6 +1038,13 @@ pub struct EyreHook {
     issue_filter: Arc<IssueFilterCallback>,
 }
 
+type HookFunc = Box<
+    dyn Fn(&(dyn std::error::Error + 'static)) -> Box<dyn eyre::EyreHandler>
+        + Send
+        + Sync
+        + 'static,
+>;
+
 impl EyreHook {
     #[allow(unused_variables)]
     pub(crate) fn default(&self, error: &(dyn std::error::Error + 'static)) -> crate::Handler {
@@ -1091,14 +1098,7 @@ impl EyreHook {
     }
 
     /// Convert the self into the boxed type expected by `eyre::set_hook`.
-    pub fn into_eyre_hook(
-        self,
-    ) -> Box<
-        dyn Fn(&(dyn std::error::Error + 'static)) -> Box<dyn eyre::EyreHandler>
-            + Send
-            + Sync
-            + 'static,
-    > {
+    pub fn into_eyre_hook(self) -> HookFunc {
         Box::new(move |e| Box::new(self.default(e)))
     }
 }

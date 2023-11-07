@@ -118,7 +118,7 @@ fn test_panic_backwards_compatibility() {
     };
 
     let output = std::process::Command::new("cargo")
-        .args(&["run", "--example", "theme_test_helper"])
+        .args(["run", "--example", "theme_test_helper"])
         .arg("--no-default-features")
         .args(&features)
         .output()
@@ -151,7 +151,6 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
         let all: Vec<_> = s.ansi_parse().collect();
         let ansi: Vec<_> = s
             .ansi_parse()
-            .into_iter()
             .filter_map(|x| {
                 if let Output::Escape(ansi) = x {
                     Some(ansi)
@@ -166,6 +165,7 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
     let (_control_tokens, control_ansi) = f(&control);
     let (_target_tokens, target_ansi) = f(&target);
 
+    // pretty_assertions::assert_eq!(target, control);
     let msg = [
         // comment out / un-comment what you need or don't need for debugging (see below for more instructions):
 
@@ -188,6 +188,7 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
 
     ].join("\n\n");
 
+    pretty_assertions::assert_eq!(target_ansi, control_ansi, "{msg}");
     assert_eq!(target_ansi, control_ansi, "{}", &msg);
 
     /*
