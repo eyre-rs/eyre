@@ -188,7 +188,6 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
 
     ].join("\n\n");
 
-    pretty_assertions::assert_eq!(target_ansi, control_ansi, "{msg}");
     assert_eq!(target_ansi, control_ansi, "{}", &msg);
 
     /*
