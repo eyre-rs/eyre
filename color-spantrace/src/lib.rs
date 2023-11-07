@@ -60,10 +60,14 @@
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.0")]
+#![cfg_attr(
+    nightly_features,
+    feature(rustdoc_missing_doc_code_examples),
+    warn(rustdoc::missing_doc_code_examples)
+)]
 #![warn(
     missing_debug_implementations,
     missing_docs,
-    rustdoc::missing_doc_code_examples,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
