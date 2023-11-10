@@ -61,9 +61,7 @@ fn main() {
         None => return,
     };
 
-    if version.is_nightly {
-        println!("cargo:rustc-cfg=nightly_features");
-    }
+    version.toolchain.set_feature();
 
     if version.minor < 52 {
         println!("cargo:rustc-cfg=eyre_no_fmt_arguments_as_str");
@@ -91,9 +89,26 @@ fn compile_probe(probe: &str) -> Option<ExitStatus> {
         .ok()
 }
 
+// TODO factor this toolchain parsing and related tests into its own file
+#[derive(PartialEq)]
+enum Toolchain {
+    Stable,
+    Beta,
+    Nightly,
+}
+impl Toolchain {
+    fn set_feature(self) {
+        match self {
+            Toolchain::Nightly => println!("cargo:rustc-cfg=nightly"),
+            Toolchain::Beta => println!("cargo:rustc-cfg=beta"),
+            Toolchain::Stable => println!("cargo:rustc-cfg=stable"),
+        }
+    }
+}
+
 struct VersionInfo {
     minor: u32,
-    is_nightly: bool,
+    toolchain: Toolchain,
 }
 
 fn rustc_version_info() -> Option<VersionInfo> {
@@ -107,7 +122,11 @@ fn rustc_version_info() -> Option<VersionInfo> {
     let _major: u32 = pieces.next()?.parse().ok()?;
     let minor = pieces.next()?.parse().ok()?;
     let _patch: u32 = pieces.next()?.parse().ok()?;
-    let is_nightly = pieces.next() == Some("nightly");
-    let version = VersionInfo { minor, is_nightly };
+    let toolchain = match pieces.next() {
+        Some("beta") => Toolchain::Beta,
+        Some("nightly") => Toolchain::Nightly,
+        _ => Toolchain::Stable,
+    };
+    let version = VersionInfo { minor, toolchain };
     Some(version)
 }
