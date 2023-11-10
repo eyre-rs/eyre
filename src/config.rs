@@ -4,7 +4,6 @@ use crate::{
     section::PanicMessage,
     writers::{EnvSection, WriterExt},
 };
-use eyre::WrapErr;
 use fmt::Display;
 use indenter::{indented, Format};
 use owo_colors::{style, OwoColorize, Style};
@@ -760,7 +759,7 @@ impl HookBuilder {
         };
 
         #[cfg(feature = "capture-spantrace")]
-        color_spantrace::set_theme(self.theme.into()).wrap_err("could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set")?;
+        eyre::WrapErr::wrap_err(color_spantrace::set_theme(self.theme.into()), "could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set")?;
 
         Ok((panic_hook, eyre_hook))
     }
@@ -1038,6 +1037,13 @@ pub struct EyreHook {
     issue_filter: Arc<IssueFilterCallback>,
 }
 
+type HookFunc = Box<
+    dyn Fn(&(dyn std::error::Error + 'static)) -> Box<dyn eyre::EyreHandler>
+        + Send
+        + Sync
+        + 'static,
+>;
+
 impl EyreHook {
     #[allow(unused_variables)]
     pub(crate) fn default(&self, error: &(dyn std::error::Error + 'static)) -> crate::Handler {
@@ -1091,14 +1097,7 @@ impl EyreHook {
     }
 
     /// Convert the self into the boxed type expected by `eyre::set_hook`.
-    pub fn into_eyre_hook(
-        self,
-    ) -> Box<
-        dyn Fn(&(dyn std::error::Error + 'static)) -> Box<dyn eyre::EyreHandler>
-            + Send
-            + Sync
-            + 'static,
-    > {
+    pub fn into_eyre_hook(self) -> HookFunc {
         Box::new(move |e| Box::new(self.default(e)))
     }
 }

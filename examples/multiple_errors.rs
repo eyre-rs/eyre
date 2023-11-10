@@ -12,13 +12,15 @@ fn join_errors(results: Vec<Result<(), SourceError>>) -> Result<(), Report> {
         return Ok(());
     }
 
-    results
+    let err = results
         .into_iter()
         .filter(Result::is_err)
         .map(Result::unwrap_err)
-        .fold(Err(eyre!("encountered multiple errors")), |report, e| {
+        .fold(eyre!("encountered multiple errors"), |report, e| {
             report.error(e)
-        })
+        });
+
+    Err(err)
 }
 
 /// Helper function to generate errors
