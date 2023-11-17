@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Fixed
+- Fix stacked borrows when dropping [by TimDiekmann](https://github.com/eyre-rs/eyre/pull/81)
+- Fix miri validation errors through now stricter provenance [by ten3roberts](https://github.com/eyre-rs/eyre/pull/103)
+- Merge eyre related crates into monorepo [by pksunkara](https://github.com/eyre-rs/eyre/pull/104), [[2]](https://github.com/eyre-rs/eyre/pull/105)[[3]](https://github.com/eyre-rs/eyre/pull/107)
+- Update documentation on no_std support [by thenorili](https://github.com/eyre-rs/eyre/pull/111)
+### Added
+- Add CONTRIBUTING.md [by yaahc](https://github.com/eyre-rs/eyre/pull/99)
 
 ## [0.6.8] - 2022-04-04
 ### Added
