@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.2.1] - 2023-11-17
+### Fixed
+- Add license files [by erickt](https://github.com/eyre-rs/color-spantrace/pull/19)
+
 ## [0.2.0] - 2022-01-12
 ### Changed
 - Updated dependency versions to match latest tracing versions
@@ -22,7 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support custom color themes for spantrace format
 
 <!-- next-url -->
-[Unreleased]: https://github.com/eyre-rs/color-spantrace/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/eyre-rs/color-spantrace/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/eyre-rs/color-spantrace/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/eyre-rs/color-spantrace/compare/v0.1.6...v0.2.0
 [0.1.6]: https://github.com/eyre-rs/color-spantrace/compare/v0.1.5...v0.1.6
 [v0.1.5]: https://github.com/eyre-rs/color-spantrace/releases/tag/v0.1.5
