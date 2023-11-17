@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [0.6.9] - 2023-11-17
 ### Fixed
 - Fix stacked borrows when dropping [by TimDiekmann](https://github.com/eyre-rs/eyre/pull/81)
 - Fix miri validation errors through now stricter provenance [by ten3roberts](https://github.com/eyre-rs/eyre/pull/103)
@@ -50,7 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/eyre-rs/eyre/compare/v0.6.8...HEAD
+[Unreleased]: https://github.com/eyre-rs/eyre/compare/v0.6.9...HEAD
+[0.6.9]: https://github.com/eyre-rs/eyre/compare/v0.6.8...v0.6.9
 [0.6.8]: https://github.com/eyre-rs/eyre/compare/v0.6.7...v0.6.8
 [0.6.7]: https://github.com/eyre-rs/eyre/compare/v0.6.6...v0.6.7
 [0.6.6]: https://github.com/eyre-rs/eyre/compare/v0.6.5...v0.6.6

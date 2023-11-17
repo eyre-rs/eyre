@@ -314,7 +314,7 @@
 //! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
 //! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.8")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.9")]
 #![cfg_attr(
     nightly,
     feature(rustdoc_missing_doc_code_examples),

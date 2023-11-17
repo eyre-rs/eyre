@@ -59,7 +59,7 @@
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.1")]
 #![cfg_attr(
     nightly,
     feature(rustdoc_missing_doc_code_examples),
