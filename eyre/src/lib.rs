@@ -316,10 +316,11 @@
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/eyre/0.6.9")]
 #![cfg_attr(
-    nightly_features,
+    nightly,
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
+#![cfg_attr(stable, warn(private_in_public))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -334,7 +335,6 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
-    private_in_public,
     unconditional_recursion,
     unused,
     unused_allocation,
