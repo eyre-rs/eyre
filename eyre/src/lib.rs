@@ -320,7 +320,6 @@
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
-#![cfg_attr(stable, warn(private_in_public))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
