@@ -316,7 +316,7 @@
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/eyre/0.6.8")]
 #![cfg_attr(
-    nightly,
+    all(nightly, feature = "unstable"),
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]

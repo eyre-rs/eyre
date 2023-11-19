@@ -1,4 +1,4 @@
-#[rustversion::attr(not(nightly), ignore)]
+#[cfg_attr(any(not(nightly), not(feature = "unstable")), ignore)]
 #[cfg_attr(miri, ignore)]
 #[test]
 fn ui() {

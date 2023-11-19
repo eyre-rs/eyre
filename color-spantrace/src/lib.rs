@@ -61,7 +61,7 @@
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.0")]
 #![cfg_attr(
-    nightly,
+    all(nightly, feature = "unstable"),
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]

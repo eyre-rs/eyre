@@ -16,6 +16,7 @@ rust-version = { workspace = true }
 default = ["auto-install", "track-caller"]
 auto-install = []
 track-caller = []
+unstable = []
 
 [dependencies]
 indenter = { workspace = true }
