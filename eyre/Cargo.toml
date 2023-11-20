@@ -26,7 +26,7 @@ pyo3 = { version = "0.20", optional = true, default-features = false }
 futures = { version = "0.3", default-features = false }
 rustversion = "1.0"
 thiserror = "1.0"
-trybuild = { version = "1.0.19", features = ["diff"] }
+ui_test = "0.21.0"
 backtrace = "0.3.46"
 anyhow = "1.0.28"
 syn = { version = "2.0", features = ["full"] }

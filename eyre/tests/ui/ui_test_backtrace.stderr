@@ -1,0 +1,1 @@
+error: embedded manifest `$DIR/ui_test_backtrace.rs` requires `-Zscript`
