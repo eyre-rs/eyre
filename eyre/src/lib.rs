@@ -341,7 +341,7 @@
     unused_parens,
     while_true
 )]
-#![cfg_attr(backtrace, feature(backtrace))]
+#![cfg_attr(backtrace, feature(error_generic_member_access))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(
     clippy::needless_doctest_main,
@@ -789,6 +789,8 @@ impl EyreHandler for DefaultHandler {
         f: &mut core::fmt::Formatter<'_>,
     ) -> core::fmt::Result {
         use core::fmt::Write as _;
+        #[cfg(backtrace)]
+        use std::error::request_ref;
 
         if f.alternate() {
             return core::fmt::Debug::fmt(error, f);
@@ -824,7 +826,7 @@ impl EyreHandler for DefaultHandler {
             let backtrace = self
                 .backtrace
                 .as_ref()
-                .or_else(|| error.backtrace())
+                .or_else(|| request_ref::<Backtrace>(error))
                 .expect("backtrace capture failed");
             if let BacktraceStatus::Captured = backtrace.status() {
                 write!(f, "\n\nStack backtrace:\n{}", backtrace)?;

@@ -1,6 +1,9 @@
 use crate::StdError;
 use core::fmt::{self, Debug, Display};
 
+#[cfg(backtrace)]
+use std::error::Request;
+
 #[repr(transparent)]
 pub(crate) struct DisplayError<M>(pub(crate) M);
 
@@ -83,8 +86,8 @@ impl Display for BoxedError {
 
 impl StdError for BoxedError {
     #[cfg(backtrace)]
-    fn backtrace(&self) -> Option<&crate::backtrace::Backtrace> {
-        self.0.backtrace()
+    fn provide<'a>(&'a self, request: &mut Request<'a>) {
+        self.0.provide(request);
     }
 
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
