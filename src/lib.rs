@@ -1099,10 +1099,10 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///
 /// # `wrap_err` vs `wrap_err_with`
 ///
-/// Depending on the instance of [`EyreHandler`] that is installed, using `wrap_err` can have
-/// significant runtime cost (even if the error case does not happen), since [`EyreHandler`] can
-/// incur significant costs (e.g., taking a lock) on error creation. Depending on the context, it
-/// may be significantly more efficient to use `wrap_err_with`.
+/// `wrap_err` incurs a runtime cost even in the non-error case because it requires eagerly
+/// constructing the error object. `wrap_err_with` avoids this cost through lazy evaluation. This
+/// cost is proportional to the cost of the currently installed [`EyreHandler`]'s creation step.
+/// `wrap_err` is useful in cases where an constructed error object already exists.
 pub trait WrapErr<T, E>: context::private::Sealed {
     /// Wrap the error value with a new adhoc error
     #[cfg_attr(track_caller, track_caller)]
