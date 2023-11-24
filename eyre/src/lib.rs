@@ -1084,6 +1084,13 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///         # panic!("expected downcast to succeed");
 ///     }
 ///     ```
+///
+/// # `wrap_err` vs `wrap_err_with`
+///
+/// `wrap_err` incurs a runtime cost even in the non-error case because it requires eagerly
+/// constructing the error object. `wrap_err_with` avoids this cost through lazy evaluation. This
+/// cost is proportional to the cost of the currently installed [`EyreHandler`]'s creation step.
+/// `wrap_err` is useful in cases where an constructed error object already exists.
 pub trait WrapErr<T, E>: context::private::Sealed {
     /// Wrap the error value with a new adhoc error
     #[cfg_attr(track_caller, track_caller)]
