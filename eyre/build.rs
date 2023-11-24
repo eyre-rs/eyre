@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsString;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, ExitStatus};
@@ -55,16 +56,18 @@ fn main() {
         _ => {}
     }
 
-    let rustc = match rustc_minor_version() {
-        Some(rustc) => rustc,
+    let version = match rustc_version_info() {
+        Some(version) => version,
         None => return,
     };
 
-    if rustc < 52 {
+    version.toolchain.set_feature();
+
+    if version.minor < 52 {
         println!("cargo:rustc-cfg=eyre_no_fmt_arguments_as_str");
     }
 
-    if rustc < 58 {
+    if version.minor < 58 {
         println!("cargo:rustc-cfg=eyre_no_fmt_args_capture");
     }
 }
@@ -86,13 +89,44 @@ fn compile_probe(probe: &str) -> Option<ExitStatus> {
         .ok()
 }
 
-fn rustc_minor_version() -> Option<u32> {
-    let rustc = env::var_os("RUSTC")?;
+// TODO factor this toolchain parsing and related tests into its own file
+#[derive(PartialEq)]
+enum Toolchain {
+    Stable,
+    Beta,
+    Nightly,
+}
+impl Toolchain {
+    fn set_feature(self) {
+        match self {
+            Toolchain::Nightly => println!("cargo:rustc-cfg=nightly"),
+            Toolchain::Beta => println!("cargo:rustc-cfg=beta"),
+            Toolchain::Stable => println!("cargo:rustc-cfg=stable"),
+        }
+    }
+}
+
+struct VersionInfo {
+    minor: u32,
+    toolchain: Toolchain,
+}
+
+fn rustc_version_info() -> Option<VersionInfo> {
+    let rustc = env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
     let output = Command::new(rustc).arg("--version").output().ok()?;
     let version = str::from_utf8(&output.stdout).ok()?;
-    let mut pieces = version.split('.');
-    if pieces.next() != Some("rustc 1") {
+    let mut pieces = version.split(['.', ' ', '-']);
+    if pieces.next() != Some("rustc") {
         return None;
     }
-    pieces.next()?.parse().ok()
+    let _major: u32 = pieces.next()?.parse().ok()?;
+    let minor = pieces.next()?.parse().ok()?;
+    let _patch: u32 = pieces.next()?.parse().ok()?;
+    let toolchain = match pieces.next() {
+        Some("beta") => Toolchain::Beta,
+        Some("nightly") => Toolchain::Nightly,
+        _ => Toolchain::Stable,
+    };
+    let version = VersionInfo { minor, toolchain };
+    Some(version)
 }

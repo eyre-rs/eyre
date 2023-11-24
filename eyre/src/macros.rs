@@ -1,6 +1,6 @@
 /// Return early with an error.
 ///
-/// This macro is equivalent to `return Err(From::from($err))`.
+/// This macro is equivalent to `return Err(eyre!(<args>))`.
 ///
 /// # Example
 ///
@@ -63,10 +63,10 @@ macro_rules! bail {
 
 /// Return early with an error if a condition is not satisfied.
 ///
-/// This macro is equivalent to `if !$cond { return Err(From::from($err)); }`.
+/// This macro is equivalent to `if !$cond { return Err(eyre!(<other args>)); }`.
 ///
 /// Analogously to `assert!`, `ensure!` takes a condition and exits the function
-/// if the condition fails. Unlike `assert!`, `ensure!` returns an `Error`
+/// if the condition fails. Unlike `assert!`, `ensure!` returns an `eyre::Result`
 /// rather than panicking.
 ///
 /// # Example
@@ -107,6 +107,11 @@ macro_rules! bail {
 /// ```
 #[macro_export]
 macro_rules! ensure {
+    ($cond:expr $(,)?) => {
+        if !$cond {
+            $crate::ensure!($cond, concat!("Condition failed: `", stringify!($cond), "`"))
+        }
+    };
     ($cond:expr, $msg:literal $(,)?) => {
         if !$cond {
             return $crate::private::Err($crate::eyre!($msg));
@@ -126,7 +131,7 @@ macro_rules! ensure {
 
 /// Construct an ad-hoc error from a string.
 ///
-/// This evaluates to an `Error`. It can take either just a string, or a format
+/// This evaluates to a `Report`. It can take either just a string, or a format
 /// string with arguments. It also can take any custom type which implements
 /// `Debug` and `Display`.
 ///

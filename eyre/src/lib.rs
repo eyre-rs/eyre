@@ -236,23 +236,9 @@
 //!
 //! ## No-std support
 //!
-//! **NOTE**: tests are currently broken for `no_std` so I cannot guarantee that
-//! everything works still. I'm waiting for upstream fixes to be merged rather than
-//! fixing them myself, so bear with me.
-//!
-//! In no_std mode, almost all the API is available and works the same way. To
-//! depend on Eyre in no_std mode, disable our default enabled "std" feature in
-//! Cargo.toml. A global allocator is required.
-//!
-//! ```toml
-//! [dependencies]
-//! eyre = { version = "0.6", default-features = false }
-//! ```
-//!
-//! Since the `?`-based error conversions would normally rely on the
-//! `std::error::Error` trait which is only available through std, no_std mode will
-//! require an explicit `.map_err(Report::msg)` when working with a non-Eyre error
-//! type inside a function that returns Eyre's error type.
+//! No-std support was removed in 2020 in [commit 608a16a] due to unaddressed upstream breakages.
+//! [commit 608a16a]:
+//! https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c6973c18f1d5
 //!
 //! ## Comparison to failure
 //!
@@ -314,7 +300,7 @@
 //! implements `context` for options which you can import to make existing
 //! `.context` calls compile.
 //!
-//! [^1]: example and explanation of breakage https://github.com/yaahc/eyre/issues/30#issuecomment-647650361
+//! [^1]: example and explanation of breakage https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361
 //!
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
@@ -322,18 +308,21 @@
 //! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
-//! [`stable-eyre`]: https://github.com/yaahc/stable-eyre
-//! [`color-eyre`]: https://github.com/yaahc/color-eyre
+//! [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
+//! [`color-eyre`]: https://github.com/eyre-rs/color-eyre
 //! [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-//! [`simple-eyre`]: https://github.com/yaahc/simple-eyre
-//! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
+//! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
+//! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.8")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.9")]
+#![cfg_attr(
+    nightly,
+    feature(rustdoc_missing_doc_code_examples),
+    warn(rustdoc::missing_doc_code_examples)
+)]
 #![warn(
     missing_debug_implementations,
     missing_docs,
-    // FIXME: this lint is currently nightly only
-    rustdoc::missing_doc_code_examples,
     unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,
@@ -345,7 +334,6 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
-    private_in_public,
     unconditional_recursion,
     unused,
     unused_allocation,
