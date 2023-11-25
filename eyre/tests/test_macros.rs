@@ -41,7 +41,7 @@ fn test_ensure() {
     assert!(f().is_err());
 
     // Tests single-argument `ensure!`
-    let f = || {
+    let f = || -> Result<()> {
         ensure!(v + v == 1);
         Ok(())
     };
@@ -58,6 +58,7 @@ fn test_ensure() {
     assert!(f().is_err());
 }
 
+#[allow(dead_code)]
 struct SomeWrappingErr {
     err: eyre::Error,
 }
