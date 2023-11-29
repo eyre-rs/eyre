@@ -362,12 +362,13 @@ mod macros;
 mod ptr;
 mod wrapper;
 
+pub mod builder;
 /// Compatibility traits for conversion between different error providers in a structural
 /// manner.
 pub mod compat;
+mod vtable;
 
 use crate::backtrace::Backtrace;
-use crate::error::ErrorImpl;
 use core::fmt::Display;
 
 use std::error::Error as StdError;
@@ -377,6 +378,7 @@ pub use eyre as format_err;
 pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
+use vtable::ErrorImpl;
 #[doc(hidden)]
 pub use DefaultHandler as DefaultContext;
 #[doc(hidden)]
