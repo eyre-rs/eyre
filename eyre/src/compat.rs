@@ -1,4 +1,4 @@
-use crate::Report;
+use crate::{builder::ReportBuilder, Report};
 
 /// Convert this result into an eyre [`Report`](crate::Report) result
 ///
@@ -6,12 +6,7 @@ use crate::Report;
 /// [`Error`](std::error::Error) is not yet available.
 pub trait IntoEyre<T> {
     /// Convert this result into an eyre [`Report`](crate::Report) result
-    fn into_eyre(self) -> crate::Result<T>
-    where
-        Self: Sized,
-    {
-        todo!()
-    }
+    fn into_eyre(self) -> crate::Result<T>;
 }
 
 /// See: [`IntoEyre`]
@@ -19,25 +14,27 @@ pub trait IntoEyre<T> {
 /// Error type automatically implements `into_eyre` for `Result<T, E>`
 pub trait IntoEyreReport {
     /// Convert this error into an eyre [`Report`](crate::Report)
-    fn into_eyre_report(self) -> Report
-    where
-        Self: Sized,
-    {
-        todo!()
-    }
+    #[track_caller]
+    fn into_eyre_report(self) -> Report;
 }
 
 impl<T, E> IntoEyre<T> for Result<T, E>
 where
     E: IntoEyreReport,
 {
+    #[track_caller]
     fn into_eyre(self) -> crate::Result<T> {
-        self.map_err(E::into_eyre_report)
+        // Use a manual match to keep backtrace
+        match self {
+            Ok(v) => Ok(v),
+            Err(err) => Err(err.into_eyre_report()),
+        }
     }
 }
 
 #[cfg(feature = "anyhow-compat")]
 impl IntoEyreReport for anyhow::Error {
+    #[track_caller]
     fn into_eyre_report(self) -> Report
     where
         Self: Sized,
@@ -60,7 +57,13 @@ impl IntoEyreReport for anyhow::Error {
             .next()
             .expect("Error chain contains at least one error");
 
-        let report = Report::msg(head.to_string());
+        #[cfg(backtrace)]
+        let report = ReportBuilder::default()
+            .with_backtrace(self.backtrace())
+            .msg(head.to_string());
+
+        #[cfg(not(backtrace))]
+        let report = ReportBuilder::default().msg(head.to_string());
         // chai
         // eprintln!("{:?}", chain.map(|v| v.to_string()).collect::<Vec<_>>());
 
