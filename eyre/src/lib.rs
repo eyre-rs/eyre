@@ -362,6 +362,10 @@ mod macros;
 mod ptr;
 mod wrapper;
 
+/// Compatibility traits for conversion between different error providers in a structural
+/// manner.
+pub mod compat;
+
 use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::Display;

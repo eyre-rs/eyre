@@ -16,11 +16,14 @@ rust-version = { workspace = true }
 default = ["auto-install", "track-caller"]
 auto-install = []
 track-caller = []
+anyhow-compat = ["anyhow"]
+anyhow-compat-backtrace = ["anyhow-compat", "anyhow/backtrace"]
 
 [dependencies]
 indenter = { workspace = true }
 once_cell = { workspace = true }
 pyo3 = { version = "0.20", optional = true, default-features = false }
+anyhow = { workspace = true, optional = true }
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
