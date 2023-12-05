@@ -362,13 +362,13 @@ mod macros;
 mod ptr;
 mod wrapper;
 
+/// Incrementally construct reports
 pub mod builder;
 /// Compatibility traits for conversion between different error providers in a structural
 /// manner.
 pub mod compat;
 mod vtable;
 
-use crate::backtrace::Backtrace;
 use core::fmt::Display;
 
 use std::error::Error as StdError;
@@ -466,6 +466,61 @@ pub use WrapErr as Context;
 #[must_use]
 pub struct Report {
     inner: OwnedPtr<ErrorImpl<()>>,
+}
+
+/// Provide an explicit backtrace for an error
+pub enum HandlerBacktraceCompat {
+    /// std::backtrace::Backtrace
+    StdBacktrace(std::backtrace::Backtrace),
+    /// stable [`backtrace`](::backtrace)
+    Backtrace(backtrace::Backtrace),
+    /// An opaque backtrack
+    Display(Box<dyn Display + Send + Sync + 'static>),
+}
+
+impl From<Box<dyn Display + Send + Sync + 'static>> for HandlerBacktraceCompat {
+    fn from(v: Box<dyn Display + Send + Sync + 'static>) -> Self {
+        Self::Display(v)
+    }
+}
+
+impl<T> From<&T> for HandlerBacktraceCompat
+where
+    T: Display,
+{
+    fn from(v: &T) -> Self {
+        Self::Display(Box::new(v.to_string()))
+    }
+}
+
+impl From<backtrace::Backtrace> for HandlerBacktraceCompat {
+    fn from(v: backtrace::Backtrace) -> Self {
+        Self::Backtrace(v)
+    }
+}
+
+impl From<std::backtrace::Backtrace> for HandlerBacktraceCompat {
+    fn from(v: std::backtrace::Backtrace) -> Self {
+        Self::StdBacktrace(v)
+    }
+}
+
+impl std::fmt::Debug for HandlerBacktraceCompat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            HandlerBacktraceCompat::StdBacktrace(_) => f.debug_tuple("StdBacktrace").finish(),
+            HandlerBacktraceCompat::Backtrace(_) => f.debug_tuple("Backtrace").finish(),
+            HandlerBacktraceCompat::Display(_) => f.debug_tuple("Display").finish(),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+#[non_exhaustive]
+/// Used for configuring error generation
+pub struct HookParams {
+    /// An explicit backtrace to attach to the error, if any
+    pub backtrace: Option<HandlerBacktraceCompat>,
 }
 
 type ErrorHook =
@@ -587,7 +642,7 @@ pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
 
 #[cfg_attr(track_caller, track_caller)]
 #[cfg_attr(not(track_caller), allow(unused_mut))]
-fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
+fn capture_handler(error: &(dyn StdError + 'static), params: HookParams) -> Box<dyn EyreHandler> {
     #[cfg(not(feature = "auto-install"))]
     let hook = HOOK
         .get()
@@ -600,6 +655,10 @@ fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
         .as_ref();
 
     let mut handler = hook(error);
+
+    if let Some(backtrace) = params.backtrace {
+        handler.set_backtrace(backtrace);
+    }
 
     #[cfg(track_caller)]
     {
@@ -721,6 +780,10 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
     /// Store the location of the caller who constructed this error report
     #[allow(unused_variables)]
     fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {}
+
+    /// Provide an explicit backtrace for this error
+    #[allow(unused_variables)]
+    fn set_backtrace(&mut self, backtrace: HandlerBacktraceCompat) {}
 }
 
 /// The default provided error report handler for `eyre::Report`.
@@ -729,7 +792,7 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
 /// error did not already capture one.
 #[allow(dead_code)]
 pub struct DefaultHandler {
-    backtrace: Option<Backtrace>,
+    backtrace: Option<HandlerBacktraceCompat>,
     #[cfg(track_caller)]
     location: Option<&'static std::panic::Location<'static>>,
 }
@@ -832,6 +895,7 @@ impl EyreHandler for DefaultHandler {
                 .as_ref()
                 .or_else(|| error.backtrace())
                 .expect("backtrace capture failed");
+
             if let BacktraceStatus::Captured = backtrace.status() {
                 write!(f, "\n\nStack backtrace:\n{}", backtrace)?;
             }
@@ -843,6 +907,10 @@ impl EyreHandler for DefaultHandler {
     #[cfg(track_caller)]
     fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {
         self.location = Some(location);
+    }
+
+    fn set_backtrace(&mut self, backtrace: HandlerBacktraceCompat) {
+        self.backtrace = Some(backtrace);
     }
 }
 

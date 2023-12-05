@@ -1,4 +1,4 @@
-use std::panic::Location;
+use std::{error::Error, panic::Location};
 
 use eyre::WrapErr;
 
@@ -43,7 +43,7 @@ impl eyre::EyreHandler for LocationHandler {
 fn test_wrap_err() {
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     let err = read_path("totally_fake_path")
@@ -70,9 +70,9 @@ fn read_path(_path: &str) -> Result<String, std::io::Error> {
 
 #[test]
 fn test_wrap_err_with() {
-    let _ = eyre::set_hook(Box::new(|_e| {
+    let _ = eyre::set_hook(Box::new(|_e: &(dyn Error + 'static)| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     let err = read_path("totally_fake_path")
@@ -85,9 +85,9 @@ fn test_wrap_err_with() {
 
 #[test]
 fn test_context() {
-    let _ = eyre::set_hook(Box::new(|_e| {
+    let _ = eyre::set_hook(Box::new(|_e: &(dyn Error + 'static)| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     let err = read_path("totally_fake_path")
@@ -102,7 +102,7 @@ fn test_context() {
 fn test_with_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     let err = read_path("totally_fake_path")
@@ -117,7 +117,7 @@ fn test_with_context() {
 fn test_option_compat_wrap_err() {
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     use eyre::ContextCompat;
@@ -131,7 +131,7 @@ fn test_option_compat_wrap_err() {
 fn test_option_compat_wrap_err_with() {
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     use eyre::ContextCompat;
@@ -145,7 +145,7 @@ fn test_option_compat_wrap_err_with() {
 fn test_option_compat_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     use eyre::ContextCompat;
@@ -159,7 +159,7 @@ fn test_option_compat_context() {
 fn test_option_compat_with_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
+        Box::new(LocationHandler::new(expected_location)) as _
     }));
 
     use eyre::ContextCompat;

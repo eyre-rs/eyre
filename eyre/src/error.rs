@@ -2,8 +2,8 @@ use crate::builder::ReportBuilder;
 use crate::chain::Chain;
 use crate::ptr::{MutPtr, OwnedPtr, RefPtr};
 use crate::vtable::{
-    header, header_mut, object_boxed, object_downcast, object_downcast_mut, object_drop,
-    object_drop_front, object_mut, object_ref, ErrorHeader, ErrorImpl, ErrorVTable,
+    header, header_mut, object_boxed, object_drop, object_mut, object_ref, ErrorHeader, ErrorImpl,
+    ErrorVTable,
 };
 use crate::EyreHandler;
 use crate::{Report, StdError};
@@ -27,7 +27,7 @@ impl Report {
     where
         E: StdError + Send + Sync + 'static,
     {
-        ReportBuilder::default().report(error)
+        ReportBuilder::default().from_stderr(error)
     }
 
     /// Create a new error object from a printable error message.
@@ -72,7 +72,7 @@ impl Report {
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        ReportBuilder::default().msg(message)
+        ReportBuilder::default().from_msg(message)
     }
 
     #[cfg_attr(track_caller, track_caller)]
@@ -80,7 +80,7 @@ impl Report {
     where
         M: Display + Debug + Send + Sync + 'static,
     {
-        ReportBuilder::default().msg(message)
+        ReportBuilder::default().from_msg(message)
     }
 
     #[cfg_attr(track_caller, track_caller)]
@@ -88,23 +88,7 @@ impl Report {
     where
         M: Display + Send + Sync + 'static,
     {
-        use crate::wrapper::{DisplayError, NoneError};
-        let error: DisplayError<M> = DisplayError(message);
-        let vtable = &ErrorVTable {
-            object_drop: object_drop::<DisplayError<M>>,
-            object_ref: object_ref::<DisplayError<M>>,
-            object_mut: object_mut::<DisplayError<M>>,
-            object_boxed: object_boxed::<DisplayError<M>>,
-            object_downcast: object_downcast::<M>,
-            object_downcast_mut: object_downcast_mut::<M>,
-            object_drop_rest: object_drop_front::<M>,
-        };
-
-        // Safety: DisplayError is repr(transparent) so it is okay for the
-        // vtable to allow casting the DisplayError<M> to M.
-        let handler = Some(crate::capture_handler(&NoneError));
-
-        unsafe { Report::construct(error, vtable, handler) }
+        ReportBuilder::default().from_display(message)
     }
 
     #[cfg_attr(track_caller, track_caller)]
@@ -114,43 +98,7 @@ impl Report {
         D: Display + Send + Sync + 'static,
         E: StdError + Send + Sync + 'static,
     {
-        let error: ContextError<D, E> = ContextError { msg, error };
-
-        let vtable = &ErrorVTable {
-            object_drop: object_drop::<ContextError<D, E>>,
-            object_ref: object_ref::<ContextError<D, E>>,
-            object_mut: object_mut::<ContextError<D, E>>,
-            object_boxed: object_boxed::<ContextError<D, E>>,
-            object_downcast: context_downcast::<D, E>,
-            object_downcast_mut: context_downcast_mut::<D, E>,
-            object_drop_rest: context_drop_rest::<D, E>,
-        };
-
-        // Safety: passing vtable that operates on the right type.
-        let handler = Some(crate::capture_handler(&error));
-
-        unsafe { Report::construct(error, vtable, handler) }
-    }
-
-    #[cfg_attr(track_caller, track_caller)]
-    pub(crate) fn from_boxed(error: Box<dyn StdError + Send + Sync>) -> Self {
-        use crate::wrapper::BoxedError;
-        let error = BoxedError(error);
-        let handler = Some(crate::capture_handler(&error));
-
-        let vtable = &ErrorVTable {
-            object_drop: object_drop::<BoxedError>,
-            object_ref: object_ref::<BoxedError>,
-            object_mut: object_mut::<BoxedError>,
-            object_boxed: object_boxed::<BoxedError>,
-            object_downcast: object_downcast::<Box<dyn StdError + Send + Sync>>,
-            object_downcast_mut: object_downcast_mut::<Box<dyn StdError + Send + Sync>>,
-            object_drop_rest: object_drop_front::<Box<dyn StdError + Send + Sync>>,
-        };
-
-        // Safety: BoxedError is repr(transparent) so it is okay for the vtable
-        // to allow casting to Box<dyn StdError + Send + Sync>.
-        unsafe { Report::construct(error, vtable, handler) }
+        ReportBuilder::default().wrap_with_msg(msg, error)
     }
 
     // Takes backtrace as argument rather than capturing it here so that the
@@ -461,7 +409,7 @@ where
 {
     #[cfg_attr(track_caller, track_caller)]
     fn from(error: E) -> Self {
-        ReportBuilder::default().report(error)
+        ReportBuilder::default().from_stderr(error)
     }
 }
 
@@ -503,7 +451,7 @@ impl Drop for Report {
 /// # Safety
 ///
 /// Requires layout of *e to match ErrorImpl<ContextError<D, E>>.
-unsafe fn context_downcast<D, E>(
+pub(crate) unsafe fn context_downcast<D, E>(
     e: RefPtr<'_, ErrorImpl<()>>,
     target: TypeId,
 ) -> Option<NonNull<()>>
@@ -527,7 +475,7 @@ where
 /// # Safety
 ///
 /// Requires layout of *e to match ErrorImpl<ContextError<D, E>>.
-unsafe fn context_downcast_mut<D, E>(
+pub(crate) unsafe fn context_downcast_mut<D, E>(
     e: MutPtr<'_, ErrorImpl<()>>,
     target: TypeId,
 ) -> Option<NonNull<()>>
@@ -550,7 +498,7 @@ where
 /// # Safety
 ///
 /// Requires layout of *e to match ErrorImpl<ContextError<D, E>>.
-unsafe fn context_drop_rest<D, E>(e: OwnedPtr<ErrorImpl<()>>, target: TypeId)
+pub(crate) unsafe fn context_drop_rest<D, E>(e: OwnedPtr<ErrorImpl<()>>, target: TypeId)
 where
     D: 'static,
     E: 'static,
@@ -595,7 +543,7 @@ where
 /// # Safety
 ///
 /// Requires layout of *e to match ErrorImpl<ContextError<D, Report>>.
-unsafe fn context_chain_downcast_mut<D>(
+pub(crate) unsafe fn context_chain_downcast_mut<D>(
     e: MutPtr<'_, ErrorImpl<()>>,
     target: TypeId,
 ) -> Option<NonNull<()>>
@@ -616,7 +564,7 @@ where
 /// # Safety
 ///
 /// Requires layout of *e to match ErrorImpl<ContextError<D, Report>>.
-unsafe fn context_chain_drop_rest<D>(e: OwnedPtr<ErrorImpl<()>>, target: TypeId)
+pub(crate) unsafe fn context_chain_drop_rest<D>(e: OwnedPtr<ErrorImpl<()>>, target: TypeId)
 where
     D: 'static,
 {

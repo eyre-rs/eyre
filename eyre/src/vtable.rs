@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
     ptr::{MutPtr, OwnedPtr, RefPtr},
-    Chain, EyreContext, EyreHandler, Report, StdError,
+    Chain, EyreHandler, Report, StdError,
 };
 
 pub(crate) struct ErrorVTable {

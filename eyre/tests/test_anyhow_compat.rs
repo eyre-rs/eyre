@@ -28,10 +28,9 @@ fn this_function_fails() -> anyhow::Result<()> {
 fn bubble() -> eyre::Result<()> {
     use anyhow::Context;
     use eyre::WrapErr;
-    this_function_fails()
-        .context("Anyhow context B")
-        .into_eyre()
-        .wrap_err("Eyre context A")?;
+    let err = this_function_fails().context("Anyhow context B");
+
+    err.into_eyre().wrap_err("Eyre context A")?;
 
     Ok(())
 }
@@ -42,7 +41,7 @@ fn anyhow_conversion() {
     use eyre::WrapErr;
     let error: Report = bubble().wrap_err("Eyre context B").unwrap_err();
 
-    eprintln!("{error:?}");
+    eprintln!("Error: {:?}", error);
 
     let chain = error.chain().map(ToString::to_string).collect::<Vec<_>>();
     assert_eq!(

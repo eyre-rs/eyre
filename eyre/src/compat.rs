@@ -39,40 +39,10 @@ impl IntoEyreReport for anyhow::Error {
     where
         Self: Sized,
     {
-        // dbg!(
-        //     self.root_cause(),
-        //     self.source(),
-        //     self.chain().rev().collect::<Vec<_>>(),
-        //     self.chain()
-        //         .rev()
-        //         .map(|v| v.to_string())
-        //         .collect::<Vec<_>>()
-        // );
-
-        let mut chain = self.chain().rev();
-
-        // We can't store the actual error
-        // PENDING: https://github.com/dtolnay/anyhow/issues/327
-        let head = chain
-            .next()
-            .expect("Error chain contains at least one error");
-
-        #[cfg(backtrace)]
         let report = ReportBuilder::default()
             .with_backtrace(self.backtrace())
-            .msg(head.to_string());
+            .from_boxed(self.into());
 
-        #[cfg(not(backtrace))]
-        let report = ReportBuilder::default().msg(head.to_string());
-        // chai
-        // eprintln!("{:?}", chain.map(|v| v.to_string()).collect::<Vec<_>>());
-
-        // report
-
-        chain.fold(report, |report, err| {
-            // We can't write the actual error
-            // PENDING: https://github.com/dtolnay/anyhow/issues/327
-            report.wrap_err(err.to_string())
-        })
+        report
     }
 }
