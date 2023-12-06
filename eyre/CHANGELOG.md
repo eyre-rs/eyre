@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Added
+- Add `OptionExt::ok_or_eyre` for yielding static `Report`s from `None` [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/125)
 
 ## [0.6.9] - 2023-11-17
 ### Fixed

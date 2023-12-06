@@ -273,27 +273,31 @@
 //! `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 //! being somewhat meaningless.
 //!
-//! Instead `eyre` intends for users to use the combinator functions provided by
-//! `std` for converting `Option`s to `Result`s. So where you would write this with
+//! Instead `eyre` offers [`OptionExt::ok_or_eyre`] to yield _static_ errors from `None`,
+//! and intends for users to use the combinator functions provided by
+//! `std`, converting `Option`s to `Result`s, for _dynamic_ errors.
+//! So where you would write this with
 //! anyhow:
 //!
 //! ```rust
 //! use anyhow::Context;
 //!
 //! let opt: Option<()> = None;
-//! let result = opt.context("new error message");
+//! let result_static = opt.context("static error message");
+//! let result_dynamic = opt.with_context(|| format!("{} error message", "dynamic"));
 //! ```
 //!
 //! With `eyre` we want users to write:
 //!
 //! ```rust
-//! use eyre::{eyre, Result};
+//! use eyre::{eyre, OptionExt, Result};
 //!
 //! # #[cfg(not(feature = "auto-install"))]
 //! # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 //! #
 //! let opt: Option<()> = None;
-//! let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
+//! let result_static: Result<()> = opt.ok_or_eyre("static error message");
+//! let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
 //! ```
 //!
 //! **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
@@ -359,12 +363,13 @@ mod error;
 mod fmt;
 mod kind;
 mod macros;
+mod option;
 mod ptr;
 mod wrapper;
 
 use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
-use core::fmt::Display;
+use core::fmt::{Debug, Display};
 
 use std::error::Error as StdError;
 
@@ -1118,6 +1123,61 @@ pub trait WrapErr<T, E>: context::private::Sealed {
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
+}
+
+/// Provides the [`ok_or_eyre`][OptionExt::ok_or_eyre] method for [`Option`].
+///
+/// This trait is sealed and cannot be implemented for types outside of
+/// `eyre`.
+///
+/// # Example
+///
+/// ```
+/// # #[cfg(not(feature = "auto-install"))]
+/// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
+/// use eyre::OptionExt;
+///
+/// let option: Option<()> = None;
+///
+/// let result = option.ok_or_eyre("static str error");
+///
+/// assert_eq!(result.unwrap_err().to_string(), "static str error");
+/// ```
+///
+/// # `ok_or_eyre` vs `ok_or_else`
+///
+/// If string interpolation is required for the generated [report][Report],
+/// use [`ok_or_else`][Option::ok_or_else] instead,
+/// invoking [`eyre!`] to perform string interpolation:
+///
+/// ```
+/// # #[cfg(not(feature = "auto-install"))]
+/// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
+/// use eyre::eyre;
+///
+/// let option: Option<()> = None;
+///
+/// let result = option.ok_or_else(|| eyre!("{} error", "dynamic"));
+///
+/// assert_eq!(result.unwrap_err().to_string(), "dynamic error");
+/// ```
+///
+/// `ok_or_eyre` incurs no runtime cost, as the error object
+/// is constructed from the provided static argument
+/// only in the `None` case.
+pub trait OptionExt<T>: context::private::Sealed {
+    /// Transform the [`Option<T>`] into a [`Result<T, E>`],
+    /// mapping [`Some(v)`][Option::Some] to [`Ok(v)`][Result::Ok]
+    /// and [`None`] to [`Report`].
+    ///
+    /// `ok_or_eyre` allows for eyre [`Report`] error objects
+    /// to be lazily created from static messages in the `None` case.
+    ///
+    /// For dynamic error messages, use [`ok_or_else`][Option::ok_or_else],
+    /// invoking [`eyre!`] in the closure to perform string interpolation.
+    fn ok_or_eyre<M>(self, message: M) -> crate::Result<T>
+    where
+        M: Debug + Display + Send + Sync + 'static;
 }
 
 /// Provides the `context` method for `Option` when porting from `anyhow`
