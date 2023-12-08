@@ -208,24 +208,30 @@ implies that you're creating a new error that saves the old error as its
 `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 being somewhat meaningless.
 
-Instead `eyre` intends for users to use the combinator functions provided by
-`std` for converting `Option`s to `Result`s. So where you would write this with
+Instead `eyre` offers [`OptionExt::ok_or_eyre`] to yield _static_ errors from `None`,
+and intends for users to use the combinator functions provided by
+`std`, converting `Option`s to `Result`s, for _dynamic_ errors.
+So where you would write this with
 anyhow:
+
+[`OptionExt::ok_or_eyre`]: https://docs.rs/eyre/latest/eyre/trait.OptionExt.html#tymethod.ok_or_eyre
 
 ```rust
 use anyhow::Context;
 
 let opt: Option<()> = None;
-let result = opt.context("new error message");
+let result_static = opt.context("static error message");
+let result_dynamic = opt.with_context(|| format!("{} error message", "dynamic"));
 ```
 
 With `eyre` we want users to write:
 
 ```rust
-use eyre::{eyre, Result};
+use eyre::{eyre, OptionExt, Result};
 
 let opt: Option<()> = None;
-let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
+let result_static: Result<()> = opt.ok_or_eyre("static error message");
+let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
 ```
 
 **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
