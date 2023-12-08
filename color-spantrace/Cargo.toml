@@ -62,3 +62,7 @@ file="CHANGELOG.md"
 search="<!-- next-url -->"
 replace="<!-- next-url -->\n[Unreleased]: https://github.com/eyre-rs/{{crate_name}}/compare/{{tag_name}}...HEAD"
 exactly=1
+
+[[example]]
+name = "color-spantrace-usage"
+path = "examples/usage.rs"
