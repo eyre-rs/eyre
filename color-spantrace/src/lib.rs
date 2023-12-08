@@ -45,25 +45,29 @@
 //!
 //! ## Output Format
 //!
-//! Running `examples/usage.rs` from the `color-spantrace` repo produces the following output:
+//! Running `examples/color-spantrace-usage.rs` from the `color-spantrace` repo produces the following output:
 //!
-//! <pre><font color="#4E9A06"><b>❯</b></font> cargo run --example usage
+//! <pre><font color="#4E9A06"><b>❯</b></font> cargo run --example color-spantrace-usage
 //! <font color="#4E9A06"><b>    Finished</b></font> dev [unoptimized + debuginfo] target(s) in 0.04s
-//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/usage`
+//! <font color="#4E9A06"><b>     Running</b></font> `target/debug/examples/color-spantrace-usage`
 //! ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //!
-//!  0: <font color="#F15D22">usage::two</font>
-//!     at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">18</font>
-//!  1: <font color="#F15D22">usage::one</font> with <font color="#34E2E2">i=42</font>
-//!     at <font color="#75507B">examples/usage.rs</font>:<font color="#75507B">13</font></pre>
+//!  0: <font color="#F15D22">color-spantrace-usage::two</font>
+//!     at <font color="#75507B">examples/color-spantrace-usage.rs</font>:<font color="#75507B">18</font>
+//!  1: <font color="#F15D22">color-spantrace-usage::one</font> with <font color="#34E2E2">i=42</font>
+//!     at <font color="#75507B">examples/color-spantrace-usage.rs</font>:<font color="#75507B">13</font></pre>
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.0")]
+#![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.1")]
+#![cfg_attr(
+    nightly,
+    feature(rustdoc_missing_doc_code_examples),
+    warn(rustdoc::missing_doc_code_examples)
+)]
 #![warn(
     missing_debug_implementations,
     missing_docs,
-    rustdoc::missing_doc_code_examples,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
@@ -74,7 +78,6 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
-    private_in_public,
     unconditional_recursion,
     unused,
     unused_allocation,

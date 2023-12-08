@@ -58,7 +58,7 @@ println!("{}", color_spantrace::colorize(&span_trace));
 
 ## Example
 
-This example is taken from `examples/usage.rs`:
+This example is taken from `examples/color-spantrace-usage.rs`:
 
 ```rust
 use tracing::instrument;

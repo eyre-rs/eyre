@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.6.8"
+version = "0.6.10"
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 description = "Flexible concrete Error Reporting type built on std::error::Error with customizable Reports"
 documentation = "https://docs.rs/eyre"
@@ -20,7 +20,7 @@ track-caller = []
 [dependencies]
 indenter = { workspace = true }
 once_cell = { workspace = true }
-pyo3 = { version = "0.13", optional = true, default-features = false }
+pyo3 = { version = "0.20", optional = true, default-features = false }
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
@@ -30,45 +30,12 @@ trybuild = { version = "1.0.19", features = ["diff"] }
 backtrace = "0.3.46"
 anyhow = "1.0.28"
 syn = { version = "2.0", features = ["full"] }
-pyo3 = { version = "0.13", default-features = false, features = ["auto-initialize"] }
+pyo3 = { version = "0.20", default-features = false, features = ["auto-initialize"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 rustdoc-args = ["--cfg", "doc_cfg"]
 
-[package.metadata.release]
-dev-version = false
+[package.metadata.workspaces]
+independent = true
 
-[[package.metadata.release.pre-release-replacements]]
-file = "CHANGELOG.md"
-search = "Unreleased"
-replace = "{{version}}"
-
-[[package.metadata.release.pre-release-replacements]]
-file = "src/lib.rs"
-search = "#!\\[doc\\(html_root_url.*"
-replace = "#![doc(html_root_url = \"https://docs.rs/{{crate_name}}/{{version}}\")]"
-exactly = 1
-
-[[package.metadata.release.pre-release-replacements]]
-file = "CHANGELOG.md"
-search = "\\.\\.\\.HEAD"
-replace = "...{{tag_name}}"
-exactly = 1
-
-[[package.metadata.release.pre-release-replacements]]
-file = "CHANGELOG.md"
-search = "ReleaseDate"
-replace = "{{date}}"
-
-[[package.metadata.release.pre-release-replacements]]
-file = "CHANGELOG.md"
-search = "<!-- next-header -->"
-replace = "<!-- next-header -->\n\n## [Unreleased] - ReleaseDate"
-exactly = 1
-
-[[package.metadata.release.pre-release-replacements]]
-file = "CHANGELOG.md"
-search = "<!-- next-url -->"
-replace = "<!-- next-url -->\n[Unreleased]: https://github.com/eyre-rs/{{crate_name}}/compare/{{tag_name}}...HEAD"
-exactly = 1

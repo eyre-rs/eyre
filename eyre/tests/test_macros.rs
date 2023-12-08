@@ -39,6 +39,34 @@ fn test_ensure() {
         Ok(())
     };
     assert!(f().is_err());
+
+    // Tests single-argument `ensure!`
+    let f = || -> Result<()> {
+        ensure!(v + v == 1);
+        Ok(())
+    };
+    assert_eq!(
+        f().unwrap_err().to_string(),
+        "Condition failed: `v + v == 1`",
+    );
+
+    // Tests automatically converting to external errors with ensure!()
+    let f = || -> Result<(), SomeWrappingErr> {
+        ensure!(false, "this will fail");
+        Ok(())
+    };
+    assert!(f().is_err());
+}
+
+#[allow(dead_code)]
+struct SomeWrappingErr {
+    err: eyre::Error,
+}
+
+impl From<eyre::Error> for SomeWrappingErr {
+    fn from(err: eyre::Error) -> Self {
+        SomeWrappingErr { err }
+    }
 }
 
 #[test]
