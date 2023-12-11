@@ -166,6 +166,8 @@ pub trait Section: crate::private::Sealed {
     /// ```rust
     /// use color_eyre::{eyre::eyre, eyre::Report, Section, SectionExt};
     ///
+    /// # #[cfg(not(miri))]
+    /// # {
     /// let output = std::process::Command::new("ls")
     ///     .output()?;
     ///
@@ -178,6 +180,7 @@ pub trait Section: crate::private::Sealed {
     /// };
     ///
     /// println!("{}", output);
+    /// # }
     /// # Ok::<_, Report>(())
     /// ```
     fn with_section<D, F>(self, section: F) -> Self::Return

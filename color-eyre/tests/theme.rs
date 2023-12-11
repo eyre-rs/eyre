@@ -39,6 +39,7 @@ static ERROR_FILE_NAME: &str = "theme_error_control_spantrace.txt";
 static ERROR_FILE_NAME: &str = "theme_error_control.txt";
 
 #[test]
+#[cfg(not(miri))]
 fn test_error_backwards_compatibility() {
     setup();
     let error = get_error("test");
@@ -102,6 +103,7 @@ static PANIC_FILE_NAME: &str = "theme_panic_control.txt";
 #[test]
 #[allow(unused_mut)]
 #[allow(clippy::vec_init_then_push)]
+#[cfg(not(miri))]
 fn test_panic_backwards_compatibility() {
     let mut features: Vec<&str> = vec![];
     #[cfg(feature = "capture-spantrace")]
