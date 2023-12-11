@@ -920,7 +920,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
             let issue_section = crate::section::github::IssueSection::new(url, payload)
                 .with_backtrace(report.backtrace.as_ref())
                 .with_location(report.panic_info.location())
-                .with_metadata(&**report.hook.issue_metadata);
+                .with_metadata(&report.hook.issue_metadata);
 
             #[cfg(feature = "capture-spantrace")]
             let issue_section = issue_section.with_span_trace(report.span_trace.as_ref());
