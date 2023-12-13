@@ -74,8 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/eyre-rs/eyre/compare/v0.6.10...HEAD
-[0.6.10]: https://github.com/eyre-rs/eyre/compare/v0.6.9...v0.6.10
+[Unreleased]: https://github.com/eyre-rs/eyre/compare/v0.6.11...HEAD
+[0.6.11]: https://github.com/eyre-rs/eyre/compare/v0.6.9...v0.6.11
 [0.6.9]:  https://github.com/eyre-rs/eyre/compare/v0.6.8...v0.6.9
 [0.6.8]:  https://github.com/eyre-rs/eyre/compare/v0.6.7...v0.6.8
 [0.6.7]:  https://github.com/eyre-rs/eyre/compare/v0.6.6...v0.6.7
