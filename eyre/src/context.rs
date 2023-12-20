@@ -1,5 +1,5 @@
 use crate::error::{ContextError, ErrorImpl};
-use crate::{ContextCompat, Report, StdError, WrapErr};
+use crate::{Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
 #[cfg(backtrace)]
@@ -62,6 +62,7 @@ where
         }
     }
 
+    #[cfg(feature = "anyhow")]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
@@ -69,6 +70,7 @@ where
         self.wrap_err(msg)
     }
 
+    #[cfg(feature = "anyhow")]
     fn with_context<D, F>(self, msg: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
@@ -78,7 +80,8 @@ where
     }
 }
 
-impl<T> ContextCompat<T> for Option<T> {
+#[cfg(feature = "anyhow")]
+impl<T> crate::ContextCompat<T> for Option<T> {
     fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,

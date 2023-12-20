@@ -265,7 +265,17 @@
 //! vice-versa by re-exporting all of the renamed APIs with the names used in
 //! `anyhow`, though there are some differences still.
 //!
-//! #### `Context` and `Option`
+//! ### Disabling the compatibility layer
+//!
+//! The `anyhow` compatibility layer is enabled by default.
+//! If you do not need anyhow compatibility, it is advisable
+//! to disable the `"anyhow"` feature:
+//!
+//! ```toml
+//! eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+//! ```
+//!
+//! ### `Context` and `Option`
 //!
 //! As part of renaming `Context` to `WrapErr` we also intentionally do not
 //! implement `WrapErr` for `Option`. This decision was made because `wrap_err`
@@ -375,18 +385,23 @@ use std::error::Error as StdError;
 
 pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
+#[cfg(feature = "anyhow")]
 #[doc(hidden)]
 pub use DefaultHandler as DefaultContext;
+#[cfg(feature = "anyhow")]
 #[doc(hidden)]
 pub use EyreHandler as EyreContext;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
 pub use Report as Error;
 /// Compatibility re-export of `WrapErr` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
 pub use WrapErr as Context;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
@@ -1112,12 +1127,14 @@ pub trait WrapErr<T, E>: context::private::Sealed {
         F: FnOnce() -> D;
 
     /// Compatibility re-export of wrap_err for interop with `anyhow`
+    #[cfg(feature = "anyhow")]
     #[cfg_attr(track_caller, track_caller)]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility re-export of wrap_err_with for interop with `anyhow`
+    #[cfg(feature = "anyhow")]
     #[cfg_attr(track_caller, track_caller)]
     fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
@@ -1223,6 +1240,7 @@ pub trait OptionExt<T>: context::private::Sealed {
 ///         .ok_or_else(|| eyre!("the thing wasnt in the list"))
 /// }
 /// ```
+#[cfg(feature = "anyhow")]
 pub trait ContextCompat<T>: context::private::Sealed {
     /// Compatibility version of `wrap_err` for creating new errors with new source on `Option`
     /// when porting from `anyhow`
