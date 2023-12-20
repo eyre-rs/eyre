@@ -237,8 +237,8 @@
 //! ## No-std support
 //!
 //! No-std support was removed in 2020 in [commit 608a16a] due to unaddressed upstream breakages.
-//! [commit 608a16a]:
-//! https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c6973c18f1d5
+//!
+//! [commit 608a16a]: https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c6973c18f1d5
 //!
 //! ## Comparison to failure
 //!
@@ -304,7 +304,7 @@
 //! implements `context` for options which you can import to make existing
 //! `.context` calls compile.
 //!
-//! [^1]: example and explanation of breakage https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361
+//! [^1]: example and explanation of breakage <https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361>
 //!
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
