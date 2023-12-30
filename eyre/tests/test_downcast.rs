@@ -109,7 +109,7 @@ fn test_drop() {
     maybe_install_handler().unwrap();
 
     let has_dropped = Flag::new();
-    let error: Report = Report::new(DetectDrop::new(&has_dropped));
+    let error: Report = Report::new(DetectDrop::new("DetectDrop", &has_dropped));
     drop(error.downcast::<DetectDrop>().unwrap());
     assert!(has_dropped.get());
 }

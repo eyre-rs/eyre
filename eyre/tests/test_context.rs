@@ -19,9 +19,10 @@ fn test_inference() -> Result<()> {
 macro_rules! context_type {
     ($name:ident) => {
         #[derive(Debug)]
+        #[repr(C)]
         struct $name {
-            message: &'static str,
             _drop: DetectDrop,
+            message: &'static str,
         }
 
         impl Display for $name {
@@ -37,6 +38,7 @@ context_type!(MidLevel);
 
 #[derive(Error, Debug)]
 #[error("{message}")]
+#[repr(C)]
 struct LowLevel {
     message: &'static str,
     drop: DetectDrop,
@@ -67,14 +69,14 @@ fn make_chain() -> (Report, Dropped) {
 
     let low = LowLevel {
         message: "no such file or directory",
-        drop: DetectDrop::new(&dropped.low),
+        drop: DetectDrop::new("LowLevel", &dropped.low),
     };
 
     // impl Report for Result<T, E>
     let mid = Err::<(), LowLevel>(low)
         .wrap_err(MidLevel {
             message: "failed to load config",
-            _drop: DetectDrop::new(&dropped.mid),
+            _drop: DetectDrop::new("MidLevel", &dropped.mid),
         })
         .unwrap_err();
 
@@ -82,7 +84,7 @@ fn make_chain() -> (Report, Dropped) {
     let high = Err::<(), Report>(mid)
         .wrap_err(HighLevel {
             message: "failed to start server",
-            _drop: DetectDrop::new(&dropped.high),
+            _drop: DetectDrop::new("HighLevel", &dropped.high),
         })
         .unwrap_err();
 
