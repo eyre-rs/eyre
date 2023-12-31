@@ -27,7 +27,9 @@ fn install() -> Result<(), impl Error> {
 
     let hook = Hook { capture_backtrace };
 
-    eyre::set_hook(Box::new(move |e| Box::new(hook.make_handler(e))))
+    eyre::set_hook(Box::new(move |e: &(dyn Error + 'static)| {
+        Box::new(hook.make_handler(e)) as Box<dyn EyreHandler>
+    }))
 }
 
 struct Hook {

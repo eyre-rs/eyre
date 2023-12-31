@@ -45,7 +45,7 @@
 //     let error = $msg;
 //     (&error).eyre_kind().new(error)
 
-use crate::Report;
+use crate::{builder::ReportBuilder, Report};
 use core::fmt::{Debug, Display};
 
 use crate::StdError;
@@ -106,6 +106,6 @@ impl BoxedKind for Box<dyn StdError + Send + Sync> {}
 impl Boxed {
     #[cfg_attr(track_caller, track_caller)]
     pub fn new(self, error: Box<dyn StdError + Send + Sync>) -> Report {
-        Report::from_boxed(error)
+        ReportBuilder::default().from_boxed(error)
     }
 }

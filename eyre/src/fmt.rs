@@ -1,4 +1,4 @@
-use crate::{error::ErrorImpl, ptr::RefPtr};
+use crate::{ptr::RefPtr, vtable::ErrorImpl};
 use core::fmt;
 
 impl ErrorImpl<()> {

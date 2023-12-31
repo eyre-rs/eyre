@@ -1,4 +1,5 @@
-use crate::error::{ContextError, ErrorImpl};
+use crate::error::ContextError;
+use crate::vtable::ErrorImpl;
 use crate::{ContextCompat, Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
