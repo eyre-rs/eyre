@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Added
+- feature flag for `anyhow` compatibility traits [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/138)
 
 ## [0.6.11] - 2023-12-13
 ### Fixed

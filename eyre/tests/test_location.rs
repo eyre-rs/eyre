@@ -1,6 +1,6 @@
 use std::panic::Location;
 
-use eyre::{OptionExt as _, WrapErr};
+use eyre::WrapErr;
 
 struct LocationHandler {
     actual: Option<&'static str>,
@@ -83,6 +83,7 @@ fn test_wrap_err_with() {
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_option_ok_or_eyre() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -90,12 +91,14 @@ fn test_option_ok_or_eyre() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::OptionExt;
     let err = None::<()>.ok_or_eyre("oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -111,6 +114,7 @@ fn test_context() {
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_with_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -126,6 +130,7 @@ fn test_with_context() {
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_option_compat_wrap_err() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -140,6 +145,7 @@ fn test_option_compat_wrap_err() {
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_option_compat_wrap_err_with() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -154,6 +160,7 @@ fn test_option_compat_wrap_err_with() {
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_option_compat_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
@@ -168,6 +175,7 @@ fn test_option_compat_context() {
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_option_compat_with_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
