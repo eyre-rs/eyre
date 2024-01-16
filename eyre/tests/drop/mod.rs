@@ -24,11 +24,13 @@ impl Flag {
 #[derive(Debug)]
 pub struct DetectDrop {
     has_dropped: Flag,
+    label: &'static str,
 }
 
 impl DetectDrop {
-    pub fn new(has_dropped: &Flag) -> Self {
+    pub fn new(label: &'static str, has_dropped: &Flag) -> Self {
         DetectDrop {
+            label,
             has_dropped: Flag {
                 atomic: Arc::clone(&has_dropped.atomic),
             },
@@ -46,6 +48,7 @@ impl Display for DetectDrop {
 
 impl Drop for DetectDrop {
     fn drop(&mut self) {
+        eprintln!("Dropping {}", self.label);
         let already_dropped = self.has_dropped.atomic.swap(true, SeqCst);
         assert!(!already_dropped);
     }

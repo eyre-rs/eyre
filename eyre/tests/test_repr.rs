@@ -31,6 +31,6 @@ fn test_drop() {
     maybe_install_handler().unwrap();
 
     let has_dropped = Flag::new();
-    drop(Report::new(DetectDrop::new(&has_dropped)));
+    drop(Report::new(DetectDrop::new("TestDrop", &has_dropped)));
     assert!(has_dropped.get());
 }
