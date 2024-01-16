@@ -1,6 +1,6 @@
 use std::panic::Location;
 
-use eyre::{OptionExt as _, WrapErr};
+use eyre::WrapErr;
 
 struct LocationHandler {
     actual: Option<&'static str>,
@@ -91,12 +91,14 @@ fn test_option_ok_or_eyre() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::OptionExt;
     let err = None::<()>.ok_or_eyre("oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
     println!("{:?}", err);
 }
 
+#[cfg(feature = "anyhow")]
 #[test]
 fn test_context() {
     let _ = eyre::set_hook(Box::new(|_e| {
