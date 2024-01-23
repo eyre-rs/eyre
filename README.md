@@ -203,7 +203,17 @@ This crate does its best to be usable as a drop in replacement of `anyhow` and
 vice-versa by `re-exporting` all of the renamed APIs with the names used in
 `anyhow`, though there are some differences still.
 
-#### `Context` and `Option`
+### Disabling the compatibility layer
+
+The `anyhow` compatibility layer is enabled by default.
+If you do not need anyhow compatibility, it is advisable
+to disable the `"anyhow"` feature:
+
+```toml
+eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+```
+
+### `Context` and `Option`
 
 As part of renaming `Context` to `WrapErr` we also intentionally do not
 implement `WrapErr` for `Option`. This decision was made because `wrap_err`
