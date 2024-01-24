@@ -101,6 +101,8 @@ fn test_option_ok_or_eyre() {
 #[cfg(feature = "anyhow")]
 #[test]
 fn test_context() {
+    use eyre::ContextCompat;
+
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
         Box::new(LocationHandler::new(expected_location))
@@ -117,6 +119,8 @@ fn test_context() {
 #[cfg(feature = "anyhow")]
 #[test]
 fn test_with_context() {
+    use eyre::ContextCompat;
+
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
         Box::new(LocationHandler::new(expected_location))
@@ -139,7 +143,7 @@ fn test_option_compat_wrap_err() {
     }));
 
     use eyre::ContextCompat;
-    let err = None::<()>.wrap_err("oopsie").unwrap_err();
+    let err = None::<()>.context("oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
     println!("{:?}", err);
@@ -154,7 +158,7 @@ fn test_option_compat_wrap_err_with() {
     }));
 
     use eyre::ContextCompat;
-    let err = None::<()>.wrap_err_with(|| "oopsie").unwrap_err();
+    let err = None::<()>.with_context(|| "oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
     println!("{:?}", err);
