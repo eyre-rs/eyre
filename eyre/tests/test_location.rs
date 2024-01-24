@@ -83,7 +83,6 @@ fn test_wrap_err_with() {
     println!("{:?}", err);
 }
 
-#[cfg(feature = "anyhow")]
 #[test]
 fn test_option_ok_or_eyre() {
     let _ = eyre::set_hook(Box::new(|_e| {
