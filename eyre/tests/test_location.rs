@@ -1,7 +1,5 @@
 use std::panic::Location;
 
-use eyre::WrapErr;
-
 struct LocationHandler {
     actual: Option<&'static str>,
     expected: &'static str,
@@ -46,6 +44,7 @@ fn test_wrap_err() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::WrapErr;
     let err = read_path("totally_fake_path")
         .wrap_err("oopsie")
         .unwrap_err();
@@ -75,6 +74,7 @@ fn test_wrap_err_with() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::WrapErr;
     let err = read_path("totally_fake_path")
         .wrap_err_with(|| "oopsie")
         .unwrap_err();
@@ -106,6 +106,7 @@ fn test_context() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::WrapErr;
     let err = read_path("totally_fake_path")
         .context("oopsie")
         .unwrap_err();
@@ -122,6 +123,7 @@ fn test_with_context() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::WrapErr;
     let err = read_path("totally_fake_path")
         .with_context(|| "oopsie")
         .unwrap_err();
