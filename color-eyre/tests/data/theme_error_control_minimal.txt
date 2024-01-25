@@ -7,17 +7,17 @@ Error:
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   [96m                              ⋮ 5 frames hidden ⋮                               [0m
    6: [91mtheme::get_error::create_report[0m[90m::h43540daddae98383[0m
-      at [35m/home/freja/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m17[0m
+      at [35m/home/username/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m17[0m
    7: [91mtheme::get_error::{{closure}}[0m[90m::h40bbef2f4cd93fab[0m
-      at [35m/home/freja/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m26[0m
+      at [35m/home/username/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m26[0m
    8: [32mcore::option::Option<T>::ok_or_else[0m[90m::h8aa47839ff49cfbe[0m
       at [35m/rustc/897e37553bba8b42751c67658967889d11ecd120/library/core/src/option.rs[0m:[35m1087[0m
    9: [91mtheme::get_error[0m[90m::h78b5b4d52bfbbad0[0m
-      at [35m/home/freja/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m26[0m
+      at [35m/home/username/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m26[0m
   10: [91mtheme::test_error_backwards_compatibility[0m[90m::h9de398ce80defffa[0m
-      at [35m/home/freja/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m45[0m
+      at [35m/home/username/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m45[0m
   11: [91mtheme::test_error_backwards_compatibility::{{closure}}[0m[90m::hbe7b8ad2562c4dc4[0m
-      at [35m/home/freja/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m43[0m
+      at [35m/home/username/dev/rust/eyre/color-eyre/tests/theme.rs[0m:[35m43[0m
   12: [32mcore::ops::function::FnOnce::call_once[0m[90m::hfc715417a1b707c5[0m
       at [35m/rustc/897e37553bba8b42751c67658967889d11ecd120/library/core/src/ops/function.rs[0m:[35m248[0m
   13: [32mcore::ops::function::FnOnce::call_once[0m[90m::h9ee1367930602049[0m
