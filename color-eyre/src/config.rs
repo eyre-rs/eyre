@@ -492,7 +492,7 @@ impl HookBuilder {
     ///
     /// ```rust
     /// color_eyre::config::HookBuilder::default()
-    ///     .panic_section("consider reporting the bug at https://github.com/eyre-rs/eyre")
+    ///     .panic_section("consider reporting the bug at https://github.com/eyre-rs/eyre/issues")
     ///     .install()
     ///     .unwrap()
     /// ```
