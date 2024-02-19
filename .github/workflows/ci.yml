@@ -44,9 +44,9 @@ jobs:
         features:
           - # default
           - --no-default-features
-          - --features track-caller
-          - --features pyo3
-          - --features auto-install
+          - --features unstable track-caller
+          - --features unstable pyo3
+          - --features unstable auto-install
           - --all-features
     steps:
       - uses: actions/checkout@v1

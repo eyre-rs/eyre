@@ -17,6 +17,7 @@ default = ["anyhow", "auto-install", "track-caller"]
 anyhow = []
 auto-install = []
 track-caller = []
+unstable = []
 
 [dependencies]
 indenter = { workspace = true }
