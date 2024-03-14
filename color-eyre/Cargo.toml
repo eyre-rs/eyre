@@ -1,14 +1,15 @@
 [package]
 name = "color-eyre"
-version = "0.6.2"
+version = "0.6.3"
 description = "An error report handler for panics and eyre::Reports for colorful, consistent, and well formatted error reports for all kinds of errors."
 documentation = "https://docs.rs/color-eyre"
+readme = "./README.md"
+
 
 authors = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
-readme = { workspace = true }
 rust-version = { workspace = true }
 
 [features]
@@ -40,9 +41,6 @@ wasm-bindgen-test = "0.3.15"
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
-
-[package.metadata.release]
-dev-version = false
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
