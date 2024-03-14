@@ -1,17 +1,10 @@
 on:
   push:
     branches:
-      - master
+    - master
   pull_request: {}
 
 name: Continuous integration
-
-env:
-  MIRIFLAGS: -Zmiri-strict-provenance
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.run_number }}
-  cancel-in-progress: true
 
 jobs:
   check:
@@ -30,59 +23,64 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --all
 
-  test-matrix:
-    name: Test Suite
+  test-features:
+    name: Test Features
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        features:
+          -
+          - --all-features
+          - --no-default-features
+          - --no-default-features --features issue-url
+          - --no-default-features --features capture-spantrace
+          - --no-default-features --features track-caller
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: ${{ matrix.features }}
+
+  test-versions:
+    name: Test Versions
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - wasm32-unknown-unknown
         rust:
           - stable
           - beta
           - nightly
-        features:
-          - # default
-          - --no-default-features
-          - --no-default-features --features track-caller
-          - --no-default-features --features auto-install
-          - --features pyo3
-          - --all-features
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
+          target: ${{ matrix.target }}
           toolchain: ${{ matrix.rust }}
           override: true
+      - name: install test runner for wasm
+        run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        if: ${{ matrix.target == 'wasm32-unknown-unknown' }}
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all ${{ matrix.features }}
-
-  test-msrv:
-    name: Test Suite
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        features:
-          - # default
-          - --no-default-features
-          - --no-default-features --features track-caller
-          - --no-default-features --features auto-install
-          # skip `--features pyo3` and `--all-features` because pyo3 doesn't support this msrv
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.65
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all ${{ matrix.features }}
+          target: ${{ matrix.target }}
+          toolchain: ${{ matrix.rust }}
+        if: ${{ matrix.target != 'wasm32-unknown-unknown' }}
+      - name: run wasm tests
+        run: wasm-pack test --node
+        if: ${{ matrix.target == 'wasm32-unknown-unknown' }}
 
   test-os:
-    name: Test Suite
+    name: Test Operating Systems
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -97,7 +95,6 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all
 
   fmt:
     name: Rustfmt
@@ -116,7 +113,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --check
+          args: --all -- --check
 
   clippy:
     name: Clippy
@@ -135,19 +132,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets --all-features -- -D warnings
-
-  miri:
-    name: Miri
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          components: miri
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: miri
-          args: test
+          args: -- -D warnings

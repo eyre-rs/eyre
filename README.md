@@ -1,13 +1,16 @@
-eyre
-====
+# eyre
 
 [![Build Status][actions-badge]][actions-url]
-[![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
-[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/eyre)
+[![Latest Version][version-badge]][version-url]
+[![Rust Documentation][docs-badge]][docs-url]
 [![Discord chat][discord-badge]][discord-url]
 
 [actions-badge]: https://github.com/eyre-rs/eyre/workflows/Continuous%20integration/badge.svg
 [actions-url]: https://github.com/eyre-rs/eyre/actions?query=workflow%3A%22Continuous+integration%22
+[version-badge]: https://img.shields.io/crates/v/eyre.svg
+[version-url]: https://crates.io/crates/eyre
+[docs-badge]: https://img.shields.io/badge/docs-latest-blue.svg
+[docs-url]: https://docs.rs/eyre
 [discord-badge]: https://img.shields.io/discord/960645145018110012?label=eyre%20community%20discord
 [discord-url]: https://discord.gg/z94RqmUTKB
 
@@ -255,10 +258,10 @@ implements `context` for options which you can import to make existing
 [`anyhow`]: https://github.com/dtolnay/anyhow
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
-[`color-eyre`]: https://github.com/eyre-rs/color-eyre
+[`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 [`jane-eyre`]: https://github.com/yaahc/jane-eyre
 [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
-[`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
+[`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 
 [^1]: example and explanation of breakage https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361
