@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+### Changed
+- Added color-eyre to the eyre monorepo
 
 ## [0.6.2] - 2022-07-11
 ### Added
