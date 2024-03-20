@@ -5,35 +5,38 @@ use std::path::Path;
 use std::process::{Command, ExitStatus};
 use std::str;
 
-// This code exercises the surface area that we expect of the std Backtrace
-// type. If the current toolchain is able to compile it, we go ahead and use
-// backtrace in eyre.
+// This code exercises the surface area that we expect of the Error generic
+// member access API. If the current toolchain is able to compile it, then
+// anyhow is able to provide backtrace support.
 const BACKTRACE_PROBE: &str = r#"
-    #![feature(backtrace)]
-    #![allow(dead_code)]
+    #![feature(error_generic_member_access)]
 
-    use std::backtrace::{Backtrace, BacktraceStatus};
-    use std::error::Error;
-    use std::fmt::{self, Display};
+    use std::backtrace::Backtrace;
+    use std::error::{self, Error, Request};
+    use std::fmt::{self, Debug, Display};
 
-    #[derive(Debug)]
-    struct E;
+    struct MyError(Thing);
+    struct Thing;
 
-    impl Display for E {
+    impl Debug for MyError {
         fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
             unimplemented!()
         }
     }
 
-    impl Error for E {
-        fn backtrace(&self) -> Option<&Backtrace> {
-            let backtrace = Backtrace::capture();
-            match backtrace.status() {
-                BacktraceStatus::Captured | BacktraceStatus::Disabled | _ => {}
-            }
+    impl Display for MyError {
+        fn fmt(&self, _formatter: &mut fmt::Formatter) -> fmt::Result {
             unimplemented!()
         }
     }
+
+    impl Error for MyError {
+        fn provide<'a>(&'a self, request: &mut Request<'a>) {
+            request.provide_ref(&self.0);
+        }
+    }
+
+    const _: fn(&dyn Error) -> Option<&Backtrace> = |err| error::request_ref::<Backtrace>(err);
 "#;
 
 const TRACK_CALLER_PROBE: &str = r#"
