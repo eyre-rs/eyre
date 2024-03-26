@@ -82,9 +82,9 @@ impl Display for BoxedError {
 }
 
 impl StdError for BoxedError {
-    #[cfg(backtrace)]
-    fn backtrace(&self) -> Option<&crate::backtrace::Backtrace> {
-        self.0.backtrace()
+    #[cfg(generic_member_access)]
+    fn provide<'a>(&'a self, request: &mut std::error::Request<'a>) {
+        self.0.provide(request);
     }
 
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
