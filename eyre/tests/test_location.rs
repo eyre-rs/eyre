@@ -107,7 +107,6 @@ fn test_context() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
-    use eyre::WrapErr;
     let err = read_path("totally_fake_path")
         .context("oopsie")
         .unwrap_err();
@@ -126,7 +125,6 @@ fn test_with_context() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
-    use eyre::WrapErr;
     let err = read_path("totally_fake_path")
         .with_context(|| "oopsie")
         .unwrap_err();
