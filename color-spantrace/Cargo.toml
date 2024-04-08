@@ -3,7 +3,6 @@ name = "color-spantrace"
 version = "0.3.0"
 description = "A pretty printer for tracing_error::SpanTrace based on color-backtrace"
 documentation = "https://docs.rs/color-spantrace"
-include.workspace = true
 
 authors = { workspace = true }
 edition = { workspace = true }
@@ -11,6 +10,7 @@ license = { workspace = true }
 repository = { workspace = true }
 readme = { workspace = true }
 rust-version = { workspace = true }
+include = { workspace = true }
 
 [dependencies]
 tracing-error = "0.2.0"
@@ -26,6 +26,3 @@ ansi-parser = "0.9" # used for testing color schemes
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
-
-[package.metadata.workspaces]
-independent = true
