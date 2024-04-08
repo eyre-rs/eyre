@@ -270,7 +270,7 @@ implements `context` for options which you can import to make existing
 [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
 [`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-[`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
+[`simple-eyre`]: https://github.com/eyre-rs/eyre/tree/master/simple-eyre
 [`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 

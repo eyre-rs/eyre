@@ -14,5 +14,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/yaahc/simple-eyre/compare/v0.3.1...HEAD
-[0.3.1]: https://github.com/yaahc/displaydoc/releases/tag/v0.3.1
+[Unreleased]: https://github.com/eyre-rs/simple-eyre/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/eyre-rs/simple-eyre/releases/tag/v0.3.1

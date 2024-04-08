@@ -29,15 +29,19 @@
 //!
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
 //! [`eyre`]: https://docs.rs/eyre
-#![doc(html_root_url = "https://docs.rs/simple-eyre/0.3.1")]
+#![cfg_attr(
+    nightly,
+    feature(rustdoc_missing_doc_code_examples),
+    warn(rustdoc::missing_doc_code_examples)
+)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
-    missing_doc_code_examples,
+    unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
-    const_err,
     dead_code,
     improper_ctypes,
     non_shorthand_field_patterns,
@@ -45,7 +49,6 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
-    private_in_public,
     unconditional_recursion,
     unused,
     unused_allocation,
@@ -53,6 +56,12 @@
     unused_parens,
     while_true
 )]
+#![allow(
+    clippy::needless_doctest_main,
+    clippy::new_ret_no_self,
+    clippy::wrong_self_convention
+)]
+
 pub use eyre;
 #[doc(hidden)]
 pub use eyre::{Report, Result};
