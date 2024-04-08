@@ -1,0 +1,51 @@
+[package]
+name = "color-eyre"
+version = "0.6.5"
+description = "An error report handler for panics and eyre::Reports for colorful, consistent, and well formatted error reports for all kinds of errors."
+documentation = "https://docs.rs/color-eyre"
+
+authors = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+readme = { workspace = true }
+rust-version = { workspace = true }
+include.workspace = true
+
+[features]
+default = ["track-caller", "capture-spantrace"]
+capture-spantrace = ["tracing-error", "color-spantrace"]
+issue-url = ["url"]
+track-caller = []
+
+[dependencies]
+eyre = { version = "1", path = "../eyre" }
+tracing-error = { version = "0.2.0", optional = true }
+backtrace = { version = "0.3.59" }
+indenter = { workspace = true }
+owo-colors = { workspace = true }
+color-spantrace = { version = "0.3", path = "../color-spantrace", optional = true }
+once_cell = { workspace = true }
+url = { version = "2.1.1", optional = true }
+
+[dev-dependencies]
+tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }
+tracing = "0.1.13"
+pretty_assertions = "1.0.0"
+thiserror = "1.0.19"
+ansi-parser = "0.9.0"
+rustversion = "1.0"
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3.15"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.release]
+dev-version = false
+
+[[example]]
+name = "color-eyre-usage"
+path = "examples/usage.rs"

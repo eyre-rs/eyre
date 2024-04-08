@@ -1,17 +1,10 @@
 on:
   push:
     branches:
-      - master
+    - master
   pull_request: {}
 
 name: Continuous integration
-
-env:
-  MIRIFLAGS: -Zmiri-strict-provenance
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'push' && github.run_number }}
-  cancel-in-progress: true
 
 jobs:
   check:
@@ -22,7 +15,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -30,9 +23,29 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --all
 
-  test-matrix:
+  test-features:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-default-features
+
+  test-versions:
     name: Test Suite
     runs-on: ubuntu-latest
     strategy:
@@ -41,15 +54,9 @@ jobs:
           - stable
           - beta
           - nightly
-        features:
-          - # default
-          - --no-default-features
-          - --no-default-features --features track-caller
-          - --no-default-features --features auto-install
-          - --features pyo3
-          - --all-features
+          - 1.39.0
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -57,29 +64,6 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all ${{ matrix.features }}
-
-  test-msrv:
-    name: Test Suite (msrv)
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        features:
-          - # default
-          - --no-default-features
-          - --no-default-features --features track-caller
-          - --no-default-features --features auto-install
-          # skip `--features pyo3` and `--all-features` because pyo3 doesn't support this msrv
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.65
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all ${{ matrix.features }}
 
   test-os:
     name: Test Suite
@@ -88,16 +72,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          profile: minimal
           override: true
+          profile: minimal
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all
 
   fmt:
     name: Rustfmt
@@ -107,7 +90,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -116,7 +99,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all --check
+          args: --all -- --check
 
   clippy:
     name: Clippy
@@ -135,18 +118,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets --all-features -- -D clippy::style -D clippy::suspicious -D clippy::complexity
-  miri:
-    name: Miri
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          components: miri
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: miri
-          args: test
+          args: --all-targets --all-features -- -D warnings
