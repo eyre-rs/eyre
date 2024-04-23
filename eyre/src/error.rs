@@ -909,5 +909,8 @@ impl AsRef<dyn StdError> for Report {
     }
 }
 
+#[cfg(feature = "serialize")]
+mod serialize;
+
 #[cfg(feature = "pyo3")]
 mod pyo3_compat;

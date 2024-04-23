@@ -17,11 +17,13 @@ default = ["anyhow", "auto-install", "track-caller"]
 anyhow = []
 auto-install = []
 track-caller = []
+serialize = ["dep:serde"]
 
 [dependencies]
 indenter = { workspace = true }
 once_cell = { workspace = true }
 pyo3 = { version = "0.20", optional = true, default-features = false }
+serde = { version = "1.0.198", optional = true }
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
