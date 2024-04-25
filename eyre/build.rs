@@ -69,16 +69,16 @@ fn compile_probe(probe: &str) -> Option<ExitStatus> {
     let probefile = Path::new(&out_dir).join("probe.rs");
     fs::write(&probefile, probe).ok()?;
 
-    // Supports invoking rustc thrugh a wrapper
-    let mut cmd = if let Some(wrapper) = env::var_os("RUSTC_WRAPPER") {
-        let mut cmd = Command::new(wrapper);
+    let rustc_wrapper = env::var_os("RUSTC_WRAPPER").filter(|wrapper| !wrapper.is_empty());
+    let rustc_workspace_wrapper =
+        env::var_os("RUSTC_WORKSPACE_WRAPPER").filter(|wrapper| !wrapper.is_empty());
+    let mut rustc = rustc_wrapper
+        .into_iter()
+        .chain(rustc_workspace_wrapper)
+        .chain(std::iter::once(rustc));
 
-        cmd.arg(rustc);
-
-        cmd
-    } else {
-        Command::new(rustc)
-    };
+    let mut cmd = Command::new(rustc.next().unwrap());
+    cmd.args(rustc);
 
     if let Some(target) = env::var_os("TARGET") {
         cmd.arg("--target").arg(target);
