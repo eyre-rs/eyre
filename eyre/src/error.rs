@@ -116,6 +116,7 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
+    #[cfg(feature = "anyhow")]
     #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_display<M>(message: M) -> Self
     where
@@ -698,13 +699,13 @@ where
     // ptr::read to take ownership of that value.
     if TypeId::of::<D>() == target {
         unsafe {
-            e.cast::<ErrorImpl<ContextError<ManuallyDrop<E>, E>>>()
+            e.cast::<ErrorImpl<ContextError<ManuallyDrop<D>, E>>>()
                 .into_box()
         };
     } else {
         debug_assert_eq!(TypeId::of::<E>(), target);
         unsafe {
-            e.cast::<ErrorImpl<ContextError<E, ManuallyDrop<E>>>>()
+            e.cast::<ErrorImpl<ContextError<D, ManuallyDrop<E>>>>()
                 .into_box()
         };
     }

@@ -1,13 +1,16 @@
-eyre
-====
+# eyre
 
 [![Build Status][actions-badge]][actions-url]
-[![Latest Version](https://img.shields.io/crates/v/eyre.svg)](https://crates.io/crates/eyre)
-[![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/eyre)
+[![Latest Version][version-badge]][version-url]
+[![Rust Documentation][docs-badge]][docs-url]
 [![Discord chat][discord-badge]][discord-url]
 
 [actions-badge]: https://github.com/eyre-rs/eyre/workflows/Continuous%20integration/badge.svg
 [actions-url]: https://github.com/eyre-rs/eyre/actions?query=workflow%3A%22Continuous+integration%22
+[version-badge]: https://img.shields.io/crates/v/eyre.svg
+[version-url]: https://crates.io/crates/eyre
+[docs-badge]: https://img.shields.io/badge/docs-latest-blue.svg
+[docs-url]: https://docs.rs/eyre
 [discord-badge]: https://img.shields.io/discord/960645145018110012?label=eyre%20community%20discord
 [discord-url]: https://discord.gg/z94RqmUTKB
 
@@ -200,7 +203,17 @@ This crate does its best to be usable as a drop in replacement of `anyhow` and
 vice-versa by `re-exporting` all of the renamed APIs with the names used in
 `anyhow`, though there are some differences still.
 
-#### `Context` and `Option`
+### Disabling the compatibility layer
+
+The `anyhow` compatibility layer is enabled by default.
+If you do not need anyhow compatibility, it is advisable
+to disable the `"anyhow"` feature:
+
+```toml
+eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+```
+
+### `Context` and `Option`
 
 As part of renaming `Context` to `WrapErr` we also intentionally do not
 implement `WrapErr` for `Option`. This decision was made because `wrap_err`
@@ -208,24 +221,30 @@ implies that you're creating a new error that saves the old error as its
 `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 being somewhat meaningless.
 
-Instead `eyre` intends for users to use the combinator functions provided by
-`std` for converting `Option`s to `Result`s. So where you would write this with
+Instead `eyre` offers [`OptionExt::ok_or_eyre`] to yield _static_ errors from `None`,
+and intends for users to use the combinator functions provided by
+`std`, converting `Option`s to `Result`s, for _dynamic_ errors.
+So where you would write this with
 anyhow:
+
+[`OptionExt::ok_or_eyre`]: https://docs.rs/eyre/latest/eyre/trait.OptionExt.html#tymethod.ok_or_eyre
 
 ```rust
 use anyhow::Context;
 
 let opt: Option<()> = None;
-let result = opt.context("new error message");
+let result_static = opt.context("static error message");
+let result_dynamic = opt.with_context(|| format!("{} error message", "dynamic"));
 ```
 
 With `eyre` we want users to write:
 
 ```rust
-use eyre::{eyre, Result};
+use eyre::{eyre, OptionExt, Result};
 
 let opt: Option<()> = None;
-let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
+let result_static: Result<()> = opt.ok_or_eyre("static error message");
+let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
 ```
 
 **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
@@ -239,10 +258,10 @@ implements `context` for options which you can import to make existing
 [`anyhow`]: https://github.com/dtolnay/anyhow
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
-[`color-eyre`]: https://github.com/eyre-rs/color-eyre
+[`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 [`jane-eyre`]: https://github.com/yaahc/jane-eyre
 [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
-[`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
+[`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 
 [^1]: example and explanation of breakage https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361

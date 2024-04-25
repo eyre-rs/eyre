@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "0.6.9"
+version = "1.0.0"
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 description = "Flexible concrete Error Reporting type built on std::error::Error with customizable Reports"
 documentation = "https://docs.rs/eyre"
@@ -13,7 +13,8 @@ readme = { workspace = true }
 rust-version = { workspace = true }
 
 [features]
-default = ["auto-install", "track-caller"]
+default = ["anyhow", "auto-install", "track-caller"]
+anyhow = []
 auto-install = []
 track-caller = []
 

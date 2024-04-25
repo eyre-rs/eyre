@@ -237,8 +237,8 @@
 //! ## No-std support
 //!
 //! No-std support was removed in 2020 in [commit 608a16a] due to unaddressed upstream breakages.
-//! [commit 608a16a]:
-//! https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c6973c18f1d5
+//!
+//! [commit 608a16a]: https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c6973c18f1d5
 //!
 //! ## Comparison to failure
 //!
@@ -265,7 +265,17 @@
 //! vice-versa by re-exporting all of the renamed APIs with the names used in
 //! `anyhow`, though there are some differences still.
 //!
-//! #### `Context` and `Option`
+//! ### Disabling the compatibility layer
+//!
+//! The `anyhow` compatibility layer is enabled by default.
+//! If you do not need anyhow compatibility, it is advisable
+//! to disable the `"anyhow"` feature:
+//!
+//! ```toml
+//! eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+//! ```
+//!
+//! ### `Context` and `Option`
 //!
 //! As part of renaming `Context` to `WrapErr` we also intentionally do not
 //! implement `WrapErr` for `Option`. This decision was made because `wrap_err`
@@ -273,34 +283,38 @@
 //! `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 //! being somewhat meaningless.
 //!
-//! Instead `eyre` intends for users to use the combinator functions provided by
-//! `std` for converting `Option`s to `Result`s. So where you would write this with
+//! Instead `eyre` offers [`OptionExt::ok_or_eyre`] to yield _static_ errors from `None`,
+//! and intends for users to use the combinator functions provided by
+//! `std`, converting `Option`s to `Result`s, for _dynamic_ errors.
+//! So where you would write this with
 //! anyhow:
 //!
 //! ```rust
 //! use anyhow::Context;
 //!
 //! let opt: Option<()> = None;
-//! let result = opt.context("new error message");
+//! let result_static = opt.context("static error message");
+//! let result_dynamic = opt.with_context(|| format!("{} error message", "dynamic"));
 //! ```
 //!
 //! With `eyre` we want users to write:
 //!
 //! ```rust
-//! use eyre::{eyre, Result};
+//! use eyre::{eyre, OptionExt, Result};
 //!
 //! # #[cfg(not(feature = "auto-install"))]
 //! # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 //! #
 //! let opt: Option<()> = None;
-//! let result: Result<()> = opt.ok_or_else(|| eyre!("new error message"));
+//! let result_static: Result<()> = opt.ok_or_eyre("static error message");
+//! let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
 //! ```
 //!
 //! **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
 //! implements `context` for options which you can import to make existing
 //! `.context` calls compile.
 //!
-//! [^1]: example and explanation of breakage https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361
+//! [^1]: example and explanation of breakage <https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361>
 //!
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
@@ -314,7 +328,7 @@
 //! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
 //! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.9")]
+#![doc(html_root_url = "https://docs.rs/eyre/0.6.11")]
 #![cfg_attr(
     nightly,
     feature(rustdoc_missing_doc_code_examples),
@@ -359,29 +373,35 @@ mod error;
 mod fmt;
 mod kind;
 mod macros;
+mod option;
 mod ptr;
 mod wrapper;
 
 use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
-use core::fmt::Display;
+use core::fmt::{Debug, Display};
 
 use std::error::Error as StdError;
 
 pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
+#[cfg(feature = "anyhow")]
 #[doc(hidden)]
 pub use DefaultHandler as DefaultContext;
+#[cfg(feature = "anyhow")]
 #[doc(hidden)]
 pub use EyreHandler as EyreContext;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
 pub use Report as Error;
 /// Compatibility re-export of `WrapErr` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
 pub use WrapErr as Context;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
@@ -709,7 +729,7 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
             }
         }
 
-        Ok(())
+        Result::Ok(())
     }
 
     /// Store the location of the caller who constructed this error report
@@ -831,7 +851,7 @@ impl EyreHandler for DefaultHandler {
             }
         }
 
-        Ok(())
+        Result::Ok(())
     }
 
     #[cfg(track_caller)]
@@ -1107,17 +1127,74 @@ pub trait WrapErr<T, E>: context::private::Sealed {
         F: FnOnce() -> D;
 
     /// Compatibility re-export of wrap_err for interop with `anyhow`
+    #[cfg(feature = "anyhow")]
     #[cfg_attr(track_caller, track_caller)]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static;
 
     /// Compatibility re-export of wrap_err_with for interop with `anyhow`
+    #[cfg(feature = "anyhow")]
     #[cfg_attr(track_caller, track_caller)]
     fn with_context<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
+}
+
+/// Provides the [`ok_or_eyre`][OptionExt::ok_or_eyre] method for [`Option`].
+///
+/// This trait is sealed and cannot be implemented for types outside of
+/// `eyre`.
+///
+/// # Example
+///
+/// ```
+/// # #[cfg(not(feature = "auto-install"))]
+/// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
+/// use eyre::OptionExt;
+///
+/// let option: Option<()> = None;
+///
+/// let result = option.ok_or_eyre("static str error");
+///
+/// assert_eq!(result.unwrap_err().to_string(), "static str error");
+/// ```
+///
+/// # `ok_or_eyre` vs `ok_or_else`
+///
+/// If string interpolation is required for the generated [report][Report],
+/// use [`ok_or_else`][Option::ok_or_else] instead,
+/// invoking [`eyre!`] to perform string interpolation:
+///
+/// ```
+/// # #[cfg(not(feature = "auto-install"))]
+/// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
+/// use eyre::eyre;
+///
+/// let option: Option<()> = None;
+///
+/// let result = option.ok_or_else(|| eyre!("{} error", "dynamic"));
+///
+/// assert_eq!(result.unwrap_err().to_string(), "dynamic error");
+/// ```
+///
+/// `ok_or_eyre` incurs no runtime cost, as the error object
+/// is constructed from the provided static argument
+/// only in the `None` case.
+pub trait OptionExt<T>: context::private::Sealed {
+    /// Transform the [`Option<T>`] into a [`Result<T, E>`],
+    /// mapping [`Some(v)`][Option::Some] to [`Ok(v)`][Result::Ok]
+    /// and [`None`] to [`Report`].
+    ///
+    /// `ok_or_eyre` allows for eyre [`Report`] error objects
+    /// to be lazily created from static messages in the `None` case.
+    ///
+    /// For dynamic error messages, use [`ok_or_else`][Option::ok_or_else],
+    /// invoking [`eyre!`] in the closure to perform string interpolation.
+    fn ok_or_eyre<M>(self, message: M) -> crate::Result<T>
+    where
+        M: Debug + Display + Send + Sync + 'static;
 }
 
 /// Provides the `context` method for `Option` when porting from `anyhow`
@@ -1163,6 +1240,7 @@ pub trait WrapErr<T, E>: context::private::Sealed {
 ///         .ok_or_else(|| eyre!("the thing wasnt in the list"))
 /// }
 /// ```
+#[cfg(feature = "anyhow")]
 pub trait ContextCompat<T>: context::private::Sealed {
     /// Compatibility version of `wrap_err` for creating new errors with new source on `Option`
     /// when porting from `anyhow`
@@ -1191,6 +1269,29 @@ pub trait ContextCompat<T>: context::private::Sealed {
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
+}
+
+/// Equivalent to Ok::<_, eyre::Error>(value).
+///
+/// This simplifies creation of an eyre::Result in places where type inference
+/// cannot deduce the `E` type of the result &mdash; without needing to write
+/// `Ok::<_, eyre::Error>(value)`.
+///
+/// One might think that `eyre::Result::Ok(value)` would work in such cases
+/// but it does not.
+///
+/// ```console
+/// error[E0282]: type annotations needed for `std::result::Result<i32, E>`
+///   --> src/main.rs:11:13
+///    |
+/// 11 |     let _ = eyre::Result::Ok(1);
+///    |         -   ^^^^^^^^^^^^^^^^ cannot infer type for type parameter `E` declared on the enum `Result`
+///    |         |
+///    |         consider giving this pattern the explicit type `std::result::Result<i32, E>`, where the type parameter `E` is specified
+/// ```
+#[allow(non_snake_case)]
+pub fn Ok<T>(t: T) -> Result<T> {
+    Result::Ok(t)
 }
 
 // Not public API. Referenced by macro-generated code.
