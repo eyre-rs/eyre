@@ -207,8 +207,6 @@ you need an error type that can be handled via match or reported. This is
 common in library crates where you don't know how your users will handle
 your errors.
 
-[thiserror]: https://github.com/dtolnay/thiserror
-
 ## Compatibility with `anyhow`
 
 This crate does its best to be usable as a drop in replacement of `anyhow` and
