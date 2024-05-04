@@ -6,6 +6,6 @@ impl Serialize for Report {
     where
         S: Serializer,
     {
-        serializer.serialize_str(self.to_string().as_ref())
+        serializer.serialize_str(format!("{:?}", self).as_ref())
     }
 }
