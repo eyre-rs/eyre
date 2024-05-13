@@ -417,22 +417,22 @@ pub use WrapErr as Context;
 ///
 /// # Display representations
 ///
-/// When you print an error object using "{}" or to_string(), only the outermost underlying error
-/// is printed, not any of the lower level causes. This is exactly as if you had called the Display
-/// impl of the error from which you constructed your eyre::Report.
+/// When you print an error object using `"{}"` or `to_string()`, only the outermost underlying error
+/// is printed, not any of the lower level causes. This is exactly as if you had called the `Display`
+/// implementation of the error from which you constructed your `eyre::Report`.
 ///
 /// ```console
 /// Failed to read instrs from ./path/to/instrs.json
 /// ```
 ///
 /// To print causes as well using eyre's default formatting of causes, use the
-/// alternate selector "{:#}".
+/// alternate selector `"{:#}"`.
 ///
 /// ```console
 /// Failed to read instrs from ./path/to/instrs.json: No such file or directory (os error 2)
 /// ```
 ///
-/// The Debug format "{:?}" includes your backtrace if one was captured. Note
+/// The Debug format `"{:?}"` includes your backtrace if one was captured. Note
 /// that this is the representation you get by default if you return an error
 /// from `fn main` instead of printing it explicitly yourself.
 ///
@@ -458,7 +458,7 @@ pub use WrapErr as Context;
 ///    7: _start
 /// ```
 ///
-/// To see a conventional struct-style Debug representation, use "{:#?}".
+/// To see a conventional struct-style Debug representation, use `"{:#?}"`.
 ///
 /// ```console
 /// Error {
@@ -1276,7 +1276,7 @@ pub trait ContextCompat<T>: context::private::Sealed {
         F: FnOnce() -> D;
 }
 
-/// Equivalent to Ok::<_, eyre::Error>(value).
+/// Equivalent to `Ok::<_, eyre::Error>(value)`.
 ///
 /// This simplifies creation of an eyre::Result in places where type inference
 /// cannot deduce the `E` type of the result &mdash; without needing to write

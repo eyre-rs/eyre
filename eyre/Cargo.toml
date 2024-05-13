@@ -30,8 +30,7 @@ autocfg = { workspace = true }
 futures = { version = "0.3", default-features = false }
 rustversion = "1.0"
 thiserror = "1.0"
-# TODO: 1.0.90 uses rustc-1.70
-trybuild = { version = "=1.0.83", features = ["diff"] }
+trybuild = { version = "=1.0.89", features = ["diff"] } # pinned due to MSRV
 backtrace = "0.3.46"
 anyhow = "1.0.28"
 syn = { version = "2.0", features = ["full"] }
