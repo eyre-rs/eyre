@@ -624,7 +624,7 @@ fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
 }
 
 impl dyn EyreHandler {
-    ///
+    /// Returns true if the handler is of the specified type
     pub fn is<T: EyreHandler>(&self) -> bool {
         // Get `TypeId` of the type this function is instantiated with.
         let t = core::any::TypeId::of::<T>();
@@ -636,7 +636,7 @@ impl dyn EyreHandler {
         t == concrete
     }
 
-    ///
+    /// Downcast the handler to a concrete type
     pub fn downcast_ref<T: EyreHandler>(&self) -> Option<&T> {
         if self.is::<T>() {
             unsafe { Some(&*(self as *const dyn EyreHandler as *const T)) }
@@ -645,7 +645,7 @@ impl dyn EyreHandler {
         }
     }
 
-    ///
+    /// Downcast the handler to a concrete type
     pub fn downcast_mut<T: EyreHandler>(&mut self) -> Option<&mut T> {
         if self.is::<T>() {
             unsafe { Some(&mut *(self as *mut dyn EyreHandler as *mut T)) }
