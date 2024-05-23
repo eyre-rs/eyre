@@ -23,6 +23,9 @@ indenter = { workspace = true }
 once_cell = { workspace = true }
 pyo3 = { version = "0.20", optional = true, default-features = false }
 
+[build-dependencies]
+autocfg = { workspace = true }
+
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
 rustversion = "1.0"
