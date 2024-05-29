@@ -108,9 +108,7 @@ macro_rules! bail {
 #[macro_export]
 macro_rules! ensure {
     ($cond:expr $(,)?) => {
-        if !$cond {
-            $crate::ensure!($cond, concat!("Condition failed: `", stringify!($cond), "`"))
-        }
+        $crate::ensure!($cond, concat!("Condition failed: `", stringify!($cond), "`"))
     };
     ($cond:expr, $msg:literal $(,)?) => {
         if !$cond {
