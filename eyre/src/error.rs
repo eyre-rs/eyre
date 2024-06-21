@@ -27,7 +27,7 @@ impl Report {
 
     /// Create a new error object from a printable error message.
     ///
-    /// If the argument implements std::error::Error, prefer `Report::new`
+    /// If the argument implements `std::error::Error`, prefer [`Report::new`]
     /// instead which preserves the underlying error's cause chain and
     /// backtrace. If the argument may or may not implement std::error::Error
     /// now or in the future, use `eyre!(err)` which handles either way

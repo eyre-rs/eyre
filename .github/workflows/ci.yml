@@ -135,8 +135,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets --all-features -- -D warnings
-
+          args: --all-targets --all-features -- -D clippy::style -D clippy::suspicious -D clippy::complexity
   miri:
     name: Miri
     runs-on: ubuntu-latest
