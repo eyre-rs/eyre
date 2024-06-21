@@ -150,6 +150,11 @@ impl<D> StdError for ContextError<D, Report>
 where
     D: Display,
 {
+    #[cfg(generic_member_access)]
+    fn provide<'a>(&'a self, request: &mut std::error::Request<'a>) {
+        self.error.provide(request)
+    }
+
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         Some(ErrorImpl::error(self.error.inner.as_ref()))
     }
