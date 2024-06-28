@@ -624,6 +624,7 @@ fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
 }
 
 impl dyn EyreHandler {
+    /// Check if the handler is of type `T`
     pub fn is<T: EyreHandler>(&self) -> bool {
         // Get `TypeId` of the type this function is instantiated with.
         let t = core::any::TypeId::of::<T>();
@@ -635,6 +636,7 @@ impl dyn EyreHandler {
         t == concrete
     }
 
+    /// Downcast the handler to a concrete type `T`
     pub fn downcast_ref<T: EyreHandler>(&self) -> Option<&T> {
         if self.is::<T>() {
             unsafe { Some(&*(self as *const dyn EyreHandler as *const T)) }
@@ -643,6 +645,7 @@ impl dyn EyreHandler {
         }
     }
 
+    /// Downcast the handler to a concrete type `T`
     pub fn downcast_mut<T: EyreHandler>(&mut self) -> Option<&mut T> {
         if self.is::<T>() {
             unsafe { Some(&mut *(self as *mut dyn EyreHandler as *mut T)) }
@@ -1122,21 +1125,6 @@ pub trait WrapErr<T, E>: context::private::Sealed {
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
-
-    /// Compatibility re-export of wrap_err for interop with `anyhow`
-    #[cfg(feature = "anyhow")]
-    #[cfg_attr(track_caller, track_caller)]
-    fn context<D>(self, msg: D) -> Result<T, Report>
-    where
-        D: Display + Send + Sync + 'static;
-
-    /// Compatibility re-export of wrap_err_with for interop with `anyhow`
-    #[cfg(feature = "anyhow")]
-    #[cfg_attr(track_caller, track_caller)]
-    fn with_context<D, F>(self, f: F) -> Result<T, Report>
-    where
-        D: Display + Send + Sync + 'static,
-        F: FnOnce() -> D;
 }
 
 /// Provides the [`ok_or_eyre`][OptionExt::ok_or_eyre] method for [`Option`].
@@ -1194,7 +1182,8 @@ pub trait OptionExt<T>: context::private::Sealed {
         M: Debug + Display + Send + Sync + 'static;
 }
 
-/// Provides the `context` method for `Option` when porting from `anyhow`
+/// Provides the `context` and `with_context` methods for `Result` and `Option` to enhance
+/// compatibility when porting from anyhow.
 ///
 /// This trait is sealed and cannot be implemented for types outside of
 /// `eyre`.
@@ -1250,19 +1239,6 @@ pub trait ContextCompat<T>: context::private::Sealed {
     /// when porting from `anyhow`
     #[cfg_attr(track_caller, track_caller)]
     fn with_context<D, F>(self, f: F) -> Result<T, Report>
-    where
-        D: Display + Send + Sync + 'static,
-        F: FnOnce() -> D;
-
-    /// Compatibility re-export of `context` for porting from `anyhow` to `eyre`
-    #[cfg_attr(track_caller, track_caller)]
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report>
-    where
-        D: Display + Send + Sync + 'static;
-
-    /// Compatibility re-export of `with_context` for porting from `anyhow` to `eyre`
-    #[cfg_attr(track_caller, track_caller)]
-    fn wrap_err_with<D, F>(self, f: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
