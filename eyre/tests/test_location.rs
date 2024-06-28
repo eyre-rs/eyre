@@ -100,13 +100,12 @@ fn test_option_ok_or_eyre() {
 #[cfg(feature = "anyhow")]
 #[test]
 fn test_context() {
-    use eyre::ContextCompat;
-
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::ContextCompat;
     let err = read_path("totally_fake_path")
         .context("oopsie")
         .unwrap_err();
@@ -118,13 +117,12 @@ fn test_context() {
 #[cfg(feature = "anyhow")]
 #[test]
 fn test_with_context() {
-    use eyre::ContextCompat;
-
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
         Box::new(LocationHandler::new(expected_location))
     }));
 
+    use eyre::ContextCompat;
     let err = read_path("totally_fake_path")
         .with_context(|| "oopsie")
         .unwrap_err();
