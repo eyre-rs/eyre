@@ -205,12 +205,12 @@ vice-versa by `re-exporting` all of the renamed APIs with the names used in
 
 ### Disabling the compatibility layer
 
-The `anyhow` compatibility layer is enabled by default.
-If you do not need anyhow compatibility, it is advisable
-to disable the `"anyhow"` feature:
+The `anyhow` compatibility layer is disabled by default.
+If you need anyhow compatibility, it is advisable
+to enable the `"anyhow"` feature:
 
 ```toml
-eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+eyre = { version = "0.6", features = ["anyhow"] }
 ```
 
 ### `Context` and `Option`
