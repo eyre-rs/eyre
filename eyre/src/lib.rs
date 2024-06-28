@@ -636,7 +636,7 @@ impl dyn EyreHandler {
         t == concrete
     }
 
-    /// Downcast the handler to a contcrete type `T`
+    /// Downcast the handler to a concrete type `T`
     pub fn downcast_ref<T: EyreHandler>(&self) -> Option<&T> {
         if self.is::<T>() {
             unsafe { Some(&*(self as *const dyn EyreHandler as *const T)) }
