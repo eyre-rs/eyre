@@ -17,7 +17,7 @@ default = ["anyhow", "auto-install", "track-caller"]
 anyhow = []
 auto-install = []
 track-caller = []
-serialize = ["dep:serde"]
+serde = ["dep:serde"]
 
 [dependencies]
 indenter = { workspace = true }

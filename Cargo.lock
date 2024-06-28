@@ -190,6 +190,7 @@ dependencies = [
  "once_cell",
  "pyo3",
  "rustversion",
+ "serde",
  "syn",
  "thiserror",
  "trybuild",
