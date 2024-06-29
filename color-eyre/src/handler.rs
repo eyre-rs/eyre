@@ -24,7 +24,6 @@ impl Handler {
 
     /// Return a reference to the captured `SpanTrace` type
     #[cfg(feature = "capture-spantrace")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "capture-spantrace")))]
     pub fn span_trace(&self) -> Option<&SpanTrace> {
         self.span_trace.as_ref()
     }

@@ -328,12 +328,13 @@
 //! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
 //! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.11")]
 #![cfg_attr(
     nightly,
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
+#![cfg_attr(backtrace, feature(backtrace))]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -355,8 +356,6 @@
     unused_parens,
     while_true
 )]
-#![cfg_attr(backtrace, feature(backtrace))]
-#![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(
     clippy::needless_doctest_main,
     clippy::new_ret_no_self,

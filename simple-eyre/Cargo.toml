@@ -1,8 +1,8 @@
 [package]
-name = "color-eyre"
-version = "0.6.2"
-description = "An error report handler for panics and eyre::Reports for colorful, consistent, and well formatted error reports for all kinds of errors."
-documentation = "https://docs.rs/color-eyre"
+name = "simple-eyre"
+version = "0.3.1"
+documentation = "https://docs.rs/simple-eyre"
+description = "One of the simplest error reporters one can build ontop of eyre, defining only an error report"
 
 authors = { workspace = true }
 edition = { workspace = true }
@@ -11,42 +11,16 @@ repository = { workspace = true }
 readme = { workspace = true }
 rust-version = { workspace = true }
 
-[features]
-default = ["track-caller", "capture-spantrace"]
-capture-spantrace = ["tracing-error", "color-spantrace"]
-issue-url = ["url"]
-track-caller = []
-
 [dependencies]
-eyre = "0.6.1"
-tracing-error = { version = "0.2.0", optional = true }
-backtrace = { version = "0.3.48", features = ["gimli-symbolize"] }
+eyre = "0.6.0"
 indenter = { workspace = true }
-owo-colors = { workspace = true }
-color-spantrace = { version = "0.2", path = "../color-spantrace", optional = true }
-once_cell = { workspace = true }
-url = { version = "2.1.1", optional = true }
-
-[dev-dependencies]
-tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }
-tracing = "0.1.13"
-pretty_assertions = "1.0.0"
-thiserror = "1.0.19"
-ansi-parser = "0.8.0"
-
-[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
-wasm-bindgen-test = "0.3.15"
-
-[[example]]
-name = "color-eyre-usage"
-path = "examples/usage.rs"
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.release]
-dev-version = false
+no-dev-version = true
 
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
@@ -64,6 +38,7 @@ search = "<!-- next-header -->"
 replace = "<!-- next-header -->\n\n## [Unreleased] - ReleaseDate"
 exactly = 1
 
+# Disable this replacement on the very first release
 [[package.metadata.release.pre-release-replacements]]
 file = "CHANGELOG.md"
 search = "\\.\\.\\.HEAD"
