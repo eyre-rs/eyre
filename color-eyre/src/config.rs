@@ -385,6 +385,7 @@ impl Frame {
 /// Builder for customizing the behavior of the global panic and error report hooks
 pub struct HookBuilder {
     filters: Vec<Box<FilterCallback>>,
+    pre_hook_callbacks: Vec<Box<PreHookCallback>>,
     capture_span_trace_by_default: bool,
     display_env_section: bool,
     #[cfg(feature = "track-caller")]
@@ -428,6 +429,7 @@ impl HookBuilder {
     pub fn blank() -> Self {
         HookBuilder {
             filters: vec![],
+            pre_hook_callbacks: vec![],
             capture_span_trace_by_default: false,
             display_env_section: true,
             #[cfg(feature = "track-caller")]
@@ -665,6 +667,28 @@ impl HookBuilder {
         self
     }
 
+    /// Add a custom pre-hook callback to the set of pre-hook callbacks
+    ///
+    /// This callback will be called before the panic / error hook is called. It can be used to
+    /// print additional information or perform other actions before the panic / error hook is
+    /// called (such as clearing the terminal, printing a message, etc.)
+    ///
+    /// **Note**: This callback will be called in the context of the panic hook, so it should be
+    /// fast and not panic.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// color_eyre::config::HookBuilder::default()
+    ///     .add_pre_hook_callback(Box::new(|| eprintln!("pre-hook callback")))
+    ///     .install()
+    ///     .unwrap();
+    /// ```
+    pub fn add_pre_hook_callback(mut self, callback: Box<PreHookCallback>) -> Self {
+        self.pre_hook_callbacks.push(callback);
+        self
+    }
+
     /// Install the given Hook as the global error report hook
     pub fn install(self) -> Result<(), crate::eyre::Report> {
         let (panic_hook, eyre_hook) = self.try_into_hooks()?;
@@ -693,6 +717,7 @@ impl HookBuilder {
         let metadata = Arc::new(self.issue_metadata);
         let panic_hook = PanicHook {
             filters: self.filters.into(),
+            pre_hook_callbacks: self.pre_hook_callbacks.into(),
             section: self.panic_section,
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
@@ -711,6 +736,7 @@ impl HookBuilder {
 
         let eyre_hook = EyreHook {
             filters: panic_hook.filters.clone(),
+            // TODO pre_hook_callbacks: panic_hook.pre_hook_callbacks.clone(),
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
             display_env_section: self.display_env_section,
@@ -908,6 +934,7 @@ impl fmt::Display for PanicReport<'_> {
 /// A panic reporting hook
 pub struct PanicHook {
     filters: Arc<[Box<FilterCallback>]>,
+    pre_hook_callbacks: Arc<[Box<PreHookCallback>]>,
     section: Option<Box<dyn Display + Send + Sync + 'static>>,
     panic_message: Box<dyn PanicMessage>,
     theme: Theme,
@@ -951,6 +978,9 @@ impl PanicHook {
         self,
     ) -> Box<dyn Fn(&std::panic::PanicInfo<'_>) + Send + Sync + 'static> {
         Box::new(move |panic_info| {
+            for callback in self.pre_hook_callbacks.iter() {
+                callback();
+            }
             eprintln!("{}", self.panic_report(panic_info));
         })
     }
@@ -990,6 +1020,7 @@ impl PanicHook {
 /// An eyre reporting hook used to construct `EyreHandler`s
 pub struct EyreHook {
     filters: Arc<[Box<FilterCallback>]>,
+    // TODO pre_hook_callbacks: Arc<[Box<PreHookCallback>]>,
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
     display_env_section: bool,
@@ -1181,6 +1212,9 @@ pub(crate) fn lib_verbosity() -> Verbosity {
 
 /// Callback for filtering a vector of `Frame`s
 pub type FilterCallback = dyn Fn(&mut Vec<&Frame>) + Send + Sync + 'static;
+
+/// Callback to run before running the panic / error hook
+pub type PreHookCallback = dyn Fn() + Send + Sync + 'static;
 
 /// Callback for filtering issue url generation in error reports
 #[cfg(feature = "issue-url")]
