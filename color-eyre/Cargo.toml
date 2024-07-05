@@ -20,7 +20,7 @@ track-caller = []
 [dependencies]
 eyre = "0.6.1"
 tracing-error = { version = "0.2.0", optional = true }
-backtrace = { version = "0.3.48", features = ["gimli-symbolize"] }
+backtrace = { version = "0.3.73" }
 indenter = { workspace = true }
 owo-colors = { workspace = true }
 color-spantrace = { version = "0.2", path = "../color-spantrace", optional = true }
