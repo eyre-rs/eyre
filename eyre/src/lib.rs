@@ -355,7 +355,7 @@
     unused_parens,
     while_true
 )]
-#![cfg_attr(backtrace, feature(backtrace))]
+#![cfg_attr(generic_member_access, feature(error_generic_member_access))]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(
     clippy::needless_doctest_main,
@@ -636,7 +636,7 @@ impl dyn EyreHandler {
         t == concrete
     }
 
-    /// Downcast the handler to a concrete type `T`
+    /// Downcast the handler to a concrete type
     pub fn downcast_ref<T: EyreHandler>(&self) -> Option<&T> {
         if self.is::<T>() {
             unsafe { Some(&*(self as *const dyn EyreHandler as *const T)) }
@@ -645,7 +645,7 @@ impl dyn EyreHandler {
         }
     }
 
-    /// Downcast the handler to a concrete type `T`
+    /// Downcast the handler to a concrete type
     pub fn downcast_mut<T: EyreHandler>(&mut self) -> Option<&mut T> {
         if self.is::<T>() {
             unsafe { Some(&mut *(self as *mut dyn EyreHandler as *mut T)) }
@@ -778,6 +778,7 @@ impl DefaultHandler {
     #[allow(unused_variables)]
     #[cfg_attr(not(feature = "auto-install"), allow(dead_code))]
     pub fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
+        // Capture the backtrace if the source error did not already capture one
         let backtrace = backtrace_if_absent!(error);
 
         Box::new(Self {
@@ -837,15 +838,19 @@ impl EyreHandler for DefaultHandler {
             }
         }
 
-        #[cfg(backtrace)]
+        #[cfg(generic_member_access)]
         {
             use std::backtrace::BacktraceStatus;
 
+            // The backtrace can be stored either in the handler instance, or the error itself.
+            //
+            // If the source error has a backtrace, the handler should not capture one
             let backtrace = self
                 .backtrace
                 .as_ref()
-                .or_else(|| error.backtrace())
+                .or_else(|| std::error::request_ref::<Backtrace>(error))
                 .expect("backtrace capture failed");
+
             if let BacktraceStatus::Captured = backtrace.status() {
                 write!(f, "\n\nStack backtrace:\n{}", backtrace)?;
             }

@@ -2,9 +2,6 @@ use crate::error::{ContextError, ErrorImpl};
 use crate::{Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
 
-#[cfg(backtrace)]
-use std::backtrace::Backtrace;
-
 mod ext {
     use super::*;
 
@@ -139,9 +136,9 @@ where
     D: Display,
     E: StdError + 'static,
 {
-    #[cfg(backtrace)]
-    fn backtrace(&self) -> Option<&Backtrace> {
-        self.error.backtrace()
+    #[cfg(generic_member_access)]
+    fn provide<'a>(&'a self, request: &mut std::error::Request<'a>) {
+        self.error.provide(request);
     }
 
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
