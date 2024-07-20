@@ -105,7 +105,7 @@ fn test_context() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
-    use eyre::WrapErr;
+    use eyre::ContextCompat;
     let err = read_path("totally_fake_path")
         .context("oopsie")
         .unwrap_err();
@@ -122,40 +122,10 @@ fn test_with_context() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
-    use eyre::WrapErr;
+    use eyre::ContextCompat;
     let err = read_path("totally_fake_path")
         .with_context(|| "oopsie")
         .unwrap_err();
-
-    // should panic if the location isn't in our crate
-    println!("{:?}", err);
-}
-
-#[cfg(feature = "anyhow")]
-#[test]
-fn test_option_compat_wrap_err() {
-    let _ = eyre::set_hook(Box::new(|_e| {
-        let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
-    }));
-
-    use eyre::ContextCompat;
-    let err = None::<()>.wrap_err("oopsie").unwrap_err();
-
-    // should panic if the location isn't in our crate
-    println!("{:?}", err);
-}
-
-#[cfg(feature = "anyhow")]
-#[test]
-fn test_option_compat_wrap_err_with() {
-    let _ = eyre::set_hook(Box::new(|_e| {
-        let expected_location = file!();
-        Box::new(LocationHandler::new(expected_location))
-    }));
-
-    use eyre::ContextCompat;
-    let err = None::<()>.wrap_err_with(|| "oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
     println!("{:?}", err);
