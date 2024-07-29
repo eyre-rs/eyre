@@ -184,6 +184,7 @@ name = "eyre"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "autocfg",
  "backtrace",
  "futures",
  "indenter",
