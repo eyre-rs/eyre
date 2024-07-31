@@ -13,8 +13,7 @@ readme = { workspace = true }
 rust-version = { workspace = true }
 
 [features]
-default = ["anyhow", "auto-install", "track-caller"]
-anyhow = []
+default = [ "auto-install", "track-caller"]
 auto-install = []
 track-caller = []
 
@@ -22,6 +21,7 @@ track-caller = []
 indenter = { workspace = true }
 once_cell = { workspace = true }
 pyo3 = { version = "0.20", optional = true, default-features = false }
+anyhow = { workspace = true, optional = true, default-features = false }
 
 [build-dependencies]
 autocfg = { workspace = true }
@@ -32,7 +32,6 @@ rustversion = "1.0"
 thiserror = "1.0"
 trybuild = { version = "=1.0.89", features = ["diff"] } # pinned due to MSRV
 backtrace = "0.3.46"
-anyhow = "1.0.28"
 syn = { version = "2.0", features = ["full"] }
 pyo3 = { version = "0.20", default-features = false, features = ["auto-initialize"] }
 
