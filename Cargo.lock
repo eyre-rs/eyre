@@ -184,11 +184,13 @@ name = "eyre"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "autocfg",
  "backtrace",
  "futures",
  "indenter",
  "once_cell",
  "pyo3",
+ "rubicon",
  "rustversion",
  "syn",
  "thiserror",
@@ -627,6 +629,12 @@ name = "regex-syntax"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
+
+[[package]]
+name = "rubicon"
+version = "3.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "722744da674f951827c749dd047c73e159aa8f5b27959c992a841ec280f20d2c"
 
 [[package]]
 name = "rustc-demangle"

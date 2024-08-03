@@ -485,7 +485,9 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
-static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+rubicon::process_local! {
+    static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+}
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]
@@ -1316,3 +1318,8 @@ pub mod private {
         }
     }
 }
+
+rubicon::compatibility_check!(
+    ("version", env!("CARGO_PKG_VERSION")),
+    // no features would change the layout of structs
+);

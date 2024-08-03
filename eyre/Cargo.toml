@@ -22,6 +22,7 @@ track-caller = []
 indenter = { workspace = true }
 once_cell = { workspace = true }
 pyo3 = { version = "0.20", optional = true, default-features = false }
+rubicon = "3.4.0"
 
 [build-dependencies]
 autocfg = { workspace = true }
