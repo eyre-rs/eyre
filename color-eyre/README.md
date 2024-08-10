@@ -57,8 +57,7 @@ color-eyre = { version = "0.6", default-features = false }
 color-eyre defaults to capturing span traces. This is because `SpanTrace`
 capture is significantly cheaper than `Backtrace` capture. However, like
 backtraces, span traces are most useful for debugging applications, and it's
-not uncommon to want to disable span trace capture by default to keep noise out
-developer.
+not uncommon to want to disable span trace capture by default to keep noise out.
 
 To disable span trace capture you must explicitly set one of the env variables
 that regulate `SpanTrace` capture to `"0"`:
