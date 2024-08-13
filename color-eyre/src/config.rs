@@ -1186,7 +1186,7 @@ pub enum Verbosity {
 
 pub(crate) fn panic_verbosity(verbosity: Option<Verbosity>) -> Verbosity {
     if let Some(v) = verbosity {
-        return v
+        return v;
     }
 
     match env::var("RUST_BACKTRACE") {
@@ -1198,7 +1198,7 @@ pub(crate) fn panic_verbosity(verbosity: Option<Verbosity>) -> Verbosity {
 
 pub(crate) fn lib_verbosity(verbosity: Option<Verbosity>) -> Verbosity {
     if let Some(v) = verbosity {
-        return v
+        return v;
     }
 
     match env::var("RUST_LIB_BACKTRACE").or_else(|_| env::var("RUST_BACKTRACE")) {
