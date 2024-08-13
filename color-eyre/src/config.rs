@@ -618,6 +618,12 @@ impl HookBuilder {
         self
     }
 
+    /// Configures the verbosity to use. Overrides environment variables.
+    pub fn verbosity(mut self, verbosity: Verbosity) -> Self {
+        self.verbosity = Some(verbosity);
+        self
+    }
+
     /// Configures the enviroment varible info section and whether or not it is displayed
     pub fn display_env_section(mut self, cond: bool) -> Self {
         self.display_env_section = cond;
@@ -1164,10 +1170,17 @@ impl fmt::Display for BacktraceFormatter<'_> {
     }
 }
 
+/// Verbosity of error and panic messages.
+///
+/// For previews or more information see the [crate documentation](crate#multiple-report-format-verbosity-levels)
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub(crate) enum Verbosity {
+pub enum Verbosity {
+    /// Minimal verbosity that does not include a `Backtrace`.
     Minimal,
+    /// The "short format" which additionally captures a `Backtrace`.
     Medium,
+    /// The full verbose format which will include context of the source files where the error
+    /// originated from, assuming it can find them on the disk.
     Full,
 }
 
