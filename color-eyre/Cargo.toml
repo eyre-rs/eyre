@@ -18,7 +18,7 @@ issue-url = ["url"]
 track-caller = []
 
 [dependencies]
-eyre = "0.6.1"
+eyre = { version = "1.0.0", path = "../eyre" }
 tracing-error = { version = "0.2.0", optional = true }
 backtrace = { version = "0.3.59" }
 indenter = { workspace = true }
