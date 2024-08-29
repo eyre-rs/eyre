@@ -381,7 +381,7 @@ use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
-use std::error::Error as StdError;
+use std::{any::Any, error::Error as StdError};
 
 pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
@@ -779,6 +779,7 @@ impl DefaultHandler {
     #[cfg_attr(not(feature = "auto-install"), allow(dead_code))]
     pub fn default_with(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
         // Capture the backtrace if the source error did not already capture one
+        eprintln!("checking backtrace");
         let backtrace = backtrace_if_absent!(error);
 
         Box::new(Self {
@@ -848,7 +849,10 @@ impl EyreHandler for DefaultHandler {
             let backtrace = self
                 .backtrace
                 .as_ref()
-                .or_else(|| std::error::request_ref::<Backtrace>(error))
+                .or_else(|| {
+                    eprintln!("Requesting backtrace from underlying type");
+                    std::error::request_ref::<std::backtrace::Backtrace>(error)
+                })
                 .expect("backtrace capture failed");
 
             if let BacktraceStatus::Captured = backtrace.status() {

@@ -17,13 +17,16 @@ macro_rules! capture_backtrace {
         None
     };
 }
+
 /// Capture a backtrace iff there is not already a backtrace in the error chain
 #[cfg(generic_member_access)]
 macro_rules! backtrace_if_absent {
     ($err:expr) => {
         match std::error::request_ref::<std::backtrace::Backtrace>($err as &dyn std::error::Error) {
-            Some(_) => None,
-            None => capture_backtrace!(),
+            Some(v) => None,
+            None => {
+                capture_backtrace!()
+            }
         }
     };
 }
