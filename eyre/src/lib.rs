@@ -39,16 +39,16 @@
 //! to avoid using `eyre::Report` as your public error type.
 //!
 //! - You export an undocumented error interface that is otherwise still
-//! accessible via downcast, making it hard for users to react to specific
-//! errors while not preventing them from depending on details you didn't mean
-//! to make part of your public API.
+//!   accessible via downcast, making it hard for users to react to specific
+//!   errors while not preventing them from depending on details you didn't mean
+//!   to make part of your public API.
 //!   - This in turn makes the error types of all libraries you use a part of
-//!   your public API as well, and makes changing any of those libraries into
-//!   undetectable runtime breakage.
+//!     your public API as well, and makes changing any of those libraries into
+//!     undetectable runtime breakage.
 //! - If many of your errors are constructed from strings, you encourage your
-//! users to use string comparison for reacting to specific errors, which is
-//! brittle and turns updating error messages into potentially undetectable
-//! runtime breakage.
+//!   users to use string comparison for reacting to specific errors, which is
+//!   brittle and turns updating error messages into potentially undetectable
+//!   runtime breakage.
 //!
 //! ## Details
 //!
