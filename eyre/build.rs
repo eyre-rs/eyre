@@ -5,6 +5,13 @@ use std::{
 };
 
 fn main() {
+    println!("cargo:rustc-check-cfg=cfg(nightly)");
+    println!("cargo:rustc-check-cfg=cfg(track_caller)");
+    println!("cargo:rustc-check-cfg=cfg(generic_member_access)");
+    println!("cargo:rustc-check-cfg=cfg(eyre_no_fmt_args_capture)");
+    println!("cargo:rustc-check-cfg=cfg(backtrace)");
+    println!("cargo:rustc-check-cfg=cfg(eyre_no_fmt_arguments_as_str)");
+    println!("cargo:rustc-check-cfg=cfg(doc_cfg)");
     let ac = autocfg::new();
 
     // https://github.com/rust-lang/rust/issues/99301 [nightly]
