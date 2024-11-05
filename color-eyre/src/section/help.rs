@@ -255,6 +255,7 @@ pub(crate) enum HelpInfo {
     Note(Box<dyn Display + Send + Sync + 'static>, Theme),
     Warning(Box<dyn Display + Send + Sync + 'static>, Theme),
     Suggestion(Box<dyn Display + Send + Sync + 'static>, Theme),
+    Report(Box<Report>, Theme),
 }
 
 impl Display for HelpInfo {
@@ -290,6 +291,16 @@ impl Display for HelpInfo {
                 }
 
                 Ok(())
+            },
+            HelpInfo::Report(report, theme) => {
+                let chain_errors = report.chain();
+                write!(f, "Report:")?;
+                for (n, error) in chain_errors.enumerate() {
+                    writeln!(f)?;
+                    write!(indented(f).ind(n), "{}", error.style(theme.help_info_report))?;
+                }
+
+                Ok(())
             }
         }
     }
@@ -315,6 +326,7 @@ impl fmt::Debug for HelpInfo {
                 .field(&format_args!("{}", custom))
                 .finish(),
             HelpInfo::Error(error, ..) => f.debug_tuple("Error").field(error).finish(),
+            HelpInfo::Report(report, ..) => f.debug_tuple("Report").field(report).finish(),
         }
     }
 }
