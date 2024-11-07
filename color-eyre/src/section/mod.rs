@@ -1,4 +1,5 @@
 //! Helpers for adding custom sections to error reports
+use crate::eyre::Report;
 use crate::writers::WriterExt;
 use std::fmt::{self, Display};
 
@@ -318,6 +319,67 @@ pub trait Section: crate::private::Sealed {
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
+
+    /// Add an report section to an error report, to be displayed after the primary error message
+    ///
+    /// # Examples
+    ///
+    /// ```rust,should_panic
+    /// use color_eyre::Section;
+    /// use eyre::{eyre, Result};
+    /// 
+    /// fn main() -> Result<()> {
+    ///     color_eyre::install()?;
+    /// 
+    ///     if let Err(err) = do_stuff() {
+    ///         let final_report = eyre!("Program failure with a unexpected error")
+    ///             .with_report(|| err);
+    ///         return Err(final_report);
+    ///     }
+    /// 
+    ///     Ok(())
+    /// }
+    /// 
+    /// fn do_stuff() -> Result<()> {
+    ///     let err = eyre!("Some thing gets wrong");
+    /// 
+    ///     Err(err)
+    /// }
+    /// 
+    /// ```
+    fn report(self, report: Report) -> Self::Return;
+
+    /// Add an report section to an error report, to be displayed after the primary error message
+    /// create the Report is lazily evaluated only in the case of an error.
+    ///
+    /// # Examples
+    ///
+    /// ```rust,should_panic
+    /// use color_eyre::Section;
+    /// use eyre::{eyre, Result};
+    /// 
+    /// fn main() -> Result<()> {
+    ///     color_eyre::install()?;
+    /// 
+    ///     if let Err(err) = do_stuff() {
+    ///         let final_report = eyre!("Program failure with a unexpected error")
+    ///             .with_report(|| err);
+    ///         return Err(final_report);
+    ///     }
+    /// 
+    ///     Ok(())
+    /// }
+    /// 
+    /// fn do_stuff() -> Result<()> {
+    ///     let err = eyre!("Some thing gets wrong");
+    /// 
+    ///     Err(err)
+    /// }
+    /// 
+    /// ```
+    fn with_report<F>(self, report: F) -> Self::Return
+    where
+        F: FnOnce() -> Report;
 
     /// Whether to suppress printing of collected backtrace (if any).
     ///
