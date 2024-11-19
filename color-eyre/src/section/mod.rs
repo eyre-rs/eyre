@@ -333,7 +333,7 @@ pub trait Section: crate::private::Sealed {
     /// 
     ///     if let Err(err) = do_stuff() {
     ///         let final_report = eyre!("Program failure with a unexpected error")
-    ///             .with_report(|| err);
+    ///             .report(err);
     ///         return Err(final_report);
     ///     }
     /// 
