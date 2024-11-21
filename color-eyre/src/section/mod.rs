@@ -327,25 +327,31 @@ pub trait Section: crate::private::Sealed {
     /// ```rust,should_panic
     /// use color_eyre::Section;
     /// use eyre::{eyre, Result};
-    /// 
+    ///
+    ///
     /// fn main() -> Result<()> {
     ///     color_eyre::install()?;
-    /// 
+    ///
+    ///
     ///     if let Err(err) = do_stuff() {
     ///         let final_report = eyre!("Program failure with a unexpected error")
     ///             .report(err);
     ///         return Err(final_report);
     ///     }
-    /// 
+    ///
+    ///
     ///     Ok(())
     /// }
-    /// 
+    ///
+    ///
     /// fn do_stuff() -> Result<()> {
     ///     let err = eyre!("Some thing gets wrong");
-    /// 
+    ///
+    ///
     ///     Err(err)
     /// }
-    /// 
+    ///
+    ///
     /// ```
     fn report(self, report: Report) -> Self::Return;
 
@@ -357,25 +363,31 @@ pub trait Section: crate::private::Sealed {
     /// ```rust,should_panic
     /// use color_eyre::Section;
     /// use eyre::{eyre, Result};
-    /// 
+    ///
+    ///
     /// fn main() -> Result<()> {
     ///     color_eyre::install()?;
-    /// 
+    ///
+    ///
     ///     if let Err(err) = do_stuff() {
     ///         let final_report = eyre!("Program failure with a unexpected error")
     ///             .with_report(|| err);
     ///         return Err(final_report);
     ///     }
-    /// 
+    ///
+    ///
     ///     Ok(())
     /// }
-    /// 
+    ///
+    ///
     /// fn do_stuff() -> Result<()> {
     ///     let err = eyre!("Some thing gets wrong");
-    /// 
+    ///
+    ///
     ///     Err(err)
     /// }
-    /// 
+    ///
+    ///
     /// ```
     fn with_report<F>(self, report: F) -> Self::Return
     where
