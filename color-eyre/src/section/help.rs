@@ -158,7 +158,7 @@ impl Section for Report {
         F: FnOnce() -> Report,
     {
         if let Some(handler) = self.handler_mut().downcast_mut::<crate::Handler>() {
-            let report = report().into();
+            let report = report();
             handler
                 .sections
                 .push(HelpInfo::Report(Box::new(report), handler.theme));
