@@ -1,5 +1,7 @@
 #![cfg(feature = "pyo3")]
 
+use std::ffi::CString;
+
 use pyo3::prelude::*;
 
 use eyre::{bail, Result, WrapErr};
@@ -26,8 +28,9 @@ fn test_pyo3_exception_contents() {
     let pyerr = PyErr::from(err);
 
     Python::with_gil(|py| {
-        let locals = [("err", pyerr)].into_py_dict(py);
-        let pyerr = py.run("raise err", None, Some(locals)).unwrap_err();
+        let locals = [("err", pyerr)].into_py_dict(py).unwrap();
+        let raise_err = CString::new("raise err").unwrap();
+        let pyerr = py.run(&raise_err, None, Some(&locals)).unwrap_err();
         assert_eq!(pyerr.value(py).to_string(), expected_contents);
     })
 }
