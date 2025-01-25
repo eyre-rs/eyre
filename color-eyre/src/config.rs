@@ -160,7 +160,7 @@ pub struct Frame {
 #[derive(Debug)]
 struct StyledFrame<'a>(&'a Frame, Theme);
 
-impl<'a> fmt::Display for StyledFrame<'a> {
+impl fmt::Display for StyledFrame<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self(frame, theme) = self;
 
