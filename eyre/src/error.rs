@@ -329,12 +329,7 @@ impl Report {
     /// The root cause is the last error in the iterator produced by
     /// [`chain()`][Report::chain].
     pub fn root_cause(&self) -> &(dyn StdError + 'static) {
-        let mut chain = self.chain();
-        let mut root_cause = chain.next().unwrap();
-        for cause in chain {
-            root_cause = cause;
-        }
-        root_cause
+        self.chain().last().unwrap()
     }
 
     /// Returns true if `E` is the type held by this error object.
