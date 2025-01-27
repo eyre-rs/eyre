@@ -8,6 +8,7 @@ use core::mem::{self, ManuallyDrop};
 use core::ptr::{self, NonNull};
 
 use core::ops::{Deref, DerefMut};
+use std::any::Any;
 
 impl Report {
     /// Create a new error object from any error type.
@@ -488,6 +489,7 @@ impl Report {
     }
 }
 
+#[cfg(not(feature = "anyhow"))]
 impl<E> From<E> for Report
 where
     E: StdError + Send + Sync + 'static,
@@ -495,6 +497,27 @@ where
     #[cfg_attr(track_caller, track_caller)]
     fn from(error: E) -> Self {
         Report::from_std(error)
+    }
+}
+
+#[cfg(feature = "anyhow")]
+impl<E> From<E> for Report
+where
+    E: 'static + Into<anyhow::Error>,
+    Result<(), E>: anyhow::Context<(), E>,
+{
+    #[cfg_attr(track_caller, track_caller)]
+    fn from(value: E) -> Self {
+        let mut value = Some(value);
+        let e = &mut value as &mut dyn Any;
+
+        if let Some(e) = e.downcast_mut::<Option<anyhow::Error>>() {
+            let e: Box<dyn StdError + Send + Sync> = e.take().unwrap().into();
+            Report::from_boxed(e)
+        } else {
+            let e: Box<dyn StdError + Send + Sync> = value.take().unwrap().into().into();
+            Report::from_boxed(e)
+        }
     }
 }
 
