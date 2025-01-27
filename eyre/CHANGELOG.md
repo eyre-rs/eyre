@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - feature flag for `anyhow` compatibility traits [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/138)
 
+## [0.6.12] - 2024-01-31
+### Fixed
+- Unsound cast to invalid type during Report downcast [by ten3roberts](https://github.com/eyre-rs/eyre/pull/143)
+
 ## [0.6.11] - 2023-12-13
 ### Fixed
 - stale references to `Error` in docstrings [by birkenfeld](https://github.com/eyre-rs/eyre/pull/87)
