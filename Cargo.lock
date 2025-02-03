@@ -116,14 +116,13 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "color-eyre"
-version = "0.6.2"
+version = "0.6.3"
 dependencies = [
  "ansi-parser",
  "backtrace",
  "color-spantrace",
  "eyre",
  "indenter",
- "once_cell",
  "owo-colors",
  "pretty_assertions",
  "thiserror",
@@ -136,10 +135,9 @@ dependencies = [
 
 [[package]]
 name = "color-spantrace"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "ansi-parser",
- "once_cell",
  "owo-colors",
  "tracing",
  "tracing-core",
@@ -178,7 +176,6 @@ dependencies = [
  "backtrace",
  "futures",
  "indenter",
- "once_cell",
  "pyo3",
  "rustversion",
  "syn",

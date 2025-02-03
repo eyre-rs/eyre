@@ -20,7 +20,6 @@ track-caller = []
 
 [dependencies]
 indenter = { workspace = true }
-once_cell = { workspace = true }
 pyo3 = { version = "0.20", optional = true, default-features = false }
 
 [build-dependencies]

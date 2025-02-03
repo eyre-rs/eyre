@@ -85,15 +85,15 @@
     unused_parens,
     while_true
 )]
-use once_cell::sync::OnceCell;
 use owo_colors::{style, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::sync::OnceLock;
 use tracing_error::SpanTrace;
 
-static THEME: OnceCell<Theme> = OnceCell::new();
+static THEME: OnceLock<Theme> = OnceLock::new();
 
 /// A struct that represents theme that is used by `color_spantrace`
 #[derive(Debug, Copy, Clone, Default)]
