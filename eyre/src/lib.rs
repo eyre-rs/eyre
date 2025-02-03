@@ -387,8 +387,8 @@ pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
-use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
+use std::sync::OnceLock;
 #[cfg(feature = "anyhow")]
 #[doc(hidden)]
 pub use DefaultHandler as DefaultContext;
@@ -485,7 +485,7 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
-static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+static HOOK: OnceLock<ErrorHook> = OnceLock::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]

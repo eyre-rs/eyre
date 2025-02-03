@@ -15,7 +15,6 @@ rust-version = { workspace = true }
 tracing-error = "0.2.0"
 tracing-core = "0.1.21"
 owo-colors = { workspace = true }
-once_cell = { workspace = true }
 
 [dev-dependencies]
 tracing-subscriber = "0.3.4"

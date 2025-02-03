@@ -24,7 +24,6 @@ backtrace = { version = "0.3.59" }
 indenter = { workspace = true }
 owo-colors = { workspace = true }
 color-spantrace = { version = "0.2", path = "../color-spantrace", optional = true }
-once_cell = { workspace = true }
 url = { version = "2.1.1", optional = true }
 
 [dev-dependencies]
