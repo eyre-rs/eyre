@@ -564,7 +564,7 @@ unsafe fn object_drop_front<E>(e: OwnedPtr<ErrorImpl<()>>, target: TypeId) {
     // Note: This must not use `mem::transmute` because it tries to reborrow the `Unique`
     //   contained in `Box`, which must not be done. In practice this probably won't make any
     //   difference by now, but technically it's unsound.
-    //   see: https://github.com/rust-lang/unsafe-code-guidelines/blob/master/wip/stacked-borrows.m
+    //   see: https://github.com/rust-lang/unsafe-code-guidelines/blob/master/wip/stacked-borrows.md
     let unerased = unsafe { e.cast::<ErrorImpl<E>>().into_box() };
 
     mem::forget(unerased._object)
