@@ -25,6 +25,9 @@ once_cell = { workspace = true }
 pyo3 = { version = "0.20", optional = true, default-features = false }
 serde = { version = "1.0.198", optional = true }
 
+[build-dependencies]
+autocfg = { workspace = true }
+
 [dev-dependencies]
 futures = { version = "0.3", default-features = false }
 rustversion = "1.0"

@@ -170,7 +170,12 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
     fn normalize_backtrace(input: &str) -> String {
         input
             .lines()
-            .take_while(|v| !v.contains("core::panic") && !v.contains("theme_test_helper::main"))
+            .take_while(|v| {
+                !v.contains("core::panic")
+                    && !v.contains("theme_test_helper::main")
+                    && !v.contains("theme::test_error_backwards_compatibility::closure")
+                    && !v.contains("theme::test_error_backwards_compatibility::{{closure}}")
+            })
             .collect::<Vec<_>>()
             .join("\n")
     }
