@@ -67,7 +67,7 @@ impl<'a, H: ?Sized, W> HeaderWriter<'a, H, W> {
     }
 }
 
-impl<'a, H: ?Sized, W> fmt::Write for ReadyHeaderWriter<'a, '_, H, W>
+impl<H: ?Sized, W> fmt::Write for ReadyHeaderWriter<'_, '_, H, W>
 where
     H: Display,
     W: fmt::Write,
