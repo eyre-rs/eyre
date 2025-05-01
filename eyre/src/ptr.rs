@@ -75,8 +75,8 @@ pub(crate) struct RefPtr<'a, T: ?Sized> {
 unsafe impl<'a, T: ?Sized> Send for RefPtr<'a, T> where &'a T: Send {}
 unsafe impl<'a, T: ?Sized> Sync for RefPtr<'a, T> where &'a T: Sync {}
 
-impl<'a, T: ?Sized> Copy for RefPtr<'a, T> {}
-impl<'a, T: ?Sized> Clone for RefPtr<'a, T> {
+impl<T: ?Sized> Copy for RefPtr<'_, T> {}
+impl<T: ?Sized> Clone for RefPtr<'_, T> {
     fn clone(&self) -> Self {
         *self
     }
@@ -121,8 +121,8 @@ pub(crate) struct MutPtr<'a, T: ?Sized> {
 unsafe impl<'a, T: ?Sized> Send for MutPtr<'a, T> where &'a mut T: Send {}
 unsafe impl<'a, T: ?Sized> Sync for MutPtr<'a, T> where &'a mut T: Sync {}
 
-impl<'a, T: ?Sized> Copy for MutPtr<'a, T> {}
-impl<'a, T: ?Sized> Clone for MutPtr<'a, T> {
+impl<T: ?Sized> Copy for MutPtr<'_, T> {}
+impl<T: ?Sized> Clone for MutPtr<'_, T> {
     fn clone(&self) -> Self {
         *self
     }
