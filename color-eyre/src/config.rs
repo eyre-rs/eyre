@@ -790,7 +790,11 @@ fn eyre_frame_filters(frames: &mut Vec<&Frame>) {
 struct DefaultPanicMessage(Theme);
 
 impl PanicMessage for DefaultPanicMessage {
-    fn display(&self, pi: &std::panic::PanicInfo<'_>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn display(
+        &self,
+        pi: &std::panic::PanicHookInfo<'_>,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
         // XXX is my assumption correct that this function is guaranteed to only run after `color_eyre` was setup successfully (including setting `THEME`), and that therefore the following line will never panic? Otherwise, we could return `fmt::Error`, but if the above is true, I like `unwrap` + a comment why this never fails better
         let theme = &self.0;
 
@@ -822,7 +826,7 @@ impl PanicMessage for DefaultPanicMessage {
 /// A type representing an error report for a panic.
 pub struct PanicReport<'a> {
     hook: &'a PanicHook,
-    panic_info: &'a std::panic::PanicInfo<'a>,
+    panic_info: &'a std::panic::PanicHookInfo<'a>,
     backtrace: Option<backtrace::Backtrace>,
     #[cfg(feature = "capture-spantrace")]
     span_trace: Option<tracing_error::SpanTrace>,
@@ -949,7 +953,7 @@ impl PanicHook {
     /// Convert self into the type expected by `std::panic::set_hook`.
     pub fn into_panic_hook(
         self,
-    ) -> Box<dyn Fn(&std::panic::PanicInfo<'_>) + Send + Sync + 'static> {
+    ) -> Box<dyn Fn(&std::panic::PanicHookInfo<'_>) + Send + Sync + 'static> {
         Box::new(move |panic_info| {
             eprintln!("{}", self.panic_report(panic_info));
         })
@@ -959,7 +963,7 @@ impl PanicHook {
     /// `Display` trait.
     pub fn panic_report<'a>(
         &'a self,
-        panic_info: &'a std::panic::PanicInfo<'_>,
+        panic_info: &'a std::panic::PanicHookInfo<'_>,
     ) -> PanicReport<'a> {
         let v = panic_verbosity();
         let capture_bt = v != Verbosity::Minimal;
