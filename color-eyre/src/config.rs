@@ -3,11 +3,12 @@
 #![allow(deprecated)] // for PanicHook until we bump MSRV
 use crate::{
     section::PanicMessage,
+    style_if_possible,
     writers::{EnvSection, WriterExt},
 };
 use fmt::Display;
 use indenter::{indented, Format};
-use owo_colors::{style, OwoColorize, Style};
+use owo_colors::{style, Style};
 use std::env;
 use std::fmt::Write as _;
 use std::{fmt, path::PathBuf, sync::Arc};
@@ -193,12 +194,12 @@ impl fmt::Display for StyledFrame<'_> {
         };
 
         if is_dependency_code {
-            write!(f, "{}", (name).style(theme.dependency_code))?;
+            write!(f, "{}", style_if_possible(name, theme.dependency_code))?;
         } else {
-            write!(f, "{}", (name).style(theme.crate_code))?;
+            write!(f, "{}", style_if_possible(name, theme.crate_code))?;
         }
 
-        write!(f, "{}", (hash_suffix).style(theme.code_hash))?;
+        write!(f, "{}", style_if_possible(hash_suffix, theme.code_hash))?;
 
         let mut separated = f.header("\n");
 
@@ -215,8 +216,8 @@ impl fmt::Display for StyledFrame<'_> {
         write!(
             &mut separated.ready(),
             "    at {}:{}",
-            file.style(theme.file),
-            lineno.style(theme.line_number),
+            style_if_possible(file, theme.file),
+            style_if_possible(lineno, theme.line_number),
         )?;
 
         let v = if std::thread::panicking() {
@@ -267,9 +268,9 @@ impl fmt::Display for SourceSection<'_> {
                 write!(
                     &mut f,
                     "{:>8} {} {}",
-                    cur_line_no.style(theme.active_line),
-                    ">".style(theme.active_line),
-                    line.style(theme.active_line),
+                    style_if_possible(cur_line_no, theme.active_line),
+                    style_if_possible(">", theme.active_line),
+                    style_if_possible(line, theme.active_line),
                 )?;
             } else {
                 write!(&mut f, "{cur_line_no:>8} │ {line}")?;
@@ -798,7 +799,7 @@ impl PanicMessage for DefaultPanicMessage {
         writeln!(
             f,
             "{}",
-            "The application panicked (crashed).".style(theme.panic_header)
+            style_if_possible("The application panicked (crashed).", theme.panic_header)
         )?;
 
         // Print panic message.
@@ -810,7 +811,7 @@ impl PanicMessage for DefaultPanicMessage {
             .unwrap_or("<non string panic payload>");
 
         write!(f, "Message:  ")?;
-        writeln!(f, "{}", payload.style(theme.panic_message))?;
+        writeln!(f, "{}", style_if_possible(payload, theme.panic_message))?;
 
         // If known, print panic location.
         write!(f, "Location: ")?;
@@ -1131,7 +1132,7 @@ impl fmt::Display for BacktraceFormatter<'_> {
                 write!(
                     &mut separated.ready(),
                     "{:^80}",
-                    buf.style(self.theme.hidden_frames)
+                    style_if_possible(&buf, self.theme.hidden_frames)
                 )?;
             };
         }
