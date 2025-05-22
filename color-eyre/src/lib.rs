@@ -364,6 +364,7 @@
 
 use std::sync::Arc;
 
+use anstream::AutoStream;
 use backtrace::Backtrace;
 pub use eyre;
 #[doc(hidden)]
@@ -371,6 +372,8 @@ pub use eyre::Report;
 #[doc(hidden)]
 pub use eyre::Result;
 pub use owo_colors;
+use owo_colors::OwoColorize;
+use owo_colors::Style;
 use section::help::HelpInfo;
 #[doc(hidden)]
 pub use section::Section as Help;
@@ -461,4 +464,18 @@ pub enum ErrorKind<'a> {
 /// ```
 pub fn install() -> Result<(), crate::eyre::Report> {
     config::HookBuilder::default().install()
+}
+
+/// Apply owo_colors style if possible. Returns a string with/without ANSI
+/// escape symbols.
+fn style_if_possible<S>(str: S, style: Style) -> String
+where
+    S: ToString + std::fmt::Display,
+{
+    let color_choice = AutoStream::choice(&std::io::stderr());
+
+    match color_choice {
+        anstream::ColorChoice::Never => str.to_string(),
+        _ => str.style(style).to_string(),
+    }
 }

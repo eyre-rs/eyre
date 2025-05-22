@@ -2,10 +2,10 @@
 use crate::{
     config::Theme,
     eyre::{Report, Result},
+    style_if_possible,
     Section,
 };
 use indenter::indented;
-use owo_colors::OwoColorize;
 use std::fmt::Write;
 use std::fmt::{self, Display};
 
@@ -261,18 +261,18 @@ impl Display for HelpInfo {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             HelpInfo::Note(note, theme) => {
-                write!(f, "{}: {}", "Note".style(theme.help_info_note), note)
+                write!(f, "{}: {}", style_if_possible("Note", theme.help_info_note), note)
             }
             HelpInfo::Warning(warning, theme) => write!(
                 f,
                 "{}: {}",
-                "Warning".style(theme.help_info_warning),
+                style_if_possible("Warning", theme.help_info_warning),
                 warning
             ),
             HelpInfo::Suggestion(suggestion, theme) => write!(
                 f,
                 "{}: {}",
-                "Suggestion".style(theme.help_info_suggestion),
+                style_if_possible("Suggestion", theme.help_info_suggestion),
                 suggestion
             ),
             HelpInfo::Custom(section) => write!(f, "{section}"),
@@ -286,7 +286,7 @@ impl Display for HelpInfo {
                 write!(f, "Error:")?;
                 for (n, error) in errors.enumerate() {
                     writeln!(f)?;
-                    write!(indented(f).ind(n), "{}", error.style(theme.help_info_error))?;
+                    write!(indented(f).ind(n), "{}", style_if_possible(error, theme.help_info_error))?;
                 }
 
                 Ok(())

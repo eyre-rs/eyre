@@ -27,6 +27,7 @@ owo-colors = { workspace = true }
 color-spantrace = { version = "0.3", path = "../color-spantrace", optional = true }
 once_cell = { workspace = true }
 url = { version = "2.1.1", optional = true }
+anstream = { workspace = true }
 
 [dev-dependencies]
 tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }

@@ -87,8 +87,9 @@
     while_true
 )]
 
+use anstream::AutoStream;
 use once_cell::sync::OnceCell;
-use owo_colors::{style, Style};
+use owo_colors::{style, OwoColorize, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
@@ -277,15 +278,19 @@ impl Frame<'_> {
             f,
             "{:>2}: {}{}{}",
             i,
-            self.theme.target.style(self.metadata.target()),
-            self.theme.target.style("::"),
-            self.theme.target.style(self.metadata.name()),
+            style_if_possible(self.metadata.target(), self.theme.target),
+            style_if_possible("::", self.theme.target),
+            style_if_possible(self.metadata.name(), self.theme.target),
         )
     }
 
     fn print_fields(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if !self.fields.is_empty() {
-            write!(f, " with {}", self.theme.fields.style(self.fields))?;
+            write!(
+                f,
+                " with {}",
+                style_if_possible(self.fields, self.theme.fields)
+            )?;
         }
 
         Ok(())
@@ -300,8 +305,8 @@ impl Frame<'_> {
             write!(
                 f,
                 "\n    at {}:{}",
-                self.theme.file.style(file),
-                self.theme.line_number.style(lineno),
+                style_if_possible(file, self.theme.file),
+                style_if_possible(lineno, self.theme.line_number),
             )?;
         } else {
             write!(f, "\n    at <unknown source file>")?;
@@ -338,7 +343,7 @@ impl Frame<'_> {
                     cur_line_no.to_string(),
                     line.unwrap()
                 )?;
-                write!(f, "\n{}", self.theme.active_line.style(&buf))?;
+                write!(f, "\n{}", style_if_possible(&buf, self.theme.active_line))?;
                 buf.clear();
             } else {
                 write!(f, "\n{:>8} │ {}", cur_line_no, line.unwrap())?;
@@ -377,5 +382,19 @@ impl fmt::Display for ColorSpanTrace<'_> {
         });
 
         err
+    }
+}
+
+/// Apply owo_colors style if possible. Returns a string with/without ANSI
+/// escape symbols.
+fn style_if_possible<S>(str: S, style: Style) -> String
+where
+    S: ToString + std::fmt::Display,
+{
+    let color_choice = AutoStream::choice(&std::io::stderr());
+
+    match color_choice {
+        anstream::ColorChoice::Never => str.to_string(),
+        _ => str.style(style).to_string(),
     }
 }
