@@ -1,6 +1,6 @@
 [package]
 name = "eyre"
-version = "1.0.0"
+version = "0.6.11"
 authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 description = "Flexible concrete Error Reporting type built on std::error::Error with customizable Reports"
 documentation = "https://docs.rs/eyre"
