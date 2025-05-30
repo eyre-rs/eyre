@@ -8,7 +8,7 @@ use crate::{
 };
 use fmt::Display;
 use indenter::{indented, Format};
-use owo_colors::{style, Style};
+use owo_colors::Style;
 use std::env;
 use std::fmt::Write as _;
 use std::{fmt, path::PathBuf, sync::Arc};
@@ -57,24 +57,24 @@ impl Theme {
     /// Returns a theme for dark backgrounds. This is the default
     pub fn dark() -> Self {
         Self {
-            file: style().purple(),
-            line_number: style().purple(),
-            active_line: style().white().bold(),
-            error: style().bright_red(),
-            help_info_note: style().bright_cyan(),
-            help_info_warning: style().bright_yellow(),
-            help_info_suggestion: style().bright_cyan(),
-            help_info_error: style().bright_red(),
-            dependency_code: style().green(),
-            crate_code: style().bright_red(),
-            code_hash: style().bright_black(),
-            panic_header: style().red(),
-            panic_message: style().cyan(),
-            panic_file: style().purple(),
-            panic_line_number: style().purple(),
-            hidden_frames: style().bright_cyan(),
-            spantrace_target: style().bright_red(),
-            spantrace_fields: style().bright_cyan(),
+            file: Style::new().purple(),
+            line_number: Style::new().purple(),
+            active_line: Style::new().white().bold(),
+            error: Style::new().bright_red(),
+            help_info_note: Style::new().bright_cyan(),
+            help_info_warning: Style::new().bright_yellow(),
+            help_info_suggestion: Style::new().bright_cyan(),
+            help_info_error: Style::new().bright_red(),
+            dependency_code: Style::new().green(),
+            crate_code: Style::new().bright_red(),
+            code_hash: Style::new().bright_black(),
+            panic_header: Style::new().red(),
+            panic_message: Style::new().cyan(),
+            panic_file: Style::new().purple(),
+            panic_line_number: Style::new().purple(),
+            hidden_frames: Style::new().bright_cyan(),
+            spantrace_target: Style::new().bright_red(),
+            spantrace_fields: Style::new().bright_cyan(),
         }
     }
 
@@ -83,24 +83,24 @@ impl Theme {
     /// Returns a theme for light backgrounds
     pub fn light() -> Self {
         Self {
-            file: style().purple(),
-            line_number: style().purple(),
-            spantrace_target: style().red(),
-            spantrace_fields: style().blue(),
-            active_line: style().bold(),
-            error: style().red(),
-            help_info_note: style().blue(),
-            help_info_warning: style().bright_red(),
-            help_info_suggestion: style().blue(),
-            help_info_error: style().red(),
-            dependency_code: style().green(),
-            crate_code: style().red(),
-            code_hash: style().bright_black(),
-            panic_header: style().red(),
-            panic_message: style().blue(),
-            panic_file: style().purple(),
-            panic_line_number: style().purple(),
-            hidden_frames: style().blue(),
+            file: Style::new().purple(),
+            line_number: Style::new().purple(),
+            spantrace_target: Style::new().red(),
+            spantrace_fields: Style::new().blue(),
+            active_line: Style::new().bold(),
+            error: Style::new().red(),
+            help_info_note: Style::new().blue(),
+            help_info_warning: Style::new().bright_red(),
+            help_info_suggestion: Style::new().blue(),
+            help_info_error: Style::new().red(),
+            dependency_code: Style::new().green(),
+            crate_code: Style::new().red(),
+            code_hash: Style::new().bright_black(),
+            panic_header: Style::new().red(),
+            panic_message: Style::new().blue(),
+            panic_file: Style::new().purple(),
+            panic_line_number: Style::new().purple(),
+            hidden_frames: Style::new().blue(),
         }
     }
 
