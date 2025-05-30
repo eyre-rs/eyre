@@ -464,7 +464,7 @@ pub fn install() -> Result<(), crate::eyre::Report> {
 
 /// Apply owo_colors style if possible. Returns a string with/without ANSI
 /// escape symbols.
-fn style_if_possible<S>(str: S, style: Style) -> String
+fn style<S>(str: S, style: Style) -> String
 where
     S: ToString + std::fmt::Display,
 {
