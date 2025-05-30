@@ -1,12 +1,13 @@
-use color_eyre::{config::Theme, eyre::Report, owo_colors::style, Section};
+use color_eyre::{config::Theme, eyre::Report, Section};
+use owo_colors::Style;
 
 /// To experiment with theme values, edit `theme()` below and execute `cargo run --example theme`
 fn theme() -> Theme {
     Theme::dark()
         // ^ use `new` to derive from a blank theme, or `light` to derive from a light theme.
         // Now configure your theme (see the docs for all options):
-        .line_number(style().blue())
-        .help_info_suggestion(style().red())
+        .line_number(Style::new().blue())
+        .help_info_suggestion(Style::new().red())
 }
 
 #[derive(Debug, thiserror::Error)]

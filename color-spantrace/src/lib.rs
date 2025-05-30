@@ -89,7 +89,7 @@
 
 use anstream::AutoStream;
 use once_cell::sync::OnceCell;
-use owo_colors::{style, OwoColorize, Style};
+use owo_colors::{OwoColorize, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
@@ -117,11 +117,11 @@ impl Theme {
     /// A theme for a dark background. This is the default
     pub fn dark() -> Self {
         Self {
-            file: style().purple(),
-            line_number: style().purple(),
-            active_line: style().white().bold(),
-            target: style().bright_red(),
-            fields: style().bright_cyan(),
+            file: Style::new().purple(),
+            line_number: Style::new().purple(),
+            active_line: Style::new().white().bold(),
+            target: Style::new().bright_red(),
+            fields: Style::new().bright_cyan(),
         }
     }
 
@@ -129,11 +129,11 @@ impl Theme {
     /// A theme for a light background
     pub fn light() -> Self {
         Self {
-            file: style().purple(),
-            line_number: style().purple(),
-            target: style().red(),
-            fields: style().blue(),
-            active_line: style().bold(),
+            file: Style::new().purple(),
+            line_number: Style::new().purple(),
+            target: Style::new().red(),
+            fields: Style::new().blue(),
+            active_line: Style::new().bold(),
         }
     }
 
