@@ -1,5 +1,6 @@
 //! Configuration options for customizing the behavior of the provided panic
 //! and error reporting hooks
+#![allow(deprecated)] // for PanicHook until we bump MSRV
 use crate::{
     section::PanicMessage,
     writers::{EnvSection, WriterExt},
