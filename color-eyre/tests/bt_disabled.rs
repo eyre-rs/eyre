@@ -10,6 +10,6 @@ fn disabled() {
 
     let report = eyre!("error occured");
 
-    let report = format!("{:?}", report);
+    let report = format!("{report:?}");
     assert!(!report.contains("RUST_BACKTRACE"));
 }

@@ -50,7 +50,7 @@ fn test_wrap_err() {
         .unwrap_err();
 
     // should panic if the location isn't in our crate
-    println!("{:?}", err);
+    println!("{err:?}");
 }
 
 #[cfg(not(miri))]
@@ -80,7 +80,7 @@ fn test_wrap_err_with() {
         .unwrap_err();
 
     // should panic if the location isn't in our crate
-    println!("{:?}", err);
+    println!("{err:?}");
 }
 
 #[test]
@@ -94,7 +94,7 @@ fn test_option_ok_or_eyre() {
     let err = None::<()>.ok_or_eyre("oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
-    println!("{:?}", err);
+    println!("{err:?}");
 }
 
 #[cfg(feature = "anyhow")]
@@ -111,7 +111,7 @@ fn test_context() {
         .unwrap_err();
 
     // should panic if the location isn't in our crate
-    println!("{:?}", err);
+    println!("{err:?}");
 }
 
 #[cfg(feature = "anyhow")]
@@ -128,7 +128,7 @@ fn test_with_context() {
         .unwrap_err();
 
     // should panic if the location isn't in our crate
-    println!("{:?}", err);
+    println!("{err:?}");
 }
 
 #[cfg(feature = "anyhow")]
@@ -143,7 +143,7 @@ fn test_option_compat_context() {
     let err = None::<()>.context("oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
-    println!("{:?}", err);
+    println!("{err:?}");
 }
 
 #[cfg(feature = "anyhow")]
@@ -158,5 +158,5 @@ fn test_option_compat_with_context() {
     let err = None::<()>.with_context(|| "oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
-    println!("{:?}", err);
+    println!("{err:?}");
 }

@@ -146,7 +146,7 @@ where
         writeln!(f, "|--|--|").expect("writing to a string doesn't panic");
 
         for (key, value) in self.metadata {
-            writeln!(f, "|**{}**|{}|", key, value).expect("writing to a string doesn't panic");
+            writeln!(f, "|**{key}**|{value}|").expect("writing to a string doesn't panic");
         }
 
         out

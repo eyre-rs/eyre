@@ -721,11 +721,11 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
         error: &(dyn StdError + 'static),
         f: &mut core::fmt::Formatter<'_>,
     ) -> core::fmt::Result {
-        write!(f, "{}", error)?;
+        write!(f, "{error}")?;
 
         if f.alternate() {
             for cause in crate::chain::Chain::new(error).skip(1) {
-                write!(f, ": {}", cause)?;
+                write!(f, ": {cause}")?;
             }
         }
 
@@ -815,7 +815,7 @@ impl EyreHandler for DefaultHandler {
             return core::fmt::Debug::fmt(error, f);
         }
 
-        write!(f, "{}", error)?;
+        write!(f, "{error}")?;
 
         if let Some(cause) = error.source() {
             write!(f, "\n\nCaused by:")?;
@@ -823,9 +823,9 @@ impl EyreHandler for DefaultHandler {
             for (n, error) in crate::chain::Chain::new(cause).enumerate() {
                 writeln!(f)?;
                 if multiple {
-                    write!(indenter::indented(f).ind(n), "{}", error)?;
+                    write!(indenter::indented(f).ind(n), "{error}")?;
                 } else {
-                    write!(indenter::indented(f), "{}", error)?;
+                    write!(indenter::indented(f), "{error}")?;
                 }
             }
         }
@@ -834,7 +834,7 @@ impl EyreHandler for DefaultHandler {
         {
             if let Some(location) = self.location {
                 write!(f, "\n\nLocation:\n")?;
-                write!(indenter::indented(f), "{}", location)?;
+                write!(indenter::indented(f), "{location}")?;
             }
         }
 

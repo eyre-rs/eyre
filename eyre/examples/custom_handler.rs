@@ -65,15 +65,15 @@ impl EyreHandler for Handler {
         let errors = iter::successors(Some(error), |error| (*error).source());
 
         for (ind, error) in errors.enumerate() {
-            write!(f, "\n{:>4}: {}", ind, error)?;
+            write!(f, "\n{ind:>4}: {error}")?;
         }
 
         if let Some(backtrace) = self.backtrace.as_ref() {
-            writeln!(f, "\n\nBacktrace:\n{:?}", backtrace)?;
+            writeln!(f, "\n\nBacktrace:\n{backtrace:?}")?;
         }
 
         if let Some(msg) = self.custom_msg.as_ref() {
-            writeln!(f, "\n\n{}", msg)?;
+            writeln!(f, "\n\n{msg}")?;
         }
 
         Ok(())
