@@ -60,7 +60,7 @@ jobs:
           args: --all ${{ matrix.features }}
 
   test-msrv:
-    name: Test Suite
+    name: Test Suite (msrv)
     runs-on: ubuntu-latest
     strategy:
       matrix:
