@@ -85,7 +85,7 @@ impl eyre::EyreHandler for Handler {
             .iter()
             .filter(|s| matches!(s, HelpInfo::Error(_, _)))
         {
-            write!(separated.ready(), "{}", section)?;
+            write!(separated.ready(), "{section}")?;
         }
 
         for section in self
@@ -93,7 +93,7 @@ impl eyre::EyreHandler for Handler {
             .iter()
             .filter(|s| matches!(s, HelpInfo::Custom(_)))
         {
-            write!(separated.ready(), "{}", section)?;
+            write!(separated.ready(), "{section}")?;
         }
 
         #[cfg(feature = "capture-spantrace")]
@@ -120,8 +120,7 @@ impl eyre::EyreHandler for Handler {
                 write!(
                     indented(&mut separated.ready())
                         .with_format(Format::Uniform { indentation: "  " }),
-                    "{}",
-                    fmted_bt
+                    "{fmted_bt}"
                 )?;
             }
         }
@@ -135,7 +134,7 @@ impl eyre::EyreHandler for Handler {
             .iter()
             .filter(|s| !matches!(s, HelpInfo::Custom(_) | HelpInfo::Error(_, _)))
         {
-            write!(&mut f, "{}", section)?;
+            write!(&mut f, "{section}")?;
             f = h.ready();
         }
 
@@ -146,7 +145,7 @@ impl eyre::EyreHandler for Handler {
                 span_trace,
             };
 
-            write!(&mut separated.ready(), "{}", env_section)?;
+            write!(&mut separated.ready(), "{env_section}")?;
         }
 
         #[cfg(feature = "issue-url")]
@@ -155,7 +154,7 @@ impl eyre::EyreHandler for Handler {
             let mut payload = String::from("Error: ");
             for (n, error) in errors() {
                 writeln!(&mut payload)?;
-                write!(indented(&mut payload).ind(n), "{}", error)?;
+                write!(indented(&mut payload).ind(n), "{error}")?;
             }
 
             let issue_section = crate::section::github::IssueSection::new(url, &payload)
@@ -165,7 +164,7 @@ impl eyre::EyreHandler for Handler {
             #[cfg(feature = "capture-spantrace")]
             let issue_section = issue_section.with_span_trace(span_trace);
 
-            write!(&mut separated.ready(), "{}", issue_section)?;
+            write!(&mut separated.ready(), "{issue_section}")?;
         }
 
         Ok(())

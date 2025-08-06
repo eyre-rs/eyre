@@ -89,7 +89,7 @@ fn test_error_backwards_compatibility() {
         Below you'll find instructions about how to debug failures of the tests in this file
     */
 
-    let target = format!("{:?}", error);
+    let target = format!("{error:?}");
     test_backwards_compatibility(target, ERROR_FILE_NAME)
 }
 
@@ -129,7 +129,7 @@ fn test_panic_backwards_compatibility() {
         .output()
         .expect("failed to execute process");
     let target = String::from_utf8(output.stderr).expect("failed to convert output to `String`");
-    println!("{}", target);
+    println!("{target}");
     test_backwards_compatibility(target, PANIC_FILE_NAME)
 }
 

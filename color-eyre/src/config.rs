@@ -1,5 +1,6 @@
 //! Configuration options for customizing the behavior of the provided panic
 //! and error reporting hooks
+#![allow(deprecated)] // for PanicHook until we bump MSRV
 use crate::{
     section::PanicMessage,
     writers::{EnvSection, WriterExt},
@@ -271,7 +272,7 @@ impl fmt::Display for SourceSection<'_> {
                     line.style(theme.active_line),
                 )?;
             } else {
-                write!(&mut f, "{:>8} │ {}", cur_line_no, line)?;
+                write!(&mut f, "{cur_line_no:>8} │ {line}")?;
             }
             f = separated.ready();
         }
@@ -837,7 +838,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
     let mut separated = f.header("\n\n");
 
     if let Some(ref section) = report.hook.section {
-        write!(&mut separated.ready(), "{}", section)?;
+        write!(&mut separated.ready(), "{section}")?;
     }
 
     #[cfg(feature = "capture-spantrace")]
@@ -855,8 +856,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
         let fmted_bt = report.hook.format_backtrace(bt);
         write!(
             indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),
-            "{}",
-            fmted_bt
+            "{fmted_bt}"
         )?;
     }
 
@@ -867,7 +867,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
             span_trace: report.span_trace.as_ref(),
         };
 
-        write!(&mut separated.ready(), "{}", env_section)?;
+        write!(&mut separated.ready(), "{env_section}")?;
     }
 
     #[cfg(feature = "issue-url")]
@@ -892,7 +892,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
             #[cfg(feature = "capture-spantrace")]
             let issue_section = issue_section.with_span_trace(report.span_trace.as_ref());
 
-            write!(&mut separated.ready(), "{}", issue_section)?;
+            write!(&mut separated.ready(), "{issue_section}")?;
         }
     }
 

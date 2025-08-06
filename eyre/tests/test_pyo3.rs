@@ -23,7 +23,7 @@ fn test_pyo3_exception_contents() {
     use pyo3::types::IntoPyDict;
 
     let err = h().unwrap_err();
-    let expected_contents = format!("{:?}", err);
+    let expected_contents = format!("{err:?}");
     let pyerr = PyErr::from(err);
 
     Python::with_gil(|py| {
