@@ -12,10 +12,11 @@ readme = { workspace = true }
 rust-version = { workspace = true }
 
 [features]
-default = ["track-caller", "capture-spantrace"]
+default = ["track-caller", "capture-spantrace", "export-owo-colors"]
 capture-spantrace = ["tracing-error", "color-spantrace"]
 issue-url = ["url"]
 track-caller = []
+export-owo-colors = []
 
 [dependencies]
 eyre = { version = "1", path = "../eyre" }
