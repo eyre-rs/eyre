@@ -14,7 +14,7 @@ mod ext {
 
     impl<E> StdError for E
     where
-        E: std::error::Error + Send + Sync + 'static,
+        E: core::error::Error + Send + Sync + 'static,
     {
         fn ext_report<D>(self, msg: D) -> Report
         where
@@ -137,7 +137,7 @@ where
     E: StdError + 'static,
 {
     #[cfg(generic_member_access)]
-    fn provide<'a>(&'a self, request: &mut std::error::Request<'a>) {
+    fn provide<'a>(&'a self, request: &mut core::error::Request<'a>) {
         self.error.provide(request);
     }
 

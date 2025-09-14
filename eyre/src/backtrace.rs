@@ -18,7 +18,7 @@ macro_rules! capture_backtrace {
     };
 }
 /// Capture a backtrace iff there is not already a backtrace in the error chain
-#[cfg(generic_member_access)]
+#[cfg(all(generic_member_access, backtrace))]
 macro_rules! backtrace_if_absent {
     ($err:expr) => {
         match std::error::request_ref::<std::backtrace::Backtrace>($err as &dyn std::error::Error) {
@@ -28,7 +28,7 @@ macro_rules! backtrace_if_absent {
     };
 }
 
-#[cfg(not(generic_member_access))]
+#[cfg(not(all(generic_member_access, backtrace)))]
 macro_rules! backtrace_if_absent {
     ($err:expr) => {
         capture_backtrace!()

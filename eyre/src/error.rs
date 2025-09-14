@@ -2,6 +2,7 @@ use crate::chain::Chain;
 use crate::ptr::{MutPtr, OwnedPtr, RefPtr};
 use crate::EyreHandler;
 use crate::{Report, StdError};
+use alloc::boxed::Box;
 use core::any::TypeId;
 use core::fmt::{self, Debug, Display};
 use core::mem::{self, ManuallyDrop};
@@ -856,7 +857,7 @@ where
     E: StdError,
 {
     #[cfg(generic_member_access)]
-    fn provide<'a>(&'a self, request: &mut std::error::Request<'a>) {
+    fn provide<'a>(&'a self, request: &mut core::error::Request<'a>) {
         self._object.provide(request)
     }
 

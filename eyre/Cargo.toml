@@ -13,14 +13,18 @@ readme = { workspace = true }
 rust-version = { workspace = true }
 
 [features]
-default = ["anyhow", "auto-install", "track-caller"]
+default = ["anyhow", "auto-install", "std", "track-caller"]
 anyhow = []
 auto-install = []
+std = []
 track-caller = []
 
 [dependencies]
 indenter = { workspace = true }
-once_cell = { workspace = true }
+once_cell = { workspace = true, default-features = false, features = [
+  "alloc",
+  "race",
+] }
 pyo3 = { version = "0.24.0", optional = true, default-features = false }
 
 [build-dependencies]

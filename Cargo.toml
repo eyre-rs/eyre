@@ -15,7 +15,7 @@ rust-version = "1.65.0"
 
 [workspace.dependencies]
 indenter = "0.3.0"
-once_cell = "1.18.0"
+once_cell = { version = "1.18.0", default-features = false }
 owo-colors = "4.0"
 autocfg = "1.0"
 
