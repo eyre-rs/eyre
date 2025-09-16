@@ -387,6 +387,7 @@ pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
+#[cfg(not(feature = "no-mut-static"))]
 use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
 #[cfg(feature = "anyhow")]
@@ -485,6 +486,7 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
+#[cfg(not(feature = "no-mut-static"))]
 static HOOK: OnceCell<ErrorHook> = OnceCell::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
@@ -595,23 +597,35 @@ impl StdError for InstallError {}
 ///     }
 /// }
 /// ```
+#[cfg_attr(feature = "no-mut-static", allow(unused_variables))]
 pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
-    HOOK.set(hook).map_err(|_| InstallError)
+    #[cfg(not(feature = "no-mut-static"))]
+    {
+        HOOK.set(hook).map_err(|_| InstallError)
+    }
+
+    #[cfg(feature = "no-mut-static")]
+    {
+        Err(InstallError)
+    }
 }
 
 #[cfg_attr(track_caller, track_caller)]
 #[cfg_attr(not(track_caller), allow(unused_mut))]
 fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
-    #[cfg(not(feature = "auto-install"))]
+    #[cfg(not(any(feature = "no-mut-static", feature = "auto-install")))]
     let hook = HOOK
         .get()
         .expect("a handler must always be installed if the `auto-install` feature is disabled")
         .as_ref();
 
-    #[cfg(feature = "auto-install")]
+    #[cfg(all(not(feature = "no-mut-static"), feature = "auto-install"))]
     let hook = HOOK
         .get_or_init(|| Box::new(DefaultHandler::default_with))
         .as_ref();
+
+    #[cfg(feature = "no-mut-static")]
+    let hook = &DefaultHandler::default_with;
 
     let mut handler = hook(error);
 
