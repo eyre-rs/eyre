@@ -489,6 +489,11 @@ type ErrorHook =
 #[cfg(not(feature = "no-mut-static"))]
 static HOOK: OnceCell<ErrorHook> = OnceCell::new();
 
+#[cfg(feature = "static-error-hook")]
+extern "Rust" {
+    fn eyre_error_hook(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler>;
+}
+
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]
 pub struct InstallError;
@@ -624,8 +629,11 @@ fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
         .get_or_init(|| Box::new(DefaultHandler::default_with))
         .as_ref();
 
-    #[cfg(feature = "no-mut-static")]
+    #[cfg(all(feature = "no-mut-static", not(feature = "static-error-hook")))]
     let hook = &DefaultHandler::default_with;
+
+    #[cfg(feature = "static-error-hook")]
+    let hook = |error| unsafe { eyre_error_hook(error) };
 
     let mut handler = hook(error);
 
