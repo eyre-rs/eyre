@@ -362,6 +362,7 @@
     clippy::new_ret_no_self,
     clippy::wrong_self_convention
 )]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
 
@@ -381,13 +382,14 @@ use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
-use std::error::Error as StdError;
+use core::error::Error as StdError;
 
+use alloc::boxed::Box;
 pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
-use once_cell::sync::OnceCell;
+use once_cell::race::OnceBox;
 use ptr::OwnedPtr;
 #[cfg(feature = "anyhow")]
 #[doc(hidden)]
@@ -485,7 +487,7 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
-static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+static HOOK: OnceBox<ErrorHook> = OnceBox::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]
@@ -596,7 +598,7 @@ impl StdError for InstallError {}
 /// }
 /// ```
 pub fn set_hook(hook: ErrorHook) -> Result<(), InstallError> {
-    HOOK.set(hook).map_err(|_| InstallError)
+    HOOK.set(Box::new(hook)).map_err(|_| InstallError)
 }
 
 #[cfg_attr(track_caller, track_caller)]
@@ -610,14 +612,14 @@ fn capture_handler(error: &(dyn StdError + 'static)) -> Box<dyn EyreHandler> {
 
     #[cfg(feature = "auto-install")]
     let hook = HOOK
-        .get_or_init(|| Box::new(DefaultHandler::default_with))
+        .get_or_init(|| Box::new(Box::new(DefaultHandler::default_with)))
         .as_ref();
 
     let mut handler = hook(error);
 
     #[cfg(track_caller)]
     {
-        handler.track_caller(std::panic::Location::caller())
+        handler.track_caller(core::panic::Location::caller())
     }
 
     handler
@@ -734,7 +736,7 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
 
     /// Store the location of the caller who constructed this error report
     #[allow(unused_variables)]
-    fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {}
+    fn track_caller(&mut self, location: &'static core::panic::Location<'static>) {}
 }
 
 /// The default provided error report handler for `eyre::Report`.
@@ -745,7 +747,7 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
 pub struct DefaultHandler {
     backtrace: Option<Backtrace>,
     #[cfg(track_caller)]
-    location: Option<&'static std::panic::Location<'static>>,
+    location: Option<&'static core::panic::Location<'static>>,
 }
 
 impl DefaultHandler {
@@ -838,7 +840,7 @@ impl EyreHandler for DefaultHandler {
             }
         }
 
-        #[cfg(generic_member_access)]
+        #[cfg(all(generic_member_access, backtrace))]
         {
             use std::backtrace::BacktraceStatus;
 
@@ -860,7 +862,7 @@ impl EyreHandler for DefaultHandler {
     }
 
     #[cfg(track_caller)]
-    fn track_caller(&mut self, location: &'static std::panic::Location<'static>) {
+    fn track_caller(&mut self, location: &'static core::panic::Location<'static>) {
         self.location = Some(location);
     }
 }

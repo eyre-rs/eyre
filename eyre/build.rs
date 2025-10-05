@@ -23,7 +23,9 @@ fn main() {
     }
 
     // https://github.com/rust-lang/rust/issues/47809 [rustc-1.46]
-    ac.emit_expression_cfg("std::panic::Location::caller", "track_caller");
+    if ac.probe_rustc_version(1, 46) {
+        autocfg::emit("track_caller");
+    }
 
     if ac.probe_rustc_version(1, 52) {
         autocfg::emit("eyre_no_fmt_arguments_as_str");
@@ -33,6 +35,7 @@ fn main() {
         autocfg::emit("eyre_no_fmt_args_capture");
     }
 
+    #[cfg(feature = "std")]
     if ac.probe_rustc_version(1, 65) {
         autocfg::emit("backtrace")
     }

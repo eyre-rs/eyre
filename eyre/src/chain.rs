@@ -1,7 +1,7 @@
 use self::ChainState::*;
 use crate::StdError;
 
-use std::vec;
+use alloc::vec::{self, Vec};
 
 pub(crate) use crate::Chain;
 

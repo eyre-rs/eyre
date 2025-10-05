@@ -1,4 +1,6 @@
-use std::{marker::PhantomData, ptr::NonNull};
+use core::{marker::PhantomData, ptr::NonNull};
+
+use alloc::boxed::Box;
 
 /// An owned pointer
 ///

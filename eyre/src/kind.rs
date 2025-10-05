@@ -46,6 +46,7 @@
 //     (&error).eyre_kind().new(error)
 
 use crate::Report;
+use alloc::boxed::Box;
 use core::fmt::{Debug, Display};
 
 use crate::StdError;

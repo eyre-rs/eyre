@@ -1,4 +1,5 @@
 use crate::StdError;
+use alloc::boxed::Box;
 use core::fmt::{self, Debug, Display};
 
 #[repr(transparent)]
@@ -83,7 +84,7 @@ impl Display for BoxedError {
 
 impl StdError for BoxedError {
     #[cfg(generic_member_access)]
-    fn provide<'a>(&'a self, request: &mut std::error::Request<'a>) {
+    fn provide<'a>(&'a self, request: &mut core::error::Request<'a>) {
         self.0.provide(request);
     }
 
