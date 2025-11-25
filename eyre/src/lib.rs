@@ -316,9 +316,9 @@
 //!
 //! [^1]: example and explanation of breakage <https://github.com/eyre-rs/eyre/issues/30#issuecomment-647650361>
 //!
-//! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
-//! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
-//! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
+//! [Report]: https://docs.rs/eyre/latest/eyre/struct.Report.html
+//! [`eyre::EyreHandler`]: https://docs.rs/eyre/latest/eyre/trait.EyreHandler.html
+//! [`eyre::WrapErr`]: https://docs.rs/eyre/latest/eyre/trait.WrapErr.html
 //! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html

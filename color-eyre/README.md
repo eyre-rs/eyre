@@ -201,13 +201,13 @@ For an example of how to setup custom filters, check out [`examples/custom_filte
 [`eyre`]: https://docs.rs/eyre
 [`tracing-error`]: https://docs.rs/tracing-error
 [`color-backtrace`]: https://docs.rs/color-backtrace
-[`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
+[`eyre::EyreHandler`]: https://docs.rs/eyre/latest/eyre/trait.EyreHandler.html
 [`backtrace::Backtrace`]: https://docs.rs/backtrace/*/backtrace/struct.Backtrace.html
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 [`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 [`Section`]: https://docs.rs/color-eyre/*/color_eyre/section/trait.Section.html
-[`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
-[`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
+[`eyre::Report`]: https://docs.rs/eyre/latest/eyre/struct.Report.html
+[`eyre::Result`]: https://docs.rs/eyre/latest/eyre/type.Result.html
 [`Handler`]: https://docs.rs/color-eyre/*/color_eyre/struct.Handler.html
 [`examples/usage.rs`]: https://github.com/eyre-rs/color-eyre/blob/master/examples/usage.rs
 [`examples/custom_filter.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_filter.rs

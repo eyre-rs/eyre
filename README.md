@@ -261,9 +261,9 @@ let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dy
 implements `context` for options which you can import to make existing
 `.context` calls compile.
 
-[Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
-[`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
-[`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
+[Report]: https://docs.rs/eyre/latest/eyre/struct.Report.html
+[`eyre::EyreHandler`]: https://docs.rs/eyre/latest/eyre/trait.EyreHandler.html
+[`eyre::WrapErr`]: https://docs.rs/eyre/latest/eyre/trait.WrapErr.html
 [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 [`anyhow`]: https://github.com/dtolnay/anyhow
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
