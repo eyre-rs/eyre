@@ -11,6 +11,7 @@ license = { workspace = true }
 repository = { workspace = true }
 readme = { workspace = true }
 rust-version = { workspace = true }
+include.workspace = true
 
 [features]
 default = ["anyhow", "auto-install", "track-caller"]
