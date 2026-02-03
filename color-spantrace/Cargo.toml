@@ -21,7 +21,7 @@ once_cell = { workspace = true }
 [dev-dependencies]
 tracing-subscriber = "0.3.4"
 tracing = "0.1.29"
-ansi-parser = "0.8" # used for testing color schemes
+ansi-parser = "0.9" # used for testing color schemes
 
 [package.metadata.docs.rs]
 all-features = true

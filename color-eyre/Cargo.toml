@@ -33,7 +33,7 @@ tracing-subscriber = { version = "0.3.0", features = ["env-filter"] }
 tracing = "0.1.13"
 pretty_assertions = "1.0.0"
 thiserror = "1.0.19"
-ansi-parser = "0.8.0"
+ansi-parser = "0.9.0"
 
 [target.'cfg(target_arch = "wasm32")'.dev-dependencies]
 wasm-bindgen-test = "0.3.15"

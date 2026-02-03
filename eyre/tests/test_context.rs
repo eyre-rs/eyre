@@ -41,7 +41,7 @@ context_type!(MidLevel);
 #[repr(C)]
 struct LowLevel {
     message: &'static str,
-    drop: DetectDrop,
+    _drop: DetectDrop,
 }
 
 struct Dropped {
@@ -69,7 +69,7 @@ fn make_chain() -> (Report, Dropped) {
 
     let low = LowLevel {
         message: "no such file or directory",
-        drop: DetectDrop::new("LowLevel", &dropped.low),
+        _drop: DetectDrop::new("LowLevel", &dropped.low),
     };
 
     // impl Report for Result<T, E>
