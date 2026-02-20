@@ -67,6 +67,7 @@
 #![warn(
     missing_debug_implementations,
     missing_docs,
+    unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,

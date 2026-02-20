@@ -334,9 +334,15 @@
 //! [`examples/custom_filter.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/multiple_errors.rs
+#![cfg_attr(
+    nightly,
+    feature(rustdoc_missing_doc_code_examples),
+    warn(rustdoc::missing_doc_code_examples)
+)]
 #![warn(
+    missing_debug_implementations,
     missing_docs,
-    rustdoc::missing_doc_code_examples,
+    unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
@@ -347,13 +353,13 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
+    unconditional_recursion,
     unused,
     unused_allocation,
     unused_comparisons,
     unused_parens,
     while_true
 )]
-#![allow(clippy::try_err)]
 
 use std::sync::Arc;
 
