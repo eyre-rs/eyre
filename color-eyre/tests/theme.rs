@@ -38,6 +38,7 @@ static ERROR_FILE_NAME: &str = "theme_error_control_spantrace.txt";
 #[cfg(all(feature = "capture-spantrace", feature = "track-caller",))]
 static ERROR_FILE_NAME: &str = "theme_error_control.txt";
 
+#[rustversion::attr(nightly, ignore)]
 #[test]
 #[cfg(not(miri))]
 fn test_error_backwards_compatibility() {
@@ -100,6 +101,7 @@ static PANIC_FILE_NAME: &str = "theme_panic_control_no_spantrace.txt";
 static PANIC_FILE_NAME: &str = "theme_panic_control.txt";
 
 // The following tests the installed panic handler
+#[rustversion::attr(nightly, ignore)]
 #[test]
 #[allow(unused_mut)]
 #[allow(clippy::vec_init_then_push)]

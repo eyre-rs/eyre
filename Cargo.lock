@@ -112,6 +112,7 @@ dependencies = [
  "once_cell",
  "owo-colors",
  "pretty_assertions",
+ "rustversion",
  "thiserror",
  "tracing",
  "tracing-error",
