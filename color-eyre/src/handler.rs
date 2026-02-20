@@ -149,22 +149,23 @@ impl eyre::EyreHandler for Handler {
         }
 
         #[cfg(feature = "issue-url")]
-        if self.issue_url.is_some() && (*self.issue_filter)(crate::ErrorKind::Recoverable(error)) {
-            let url = self.issue_url.as_ref().unwrap();
-            let mut payload = String::from("Error: ");
-            for (n, error) in errors() {
-                writeln!(&mut payload)?;
-                write!(indented(&mut payload).ind(n), "{error}")?;
+        if let Some(url) = self.issue_url.as_ref() {
+            if (*self.issue_filter)(crate::ErrorKind::Recoverable(error)) {
+                let mut payload = String::from("Error: ");
+                for (n, error) in errors() {
+                    writeln!(&mut payload)?;
+                    write!(indented(&mut payload).ind(n), "{error}")?;
+                }
+
+                let issue_section = crate::section::github::IssueSection::new(url, &payload)
+                    .with_backtrace(self.backtrace.as_ref())
+                    .with_metadata(&self.issue_metadata);
+
+                #[cfg(feature = "capture-spantrace")]
+                let issue_section = issue_section.with_span_trace(span_trace);
+
+                write!(&mut separated.ready(), "{issue_section}")?;
             }
-
-            let issue_section = crate::section::github::IssueSection::new(url, &payload)
-                .with_backtrace(self.backtrace.as_ref())
-                .with_metadata(&self.issue_metadata);
-
-            #[cfg(feature = "capture-spantrace")]
-            let issue_section = issue_section.with_span_trace(span_trace);
-
-            write!(&mut separated.ready(), "{issue_section}")?;
         }
 
         Ok(())

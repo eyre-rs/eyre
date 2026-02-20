@@ -12,6 +12,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/eyre-rs/eyre"
 readme = "README.md"
 rust-version = "1.65.0"
+include = ["README.md", "LICENSE-APACHE", "LICENSE-MIT", "build.rs", "Cargo.toml", "src/**/*.rs"]
 
 [workspace.dependencies]
 indenter = "0.3.0"

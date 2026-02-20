@@ -874,25 +874,24 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
     {
         let payload = report.panic_info.payload();
 
-        if report.hook.issue_url.is_some()
-            && (*report.hook.issue_filter)(crate::ErrorKind::NonRecoverable(payload))
-        {
-            let url = report.hook.issue_url.as_ref().unwrap();
-            let payload = payload
-                .downcast_ref::<String>()
-                .map(String::as_str)
-                .or_else(|| payload.downcast_ref::<&str>().cloned())
-                .unwrap_or("<non string panic payload>");
+        if let Some(url) = report.hook.issue_url.as_ref() {
+            if (*report.hook.issue_filter)(crate::ErrorKind::NonRecoverable(payload)) {
+                let payload = payload
+                    .downcast_ref::<String>()
+                    .map(String::as_str)
+                    .or_else(|| payload.downcast_ref::<&str>().cloned())
+                    .unwrap_or("<non string panic payload>");
 
-            let issue_section = crate::section::github::IssueSection::new(url, payload)
-                .with_backtrace(report.backtrace.as_ref())
-                .with_location(report.panic_info.location())
-                .with_metadata(&report.hook.issue_metadata);
+                let issue_section = crate::section::github::IssueSection::new(url, payload)
+                    .with_backtrace(report.backtrace.as_ref())
+                    .with_location(report.panic_info.location())
+                    .with_metadata(&report.hook.issue_metadata);
 
-            #[cfg(feature = "capture-spantrace")]
-            let issue_section = issue_section.with_span_trace(report.span_trace.as_ref());
+                #[cfg(feature = "capture-spantrace")]
+                let issue_section = issue_section.with_span_trace(report.span_trace.as_ref());
 
-            write!(&mut separated.ready(), "{issue_section}")?;
+                write!(&mut separated.ready(), "{issue_section}")?;
+            }
         }
     }
 

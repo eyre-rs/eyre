@@ -27,15 +27,15 @@ fn join_errors(results: Vec<Result<(), SourceError>>) -> Result<(), Report> {
 fn get_errors() -> Vec<Result<(), SourceError>> {
     vec![
         Err(SourceError {
-            source: StrError("The task you ran encountered an error"),
+            _source: StrError("The task you ran encountered an error"),
             msg: "The task could not be completed",
         }),
         Err(SourceError {
-            source: StrError("The machine you're connecting to is actively on fire"),
+            _source: StrError("The machine you're connecting to is actively on fire"),
             msg: "The machine is unreachable",
         }),
         Err(SourceError {
-            source: StrError("The file you're parsing is literally written in c++ instead of rust, what the hell"),
+            _source: StrError("The file you're parsing is literally written in c++ instead of rust, what the hell"),
             msg: "The file could not be parsed",
         }),
     ]
@@ -51,5 +51,5 @@ struct StrError(&'static str);
 #[error("{msg}")]
 struct SourceError {
     msg: &'static str,
-    source: StrError,
+    _source: StrError,
 }
