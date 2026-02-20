@@ -1,11 +1,11 @@
 [package]
 name = "eyre"
 version = "1.0.0"
-authors = ["David Tolnay <dtolnay@gmail.com>", "Jane Lusby <jlusby42@gmail.com>"]
 description = "Flexible concrete Error Reporting type built on std::error::Error with customizable Reports"
 documentation = "https://docs.rs/eyre"
 categories = ["rust-patterns"]
 
+authors = { workspace = true }
 edition = { workspace = true }
 license = { workspace = true }
 repository = { workspace = true }
