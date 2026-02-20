@@ -325,17 +325,15 @@
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
 //! [`backtrace::Backtrace`]: https://docs.rs/backtrace/*/backtrace/struct.Backtrace.html
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
-//! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
+//! [`color-spantrace`]: https://docs.rs/color-spantrace
 //! [`Section`]: https://docs.rs/color-eyre/*/color_eyre/trait.Section.html
 //! [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
 //! [`Handler`]: https://docs.rs/color-eyre/*/color_eyre/struct.Handler.html
-//! [`examples/usage.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/usage.rs
-//! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
-//! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
-//! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.6.2")]
-#![cfg_attr(docsrs, feature(doc_cfg))]
+//! [`examples/usage.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/usage.rs
+//! [`examples/custom_filter.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_filter.rs
+//! [`examples/custom_section.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_section.rs
+//! [`examples/multiple_errors.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/multiple_errors.rs
 #![warn(
     missing_docs,
     rustdoc::missing_doc_code_examples,
