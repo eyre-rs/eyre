@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.3.1](https://github.com/eyre-rs/eyre/compare/color-spantrace-v0.3.0...color-spantrace-v0.3.1) - 2026-02-20
+
+### Other
+
+- Bump pyo3 dependency to fix the CI error
+- Exclude development scripts from published package
+
 ## [0.2.1] - 2023-11-17
 ### Fixed
 - Add license files [by erickt](https://github.com/eyre-rs/color-spantrace/pull/19)
