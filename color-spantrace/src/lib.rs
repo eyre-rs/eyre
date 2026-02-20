@@ -64,6 +64,7 @@
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -85,6 +86,7 @@
     unused_parens,
     while_true
 )]
+
 use once_cell::sync::OnceCell;
 use owo_colors::{style, Style};
 use std::env;

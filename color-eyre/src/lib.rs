@@ -339,6 +339,7 @@
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -422,7 +423,6 @@ pub struct Handler {
 
 /// The kind of type erased error being reported
 #[cfg(feature = "issue-url")]
-#[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
 pub enum ErrorKind<'a> {
     /// A non recoverable error aka `panic!`
     NonRecoverable(&'a dyn std::any::Any),
