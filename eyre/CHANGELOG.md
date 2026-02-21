@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [1.0.0](https://github.com/eyre-rs/eyre/compare/eyre-v0.6.12...eyre-v1.0.0) - 2026-02-21
+
+### Added
+
+- introduce an `"anyhow"` compatibility layer feature flag ([#138](https://github.com/eyre-rs/eyre/pull/138))
+
+### Fixed
+
+- consistent naming and duplicated tests
+- import consistency
+- typo in doc comment
+- *(docs)* enclose inline code in backticks ([#170](https://github.com/eyre-rs/eyre/pull/170))
+- remove `anyhow` feature flag from `OptionExt` location test  ([#148](https://github.com/eyre-rs/eyre/pull/148))
+
+### Other
+
+- Use doc_auto_cfg for docs.rs
+- Use workspace authors info
+- Remove doc(html_root_url)
+- Bump pyo3 dependency to fix the CI error
+- Exclude development scripts from published package
+- Add release-plz to CI ([#242](https://github.com/eyre-rs/eyre/pull/242))
+- Redo eyre version bump
+- Undo eyre version bump (DO NOT PUBLISH EYRE)
+- re-bump eyre version
+- Undo eyre version bump
+- Merge branch 'clippy' into pyo3
+- Update pyo3
+- emit rustc-check-cfg info and fix doc_lazy_continuation clippy warning ([#200](https://github.com/eyre-rs/eyre/pull/200))
+- Merge branch 'master' into fix-nightly-backtraces
+- Merge branch 'master' into fix-ambiguous-methods
+- Remove empty doc comments
+- Merge branch 'master' into bump-owo-colors-for-everyone
+- Don't evaluate 1-argument `ensure!` condition twice ([#166](https://github.com/eyre-rs/eyre/pull/166))
+- Fix ci breaking due to new dependencies and rustc changes (backport to master) ([#163](https://github.com/eyre-rs/eyre/pull/163))
+- Merge remote-tracking branch 'origin/master' into color-eyre
+- Bump version 1.0.0 ([#146](https://github.com/eyre-rs/eyre/pull/146))
 ### Added
 - feature flag for `anyhow` compatibility traits [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/138)
 
