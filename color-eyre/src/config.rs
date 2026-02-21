@@ -546,7 +546,6 @@ impl HookBuilder {
     ///     .unwrap();
     /// ```
     #[cfg(feature = "issue-url")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
     pub fn issue_url<S: ToString>(mut self, url: S) -> Self {
         self.issue_url = Some(url.to_string());
         self
@@ -566,7 +565,6 @@ impl HookBuilder {
     ///     .unwrap();
     /// ```
     #[cfg(feature = "issue-url")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
     pub fn add_issue_metadata<K, V>(mut self, key: K, value: V) -> Self
     where
         K: Display,
@@ -602,7 +600,6 @@ impl HookBuilder {
     ///     .unwrap();
     ///
     #[cfg(feature = "issue-url")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
     pub fn issue_filter<F>(mut self, predicate: F) -> Self
     where
         F: Fn(crate::ErrorKind<'_>) -> bool + Send + Sync + 'static,
@@ -629,7 +626,6 @@ impl HookBuilder {
     ///
     /// This will not disable the location section in a panic message.
     #[cfg(feature = "track-caller")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "track-caller")))]
     pub fn display_location_section(mut self, cond: bool) -> Self {
         self.display_location_section = cond;
         self
@@ -1183,5 +1179,4 @@ pub type FilterCallback = dyn Fn(&mut Vec<&Frame>) + Send + Sync + 'static;
 
 /// Callback for filtering issue url generation in error reports
 #[cfg(feature = "issue-url")]
-#[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
 pub type IssueFilterCallback = dyn Fn(crate::ErrorKind<'_>) -> bool + Send + Sync + 'static;

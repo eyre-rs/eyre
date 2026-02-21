@@ -59,15 +59,16 @@
 //!
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/color-spantrace/0.2.1")]
 #![cfg_attr(
     nightly,
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
+    unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
@@ -85,6 +86,7 @@
     unused_parens,
     while_true
 )]
+
 use once_cell::sync::OnceCell;
 use owo_colors::{style, Style};
 use std::env;
