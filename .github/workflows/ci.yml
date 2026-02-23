@@ -42,10 +42,12 @@ jobs:
           - beta
           - nightly
         features:
-          - # default
+          - "" # default
           - --no-default-features
           - --no-default-features --features track-caller
           - --no-default-features --features auto-install
+          - --no-default-features --features capture-spantrace
+          - --no-default-features --features issue-url
           - --features pyo3
           - --all-features
     steps:
@@ -65,11 +67,15 @@ jobs:
     strategy:
       matrix:
         features:
-          - # default
+          - "" # default
           - --no-default-features
           - --no-default-features --features track-caller
           - --no-default-features --features auto-install
-          # skip `--features pyo3` and `--all-features` because pyo3 doesn't support this msrv
+          - --no-default-features --features capture-spantrace
+          - --no-default-features --features issue-url
+          # skip the following because pyo3 doesn't support this msrv
+          # - --features pyo3
+          # - --all-features
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -98,6 +104,23 @@ jobs:
         with:
           command: test
           args: --all
+
+  # Fix failing tests
+  # test-wasm:
+  #   name: Test Suite (wasm)
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v1
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         target: wasm32-unknown-unknown
+  #         toolchain: stable
+  #         override: true
+  #     - name: install test runner for wasm
+  #       run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  #     - name: run wasm tests
+  #       run: wasm-pack test --node
+  #       working-directory: color-eyre
 
   fmt:
     name: Rustfmt
