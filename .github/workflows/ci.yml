@@ -41,6 +41,7 @@ jobs:
           - stable
           - beta
           - nightly
+          - 1.65.0 # msrv
         features:
           - "" # default
           - --no-default-features
@@ -50,37 +51,17 @@ jobs:
           - --no-default-features --features issue-url
           - --features pyo3
           - --all-features
+        # skip the following because pyo3 doesn't support this msrv
+        exclude:
+          - rust: 1.65.0
+            features: --features pyo3
+          - rust: 1.65.0
+            features: --all-features
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all ${{ matrix.features }}
-
-  test-msrv:
-    name: Test Suite (msrv)
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        features:
-          - "" # default
-          - --no-default-features
-          - --no-default-features --features track-caller
-          - --no-default-features --features auto-install
-          - --no-default-features --features capture-spantrace
-          - --no-default-features --features issue-url
-          # skip the following because pyo3 doesn't support this msrv
-          # - --features pyo3
-          # - --all-features
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.65
           override: true
       - uses: actions-rs/cargo@v1
         with:
