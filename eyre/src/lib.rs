@@ -388,12 +388,6 @@ pub use eyre as format_err;
 pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
-#[cfg(feature = "anyhow")]
-#[doc(hidden)]
-pub use DefaultHandler as DefaultContext;
-#[cfg(feature = "anyhow")]
-#[doc(hidden)]
-pub use EyreHandler as EyreContext;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
