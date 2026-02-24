@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.6.6](https://github.com/eyre-rs/eyre/compare/color-eyre-v0.6.5...color-eyre-v0.6.6) - 2026-02-24
+
+### Other
+
+- Fix broken links
+- Make cargo.toml consistent
+- Add simple-eyre to workspace
+- Make sure the fmt check runs on all crates
+- Use doc_auto_cfg for docs.rs
+- Unify lint config
+- Fix broken links
+- Ignore some tests in nightly
+- Bump pyo3 dependency to fix the CI error
+- Exclude development scripts from published package
+- Add release-plz to CI ([#242](https://github.com/eyre-rs/eyre/pull/242))
+- Redo eyre version bump
+
 ## [0.6.2] - 2022-07-11
 ### Added
 - Option to disable display of location section in error reports
