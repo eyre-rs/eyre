@@ -172,9 +172,27 @@ both high-quality and timely.
 
 Finally, if nothing brings you more satisfaction than seeing every last issue
 labeled and all resolved issues closed, feel free to message any Eyre Circle
-Member (currently @yaahc) for the triage role to help us keep things tidy. This
+Member (currently @yaahc and @ten3roberts) for the triage role to help us keep things tidy. This
 role only requires good faith and a basic understanding of our development
 process.
 
 [Discord]: https://discord.gg/z94RqmUTKB
 [^1]: Okay, I'll admit it, it's really just the Rust Project's CoC :sweat_smile:
+
+# Release Process
+
+The `master` branch contains all the latest changes and is considered unstable.
+
+For each bugfix and non-breaking change, the relevant commits are cherry-picked to relevant stable release branches,
+denoted by `releas-<major>.<minor>`. A new version is then published from each of the relevant stable release branches.
+
+Change logs are maintained on the `master` branch in the `CHANGELOG.md` file. Updating the changelog as part of a PR is
+highly encouraged, but not strictly required. The changelog *should not* be maintained on the stable release branches or
+in the release commits, as this leads to them not being visible on the `master` branch.
+
+## Publishing a new release
+- Cherry pick the relevant commits to the relevant stable release branches
+- Checkout the stable release branch, e.g. `release-0.6`
+- Run `cargo release <version>` to publish a new release
+  - This will publish to `crates.io`, and create a new tagged git commit on the release branch, which is subsequently pushed to the remote.
+[ WIP ] workspace wide release, pending #110 (color-eyre inclusion)
