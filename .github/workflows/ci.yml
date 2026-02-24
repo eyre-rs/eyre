@@ -1,8 +1,14 @@
 on:
   push:
+    paths-ignore:
+      - '**/*.md'
+      - '**/LICENSE*'
     branches:
       - master
-  pull_request: {}
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - '**/LICENSE*'
 
 name: Continuous integration
 
