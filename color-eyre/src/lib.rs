@@ -409,6 +409,7 @@ pub struct Handler {
     display_env_section: bool,
     #[cfg(feature = "track-caller")]
     display_location_section: bool,
+    reversed_stacktrace: bool,
     #[cfg(feature = "issue-url")]
     issue_url: Option<String>,
     #[cfg(feature = "issue-url")]
