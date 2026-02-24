@@ -10,7 +10,7 @@ license = { workspace = true }
 repository = { workspace = true }
 readme = { workspace = true }
 rust-version = { workspace = true }
-include.workspace = true
+include = { workspace = true }
 
 [features]
 default = ["track-caller", "capture-spantrace"]
@@ -42,9 +42,6 @@ wasm-bindgen-test = "0.3.15"
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
-
-[package.metadata.release]
-dev-version = false
 
 [[example]]
 name = "color-eyre-usage"

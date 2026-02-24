@@ -2,7 +2,8 @@
 members = [
   "color-eyre",
   "color-spantrace",
-  "eyre"
+  "eyre",
+  "simple-eyre",
 ]
 
 [workspace.package]
@@ -22,5 +23,4 @@ autocfg = "1.0"
 
 [profile.dev.package.backtrace]
 opt-level = 3
-
 

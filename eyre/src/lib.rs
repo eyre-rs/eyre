@@ -323,10 +323,10 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
-//! [`color-eyre`]: https://github.com/eyre-rs/color-eyre
+//! [`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 //! [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-//! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
-//! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
+//! [`simple-eyre`]: https://github.com/eyre-rs/eyre/tree/master/simple-eyre
+//! [`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 #![cfg_attr(
     nightly,
