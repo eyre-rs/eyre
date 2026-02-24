@@ -220,9 +220,9 @@ impl fmt::Display for StyledFrame<'_> {
         )?;
 
         let v = if std::thread::panicking() {
-            panic_verbosity()
+            panic_verbosity(None)
         } else {
-            lib_verbosity()
+            lib_verbosity(None)
         };
 
         // Maybe print source.
@@ -387,6 +387,7 @@ impl Frame {
 pub struct HookBuilder {
     filters: Vec<Box<FilterCallback>>,
     capture_span_trace_by_default: bool,
+    verbosity: Option<Verbosity>,
     display_env_section: bool,
     #[cfg(feature = "track-caller")]
     display_location_section: bool,
@@ -430,6 +431,7 @@ impl HookBuilder {
         HookBuilder {
             filters: vec![],
             capture_span_trace_by_default: false,
+            verbosity: None,
             display_env_section: true,
             #[cfg(feature = "track-caller")]
             display_location_section: true,
@@ -614,6 +616,12 @@ impl HookBuilder {
         self
     }
 
+    /// Configures the verbosity to use. Overrides environment variables.
+    pub fn verbosity(mut self, verbosity: Verbosity) -> Self {
+        self.verbosity = Some(verbosity);
+        self
+    }
+
     /// Configures the enviroment varible info section and whether or not it is displayed
     pub fn display_env_section(mut self, cond: bool) -> Self {
         self.display_env_section = cond;
@@ -693,6 +701,7 @@ impl HookBuilder {
             section: self.panic_section,
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
+            verbosity: self.verbosity,
             display_env_section: self.display_env_section,
             panic_message: self
                 .panic_message
@@ -710,6 +719,7 @@ impl HookBuilder {
             filters: panic_hook.filters.clone(),
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
+            verbosity: self.verbosity,
             display_env_section: self.display_env_section,
             #[cfg(feature = "track-caller")]
             display_location_section: self.display_location_section,
@@ -828,7 +838,7 @@ pub struct PanicReport<'a> {
 fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     report.hook.panic_message.display(report.panic_info, f)?;
 
-    let v = panic_verbosity();
+    let v = panic_verbosity(None);
     let capture_bt = v != Verbosity::Minimal;
 
     let mut separated = f.header("\n\n");
@@ -908,6 +918,7 @@ pub struct PanicHook {
     theme: Theme,
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
+    verbosity: Option<Verbosity>,
     display_env_section: bool,
     #[cfg(feature = "issue-url")]
     issue_url: Option<String>,
@@ -956,7 +967,7 @@ impl PanicHook {
         &'a self,
         panic_info: &'a std::panic::PanicInfo<'_>,
     ) -> PanicReport<'a> {
-        let v = panic_verbosity();
+        let v = panic_verbosity(self.verbosity);
         let capture_bt = v != Verbosity::Minimal;
 
         #[cfg(feature = "capture-spantrace")]
@@ -987,6 +998,7 @@ pub struct EyreHook {
     filters: Arc<[Box<FilterCallback>]>,
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
+    verbosity: Option<Verbosity>,
     display_env_section: bool,
     #[cfg(feature = "track-caller")]
     display_location_section: bool,
@@ -1009,10 +1021,12 @@ type HookFunc = Box<
 impl EyreHook {
     #[allow(unused_variables)]
     pub(crate) fn default(&self, error: &(dyn std::error::Error + 'static)) -> crate::Handler {
-        let backtrace = if lib_verbosity() != Verbosity::Minimal {
-            Some(backtrace::Backtrace::new())
-        } else {
-            None
+        let backtrace = {
+            if lib_verbosity(self.verbosity) != Verbosity::Minimal {
+                Some(backtrace::Backtrace::new())
+            } else {
+                None
+            }
         };
 
         #[cfg(feature = "capture-spantrace")]
@@ -1151,14 +1165,25 @@ impl fmt::Display for BacktraceFormatter<'_> {
     }
 }
 
+/// Verbosity of error and panic messages.
+///
+/// For previews or more information see the [crate documentation](crate#multiple-report-format-verbosity-levels)
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub(crate) enum Verbosity {
+pub enum Verbosity {
+    /// Minimal verbosity that does not include a `Backtrace`.
     Minimal,
+    /// The "short format" which additionally captures a `Backtrace`.
     Medium,
+    /// The full verbose format which will include context of the source files where the error
+    /// originated from, assuming it can find them on the disk.
     Full,
 }
 
-pub(crate) fn panic_verbosity() -> Verbosity {
+pub(crate) fn panic_verbosity(verbosity: Option<Verbosity>) -> Verbosity {
+    if let Some(v) = verbosity {
+        return v;
+    }
+
     match env::var("RUST_BACKTRACE") {
         Ok(s) if s == "full" => Verbosity::Full,
         Ok(s) if s != "0" => Verbosity::Medium,
@@ -1166,7 +1191,11 @@ pub(crate) fn panic_verbosity() -> Verbosity {
     }
 }
 
-pub(crate) fn lib_verbosity() -> Verbosity {
+pub(crate) fn lib_verbosity(verbosity: Option<Verbosity>) -> Verbosity {
+    if let Some(v) = verbosity {
+        return v;
+    }
+
     match env::var("RUST_LIB_BACKTRACE").or_else(|_| env::var("RUST_BACKTRACE")) {
         Ok(s) if s == "full" => Verbosity::Full,
         Ok(s) if s != "0" => Verbosity::Medium,
