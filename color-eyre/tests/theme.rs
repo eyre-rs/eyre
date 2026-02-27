@@ -295,8 +295,8 @@ fn setup() {
     use owo_colors::style;
     let styles = color_eyre::config::Styles::dark()
         // ^ or, instead of `dark`, use `new` for blank styles or `light` if you what to derive from a light theme. Now configure your styles (see the docs for all options):
-        .line_number(style().blue())
-        .help_info_suggestion(style().red());
+        .line_number(Style::new().blue())
+        .help_info_suggestion(Style::new().red());
 
     color_eyre::config::HookBuilder::new()
         .styles(styles)
