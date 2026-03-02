@@ -199,7 +199,7 @@ the necessary improvements for this to be possible as part of [RFC 2504].
 
 [RFC 2504]: https://github.com/rust-lang/rfcs/blob/master/text/2504-fix-error.md
 
-## Comparison to thiserror
+## Comparison to `thiserror`
 
 Use `eyre` if you don't think you'll do anything with an error other than
 report it. This is common in application code. Use `thiserror` if you think
