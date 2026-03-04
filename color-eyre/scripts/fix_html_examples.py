@@ -16,7 +16,7 @@ class LineType(enum.Enum):
     SOURCE = enum.auto()
 
     @classmethod
-    def from_line(cls, line: str) -> (LineType, str):
+    def from_line(cls, line: str) -> tuple[LineType, str]:
         if line.startswith("//!"):
             return (cls.OUTER_DOC, line[len("//!") :])
         elif line.startswith("///"):
