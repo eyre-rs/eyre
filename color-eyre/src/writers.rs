@@ -189,9 +189,9 @@ pub(crate) struct EnvSection<'a> {
 impl fmt::Display for EnvSection<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let v = if std::thread::panicking() {
-            panic_verbosity()
+            panic_verbosity(None)
         } else {
-            lib_verbosity()
+            lib_verbosity(None)
         };
         write!(f, "{}", BacktraceOmited(!self.bt_captured))?;
 
