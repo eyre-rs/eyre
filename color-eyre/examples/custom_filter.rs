@@ -9,18 +9,14 @@ fn main() -> Result<(), Report> {
 
     color_eyre::config::HookBuilder::default()
         .add_frame_filter(Box::new(|frames| {
-            let filters = &["custom_filter::main"];
+            let filters = ["custom_filter::main"];
 
             frames.retain(|frame| {
-                !filters.iter().any(|f| {
-                    let name = if let Some(name) = frame.name.as_ref() {
-                        name.as_str()
-                    } else {
-                        return true;
-                    };
+                let Some(name) = frame.name.as_deref() else {
+                    return true;
+                };
 
-                    name.starts_with(f)
-                })
+                !filters.iter().any(|f| name.starts_with(f))
             });
         }))
         .install()

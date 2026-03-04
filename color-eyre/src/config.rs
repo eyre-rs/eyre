@@ -638,20 +638,16 @@ impl HookBuilder {
     /// ```rust
     /// color_eyre::config::HookBuilder::default()
     ///     .add_frame_filter(Box::new(|frames| {
-    ///         let filters = &[
+    ///         let filters = [
     ///             "uninteresting_function",
     ///         ];
     ///
     ///         frames.retain(|frame| {
-    ///             !filters.iter().any(|f| {
-    ///                 let name = if let Some(name) = frame.name.as_ref() {
-    ///                     name.as_str()
-    ///                 } else {
-    ///                     return true;
-    ///                 };
+    ///             let Some(name) = frame.name.as_deref() else {
+    ///                 return true;
+    ///             };
     ///
-    ///                 name.starts_with(f)
-    ///             })
+    ///             !filters.iter().any(|f| name.starts_with(f))
     ///         });
     ///     }))
     ///     .install()
@@ -765,22 +761,18 @@ fn default_frame_filter(frames: &mut Vec<&Frame>) {
 }
 
 fn eyre_frame_filters(frames: &mut Vec<&Frame>) {
-    let filters = &[
+    let filters = [
         "<color_eyre::Handler as eyre::EyreHandler>::default",
         "eyre::",
         "color_eyre::",
     ];
 
     frames.retain(|frame| {
-        !filters.iter().any(|f| {
-            let name = if let Some(name) = frame.name.as_ref() {
-                name.as_str()
-            } else {
-                return true;
-            };
+        let Some(name) = frame.name.as_deref() else {
+            return true;
+        };
 
-            name.starts_with(f)
-        })
+        !filters.iter().any(|filter| name.starts_with(filter))
     });
 }
 
