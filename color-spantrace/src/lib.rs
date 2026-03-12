@@ -87,8 +87,9 @@
     while_true
 )]
 
+use anstream::AutoStream;
 use once_cell::sync::OnceCell;
-use owo_colors::{style, Style};
+use owo_colors::{OwoColorize, Style};
 use std::env;
 use std::fmt;
 use std::fs::File;
@@ -116,11 +117,11 @@ impl Theme {
     /// A theme for a dark background. This is the default
     pub fn dark() -> Self {
         Self {
-            file: style().purple(),
-            line_number: style().purple(),
-            active_line: style().white().bold(),
-            target: style().bright_red(),
-            fields: style().bright_cyan(),
+            file: Style::new().purple(),
+            line_number: Style::new().purple(),
+            active_line: Style::new().white().bold(),
+            target: Style::new().bright_red(),
+            fields: Style::new().bright_cyan(),
         }
     }
 
@@ -128,11 +129,11 @@ impl Theme {
     /// A theme for a light background
     pub fn light() -> Self {
         Self {
-            file: style().purple(),
-            line_number: style().purple(),
-            target: style().red(),
-            fields: style().blue(),
-            active_line: style().bold(),
+            file: Style::new().purple(),
+            line_number: Style::new().purple(),
+            target: Style::new().red(),
+            fields: Style::new().blue(),
+            active_line: Style::new().bold(),
         }
     }
 
@@ -277,15 +278,15 @@ impl Frame<'_> {
             f,
             "{:>2}: {}{}{}",
             i,
-            self.theme.target.style(self.metadata.target()),
-            self.theme.target.style("::"),
-            self.theme.target.style(self.metadata.name()),
+            style(self.metadata.target(), self.theme.target),
+            style("::", self.theme.target),
+            style(self.metadata.name(), self.theme.target),
         )
     }
 
     fn print_fields(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if !self.fields.is_empty() {
-            write!(f, " with {}", self.theme.fields.style(self.fields))?;
+            write!(f, " with {}", style(self.fields, self.theme.fields))?;
         }
 
         Ok(())
@@ -300,8 +301,8 @@ impl Frame<'_> {
             write!(
                 f,
                 "\n    at {}:{}",
-                self.theme.file.style(file),
-                self.theme.line_number.style(lineno),
+                style(file, self.theme.file),
+                style(lineno, self.theme.line_number),
             )?;
         } else {
             write!(f, "\n    at <unknown source file>")?;
@@ -338,7 +339,7 @@ impl Frame<'_> {
                     cur_line_no.to_string(),
                     line.unwrap()
                 )?;
-                write!(f, "\n{}", self.theme.active_line.style(&buf))?;
+                write!(f, "\n{}", style(&buf, self.theme.active_line))?;
                 buf.clear();
             } else {
                 write!(f, "\n{:>8} │ {}", cur_line_no, line.unwrap())?;
@@ -377,5 +378,19 @@ impl fmt::Display for ColorSpanTrace<'_> {
         });
 
         err
+    }
+}
+
+/// Apply owo_colors style if possible. Returns a string with/without ANSI
+/// escape symbols.
+fn style<S>(str: S, style: Style) -> String
+where
+    S: ToString + std::fmt::Display,
+{
+    let color_choice = AutoStream::choice(&std::io::stderr());
+
+    match color_choice {
+        anstream::ColorChoice::Never => str.to_string(),
+        _ => str.style(style).to_string(),
     }
 }
