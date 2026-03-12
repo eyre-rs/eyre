@@ -325,20 +325,25 @@
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
 //! [`backtrace::Backtrace`]: https://docs.rs/backtrace/*/backtrace/struct.Backtrace.html
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
-//! [`color-spantrace`]: https://github.com/yaahc/color-spantrace
+//! [`color-spantrace`]: https://docs.rs/color-spantrace
 //! [`Section`]: https://docs.rs/color-eyre/*/color_eyre/trait.Section.html
 //! [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
 //! [`Handler`]: https://docs.rs/color-eyre/*/color_eyre/struct.Handler.html
-//! [`examples/usage.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/usage.rs
-//! [`examples/custom_filter.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_filter.rs
-//! [`examples/custom_section.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/custom_section.rs
-//! [`examples/multiple_errors.rs`]: https://github.com/yaahc/color-eyre/blob/master/examples/multiple_errors.rs
-#![doc(html_root_url = "https://docs.rs/color-eyre/0.6.2")]
-#![cfg_attr(docsrs, feature(doc_cfg))]
+//! [`examples/usage.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/usage.rs
+//! [`examples/custom_filter.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_filter.rs
+//! [`examples/custom_section.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_section.rs
+//! [`examples/multiple_errors.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/multiple_errors.rs
+#![cfg_attr(
+    nightly,
+    feature(rustdoc_missing_doc_code_examples),
+    warn(rustdoc::missing_doc_code_examples)
+)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
+    missing_debug_implementations,
     missing_docs,
-    rustdoc::missing_doc_code_examples,
+    unsafe_op_in_unsafe_fn,
     rust_2018_idioms,
     unreachable_pub,
     bad_style,
@@ -349,13 +354,13 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
+    unconditional_recursion,
     unused,
     unused_allocation,
     unused_comparisons,
     unused_parens,
     while_true
 )]
-#![allow(clippy::try_err)]
 
 use std::sync::Arc;
 
@@ -418,7 +423,6 @@ pub struct Handler {
 
 /// The kind of type erased error being reported
 #[cfg(feature = "issue-url")]
-#[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
 pub enum ErrorKind<'a> {
     /// A non recoverable error aka `panic!`
     NonRecoverable(&'a dyn std::any::Any),

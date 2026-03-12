@@ -19,7 +19,7 @@ fn main() -> Result<(), Report> {
         .install()?;
 
     let report = read_config().unwrap_err();
-    eprintln!("Error: {:?}", report);
+    eprintln!("Error: {report:?}");
 
     read_config2();
 

@@ -11,7 +11,7 @@ fn main() {
     println!("cargo:rustc-check-cfg=cfg(eyre_no_fmt_args_capture)");
     println!("cargo:rustc-check-cfg=cfg(backtrace)");
     println!("cargo:rustc-check-cfg=cfg(eyre_no_fmt_arguments_as_str)");
-    println!("cargo:rustc-check-cfg=cfg(doc_cfg)");
+    println!("cargo:rustc-check-cfg=cfg(docsrs)");
     let ac = autocfg::new();
 
     // https://github.com/rust-lang/rust/issues/99301 [nightly]
@@ -49,7 +49,7 @@ const GENERIC_MEMBER_ACCESS_PROBE: &str = r#"
     use std::fmt::{self, Display};
 
     #[derive(Debug)]
-    struct E { 
+    struct E {
         backtrace: MyBacktrace,
     }
 

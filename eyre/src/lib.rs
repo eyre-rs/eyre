@@ -323,17 +323,17 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
-//! [`color-eyre`]: https://github.com/eyre-rs/color-eyre
+//! [`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 //! [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-//! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
-//! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
+//! [`simple-eyre`]: https://github.com/eyre-rs/eyre/tree/master/simple-eyre
+//! [`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.11")]
 #![cfg_attr(
     nightly,
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -356,7 +356,6 @@
     while_true
 )]
 #![cfg_attr(generic_member_access, feature(error_generic_member_access))]
-#![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(
     clippy::needless_doctest_main,
     clippy::new_ret_no_self,
@@ -721,11 +720,11 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
         error: &(dyn StdError + 'static),
         f: &mut core::fmt::Formatter<'_>,
     ) -> core::fmt::Result {
-        write!(f, "{}", error)?;
+        write!(f, "{error}")?;
 
         if f.alternate() {
             for cause in crate::chain::Chain::new(error).skip(1) {
-                write!(f, ": {}", cause)?;
+                write!(f, ": {cause}")?;
             }
         }
 
@@ -815,7 +814,7 @@ impl EyreHandler for DefaultHandler {
             return core::fmt::Debug::fmt(error, f);
         }
 
-        write!(f, "{}", error)?;
+        write!(f, "{error}")?;
 
         if let Some(cause) = error.source() {
             write!(f, "\n\nCaused by:")?;
@@ -823,9 +822,9 @@ impl EyreHandler for DefaultHandler {
             for (n, error) in crate::chain::Chain::new(cause).enumerate() {
                 writeln!(f)?;
                 if multiple {
-                    write!(indenter::indented(f).ind(n), "{}", error)?;
+                    write!(indenter::indented(f).ind(n), "{error}")?;
                 } else {
-                    write!(indenter::indented(f), "{}", error)?;
+                    write!(indenter::indented(f), "{error}")?;
                 }
             }
         }
@@ -834,7 +833,7 @@ impl EyreHandler for DefaultHandler {
         {
             if let Some(location) = self.location {
                 write!(f, "\n\nLocation:\n")?;
-                write!(indenter::indented(f), "{}", location)?;
+                write!(indenter::indented(f), "{location}")?;
             }
         }
 

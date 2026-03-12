@@ -1,5 +1,6 @@
 //! Configuration options for customizing the behavior of the provided panic
 //! and error reporting hooks
+#![allow(deprecated)] // for PanicHook until we bump MSRV
 use crate::{
     section::PanicMessage,
     writers::{EnvSection, WriterExt},
@@ -160,7 +161,7 @@ pub struct Frame {
 #[derive(Debug)]
 struct StyledFrame<'a>(&'a Frame, Theme);
 
-impl<'a> fmt::Display for StyledFrame<'a> {
+impl fmt::Display for StyledFrame<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let Self(frame, theme) = self;
 
@@ -271,7 +272,7 @@ impl fmt::Display for SourceSection<'_> {
                     line.style(theme.active_line),
                 )?;
             } else {
-                write!(&mut f, "{:>8} │ {}", cur_line_no, line)?;
+                write!(&mut f, "{cur_line_no:>8} │ {line}")?;
             }
             f = separated.ready();
         }
@@ -545,7 +546,6 @@ impl HookBuilder {
     ///     .unwrap();
     /// ```
     #[cfg(feature = "issue-url")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
     pub fn issue_url<S: ToString>(mut self, url: S) -> Self {
         self.issue_url = Some(url.to_string());
         self
@@ -565,7 +565,6 @@ impl HookBuilder {
     ///     .unwrap();
     /// ```
     #[cfg(feature = "issue-url")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
     pub fn add_issue_metadata<K, V>(mut self, key: K, value: V) -> Self
     where
         K: Display,
@@ -601,7 +600,6 @@ impl HookBuilder {
     ///     .unwrap();
     ///
     #[cfg(feature = "issue-url")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
     pub fn issue_filter<F>(mut self, predicate: F) -> Self
     where
         F: Fn(crate::ErrorKind<'_>) -> bool + Send + Sync + 'static,
@@ -628,7 +626,6 @@ impl HookBuilder {
     ///
     /// This will not disable the location section in a panic message.
     #[cfg(feature = "track-caller")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "track-caller")))]
     pub fn display_location_section(mut self, cond: bool) -> Self {
         self.display_location_section = cond;
         self
@@ -837,7 +834,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
     let mut separated = f.header("\n\n");
 
     if let Some(ref section) = report.hook.section {
-        write!(&mut separated.ready(), "{}", section)?;
+        write!(&mut separated.ready(), "{section}")?;
     }
 
     #[cfg(feature = "capture-spantrace")]
@@ -855,8 +852,7 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
         let fmted_bt = report.hook.format_backtrace(bt);
         write!(
             indented(&mut separated.ready()).with_format(Format::Uniform { indentation: "  " }),
-            "{}",
-            fmted_bt
+            "{fmted_bt}"
         )?;
     }
 
@@ -867,32 +863,31 @@ fn print_panic_info(report: &PanicReport<'_>, f: &mut fmt::Formatter<'_>) -> fmt
             span_trace: report.span_trace.as_ref(),
         };
 
-        write!(&mut separated.ready(), "{}", env_section)?;
+        write!(&mut separated.ready(), "{env_section}")?;
     }
 
     #[cfg(feature = "issue-url")]
     {
         let payload = report.panic_info.payload();
 
-        if report.hook.issue_url.is_some()
-            && (*report.hook.issue_filter)(crate::ErrorKind::NonRecoverable(payload))
-        {
-            let url = report.hook.issue_url.as_ref().unwrap();
-            let payload = payload
-                .downcast_ref::<String>()
-                .map(String::as_str)
-                .or_else(|| payload.downcast_ref::<&str>().cloned())
-                .unwrap_or("<non string panic payload>");
+        if let Some(url) = report.hook.issue_url.as_ref() {
+            if (*report.hook.issue_filter)(crate::ErrorKind::NonRecoverable(payload)) {
+                let payload = payload
+                    .downcast_ref::<String>()
+                    .map(String::as_str)
+                    .or_else(|| payload.downcast_ref::<&str>().cloned())
+                    .unwrap_or("<non string panic payload>");
 
-            let issue_section = crate::section::github::IssueSection::new(url, payload)
-                .with_backtrace(report.backtrace.as_ref())
-                .with_location(report.panic_info.location())
-                .with_metadata(&report.hook.issue_metadata);
+                let issue_section = crate::section::github::IssueSection::new(url, payload)
+                    .with_backtrace(report.backtrace.as_ref())
+                    .with_location(report.panic_info.location())
+                    .with_metadata(&report.hook.issue_metadata);
 
-            #[cfg(feature = "capture-spantrace")]
-            let issue_section = issue_section.with_span_trace(report.span_trace.as_ref());
+                #[cfg(feature = "capture-spantrace")]
+                let issue_section = issue_section.with_span_trace(report.span_trace.as_ref());
 
-            write!(&mut separated.ready(), "{}", issue_section)?;
+                write!(&mut separated.ready(), "{issue_section}")?;
+            }
         }
     }
 
@@ -1184,5 +1179,4 @@ pub type FilterCallback = dyn Fn(&mut Vec<&Frame>) + Send + Sync + 'static;
 
 /// Callback for filtering issue url generation in error reports
 #[cfg(feature = "issue-url")]
-#[cfg_attr(docsrs, doc(cfg(feature = "issue-url")))]
 pub type IssueFilterCallback = dyn Fn(crate::ErrorKind<'_>) -> bool + Send + Sync + 'static;

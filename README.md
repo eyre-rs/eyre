@@ -62,7 +62,7 @@ avoid using `eyre::Report` as your public error type.
     public API as well, and makes changing any of those libraries into an
     undetectable runtime breakage.
 - If many of your errors are constructed from strings you encourage your users
-  to use string comparision for reacting to specific errors which is brittle
+  to use string comparison for reacting to specific errors which is brittle
   and turns updating error messages into a potentially undetectable runtime
   breakage.
 
@@ -270,7 +270,7 @@ implements `context` for options which you can import to make existing
 [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
 [`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-[`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
+[`simple-eyre`]: https://github.com/eyre-rs/eyre/tree/master/simple-eyre
 [`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 

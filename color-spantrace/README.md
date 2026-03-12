@@ -88,11 +88,11 @@ This creates the following output
 
 ### Minimal Format
 
-![minimal format](./pictures/minimal.png)
+![minimal format](https://raw.githubusercontent.com/eyre-rs/eyre/refs/heads/master/color-spantrace/pictures/minimal.png)
 
 ### Full Format
 
-![Full format](./pictures/full.png)
+![Full format](https://raw.githubusercontent.com/eyre-rs/eyre/refs/heads/master/color-spantrace/pictures/full.png)
 
 #### License
 
