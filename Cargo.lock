@@ -102,7 +102,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "color-eyre"
-version = "0.6.5"
+version = "0.6.6"
 dependencies = [
  "ansi-parser",
  "backtrace",
@@ -123,7 +123,7 @@ dependencies = [
 
 [[package]]
 name = "color-spantrace"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "ansi-parser",
  "once_cell",
@@ -617,7 +617,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "simple-eyre"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "eyre",
  "indenter",

@@ -1,6 +1,6 @@
 [package]
 name = "simple-eyre"
-version = "0.3.1"
+version = "0.3.2"
 description = "One of the simplest error reporters one can build ontop of eyre, defining only an error report"
 documentation = "https://docs.rs/simple-eyre"
 
