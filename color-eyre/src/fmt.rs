@@ -16,6 +16,8 @@ impl fmt::Display for LocationSection<'_> {
             write!(f, "{}", loc.file().style(theme.panic_file))?;
             write!(f, ":")?;
             write!(f, "{}", loc.line().style(theme.panic_line_number))?;
+            write!(f, ":")?;
+            write!(f, "{}", loc.column().style(theme.panic_line_number))?;
         } else {
             write!(f, "<unknown>")?;
         }

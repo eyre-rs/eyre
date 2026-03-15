@@ -154,6 +154,8 @@ pub struct Frame {
     pub name: Option<String>,
     /// source line number
     pub lineno: Option<u32>,
+    /// source column number
+    pub colno: Option<u32>,
     /// source file path
     pub filename: Option<PathBuf>,
 }
@@ -212,11 +214,13 @@ impl fmt::Display for StyledFrame<'_> {
         let lineno = frame
             .lineno
             .map_or("<unknown line>".to_owned(), |x| x.to_string());
+        let colno = frame.colno.map_or(String::new(), |x| format!(":{}", x));
         write!(
             &mut separated.ready(),
-            "    at {}:{}",
+            "    at {}:{}{}",
             file.style(theme.file),
             lineno.style(theme.line_number),
+            colno.style(theme.line_number),
         )?;
 
         let v = if std::thread::panicking() {
@@ -1084,6 +1088,7 @@ impl fmt::Display for BacktraceFormatter<'_> {
             .map(|(sym, n)| Frame {
                 name: sym.name().map(|x| x.to_string()),
                 lineno: sym.lineno(),
+                colno: sym.colno(),
                 filename: sym.filename().map(|x| x.into()),
                 n,
             })
