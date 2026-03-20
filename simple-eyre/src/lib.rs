@@ -29,11 +29,6 @@
 //!
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
 //! [`eyre`]: https://docs.rs/eyre
-#![cfg_attr(
-    nightly,
-    feature(rustdoc_missing_doc_code_examples),
-    warn(rustdoc::missing_doc_code_examples)
-)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
