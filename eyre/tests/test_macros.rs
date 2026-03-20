@@ -84,7 +84,6 @@ fn test_temporaries() {
 }
 
 #[test]
-#[cfg(not(eyre_no_fmt_args_capture))]
 fn test_capture_format_args() {
     maybe_install_handler().unwrap();
 

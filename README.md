@@ -122,12 +122,9 @@ avoid using `eyre::Report` as your public error type.
   }
   ```
 
-- If using rust >1.65, a backtrace is captured and printed with the
-  error.
-
-  On nightly eyre will use the underlying error's backtrace if it has one.
-
-  In order to see backtraces, they must be enabled through the environment variables
+- A backtrace is captured and printed with the error. On nightly,
+  eyre will use the underlying error's backtrace if it has one. In order
+  to see backtraces, they must be enabled through the environment variables
   described in [`std::backtrace`]:
 
   - If you want panics and errors to both have backtraces, set
@@ -168,11 +165,20 @@ avoid using `eyre::Report` as your public error type.
   return Err(eyre!("Missing attribute: {}", missing));
   ```
 
-- On newer versions of the compiler (e.g. 1.58 and later) this macro also
-  supports format args captures.
+  A `bail!` macro is provided as a shorthand for the same early return.
+
+  ```rust
+  bail!("Missing attribute: {}", missing);
+  ```
+
+  This macro also supports format args captures.
 
   ```rust
   return Err(eyre!("Missing attribute: {missing}"));
+  ```
+
+  ```rust
+  bail!("Missing attribute: {missing}");
   ```
 
 ## No-std support
