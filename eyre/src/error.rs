@@ -488,6 +488,7 @@ impl Report {
     }
 }
 
+#[cfg(not(feature = "anyhow"))]
 impl<E> From<E> for Report
 where
     E: StdError + Send + Sync + 'static,
@@ -495,6 +496,28 @@ where
     #[cfg_attr(track_caller, track_caller)]
     fn from(error: E) -> Self {
         Report::from_std(error)
+    }
+}
+
+#[cfg(feature = "anyhow")]
+impl<E> From<E> for Report
+where
+    E: Into<anyhow::Error>,
+    Result<(), E>: anyhow::Context<(), E>,
+{
+    #[cfg_attr(track_caller, track_caller)]
+    fn from(error: E) -> Self {
+        let anyhow_error: anyhow::Error = error.into();
+        let e: Box<dyn StdError + Send + Sync + 'static> = anyhow_error.into();
+        Report::from_boxed(e)
+    }
+}
+
+#[cfg(feature = "anyhow")]
+impl From<Report> for anyhow::Error {
+    fn from(report: Report) -> Self {
+        let boxed_error: Box<dyn StdError + Send + Sync + 'static> = report.into();
+        anyhow::Error::from_boxed(boxed_error)
     }
 }
 

@@ -17,6 +17,7 @@ default = ["track-caller", "capture-spantrace"]
 capture-spantrace = ["tracing-error", "color-spantrace"]
 issue-url = ["url"]
 track-caller = []
+anyhow = ["eyre/anyhow"]
 
 [dependencies]
 eyre = { version = "1", path = "../eyre" }
