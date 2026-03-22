@@ -382,7 +382,6 @@ use core::fmt::{Debug, Display};
 
 use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
-pub use report as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use report as anyhow;
