@@ -26,7 +26,7 @@ use simple_eyre::eyre::{eyre, WrapErr, Report};
 fn main() -> Result<(), Report> {
     simple_eyre::install()?;
 
-    let e: Report = eyre!("oh no this program is just bad!");
+    let e: Report = report!("oh no this program is just bad!");
 
     Err(e).wrap_err("usage example successfully experienced a failure")
 }

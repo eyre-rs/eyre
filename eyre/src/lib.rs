@@ -158,7 +158,7 @@
 //!   # #[cfg(not(feature = "auto-install"))]
 //!   # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 //!   #
-//!   # let error: Report = eyre!("...");
+//!   # let error: Report = report!("...");
 //!   # let root_cause = &error;
 //!   #
 //!   # let ret =
@@ -207,7 +207,7 @@
 //!   }
 //!   ```
 //!
-//! - One-off error messages can be constructed using the `eyre!` macro, which
+//! - One-off error messages can be constructed using the `report!` macro, which
 //!   supports string interpolation and produces an `eyre::Report`.
 //!
 //!   ```rust
@@ -215,7 +215,7 @@
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   return Err(eyre!("Missing attribute: {}", missing));
+//!   return Err(report!("Missing attribute: {}", missing));
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -229,7 +229,7 @@
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
 //!   # #[cfg(not(eyre_no_fmt_args_capture))]
-//!   return Err(eyre!("Missing attribute: {missing}"));
+//!   return Err(report!("Missing attribute: {missing}"));
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -307,7 +307,7 @@
 //! #
 //! let opt: Option<()> = None;
 //! let result_static: Result<()> = opt.ok_or_eyre("static error message");
-//! let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
+//! let result_dynamic: Result<()> = opt.ok_or_else(|| report!("{} error message", "dynamic"));
 //! ```
 //!
 //! **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
@@ -380,14 +380,13 @@ use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
-use std::error::Error as StdError;
-
-pub use eyre as format_err;
-/// Compatibility re-export of `eyre` for interop with `anyhow`
-#[cfg(feature = "anyhow")]
-pub use eyre as anyhow;
 use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
+pub use report as format_err;
+/// Compatibility re-export of `eyre` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
+pub use report as anyhow;
+use std::error::Error as StdError;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
@@ -516,7 +515,7 @@ impl StdError for InstallError {}
 ///     install().unwrap();
 ///
 ///     // construct a report with, hopefully, our custom handler!
-///     let mut report = eyre::eyre!("hello from custom error town!");
+///     let mut report = eyre::report!("hello from custom error town!");
 ///
 ///     // manually set the custom msg for this report after it has been constructed
 ///     if let Some(handler) = report.handler_mut().downcast_mut::<Handler>() {
@@ -760,7 +759,7 @@ impl DefaultHandler {
     ///
     /// fn main() -> Result<()> {
     ///     install_default().expect("default handler inexplicably already installed");
-    ///     Err(eyre!("hello from default error city!"))
+    ///     Err(report!("hello from default error city!"))
     /// }
     ///
     /// fn install_default() -> Result<(), InstallError> {
@@ -1004,7 +1003,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 /// use eyre::{WrapErr, Report, eyre};
 ///
 /// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
-///     err.map_err(|e| eyre!(e)).wrap_err("saw a downstream error")
+///     err.map_err(|e| report!(e)).wrap_err("saw a downstream error")
 /// }
 /// ```
 ///
@@ -1148,7 +1147,7 @@ pub trait WrapErr<T, E>: context::private::Sealed {
 ///
 /// If string interpolation is required for the generated [report][Report],
 /// use [`ok_or_else`][Option::ok_or_else] instead,
-/// invoking [`eyre!`] to perform string interpolation:
+/// invoking [`report!`] to perform string interpolation:
 ///
 /// ```
 /// # #[cfg(not(feature = "auto-install"))]
@@ -1157,7 +1156,7 @@ pub trait WrapErr<T, E>: context::private::Sealed {
 ///
 /// let option: Option<()> = None;
 ///
-/// let result = option.ok_or_else(|| eyre!("{} error", "dynamic"));
+/// let result = option.ok_or_else(|| report!("{} error", "dynamic"));
 ///
 /// assert_eq!(result.unwrap_err().to_string(), "dynamic error");
 /// ```
@@ -1174,7 +1173,7 @@ pub trait OptionExt<T>: context::private::Sealed {
     /// to be lazily created from static messages in the `None` case.
     ///
     /// For dynamic error messages, use [`ok_or_else`][Option::ok_or_else],
-    /// invoking [`eyre!`] in the closure to perform string interpolation.
+    /// invoking [`report!`] in the closure to perform string interpolation.
     fn ok_or_eyre<M>(self, message: M) -> crate::Result<T>
     where
         M: Debug + Display + Send + Sync + 'static;
@@ -1221,7 +1220,7 @@ pub trait OptionExt<T>: context::private::Sealed {
 /// fn get_thing(mut things: impl Iterator<Item = u32>) -> eyre::Result<u32> {
 ///     things
 ///         .find(|&thing| thing == 42)
-///         .ok_or_else(|| eyre!("the thing wasnt in the list"))
+///         .ok_or_else(|| report!("the thing wasnt in the list"))
 /// }
 /// ```
 #[cfg(feature = "anyhow")]
@@ -1301,10 +1300,10 @@ pub mod private {
         let fmt_arguments_as_str = args.as_str();
 
         if let Some(message) = fmt_arguments_as_str {
-            // eyre!("literal"), can downcast to &'static str
+            // report!("literal"), can downcast to &'static str
             Report::msg(message)
         } else {
-            // eyre!("interpolate {var}"), can downcast to String
+            // report!("interpolate {var}"), can downcast to String
             Report::msg(fmt::format(args))
         }
     }

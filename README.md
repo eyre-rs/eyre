@@ -161,18 +161,18 @@ avoid using `eyre::Report` as your public error type.
   }
   ```
 
-- One-off error messages can be constructed using the `eyre!` macro, which
+- One-off error messages can be constructed using the `report!` macro, which
   supports string interpolation and produces an `eyre::Report`.
 
   ```rust
-  return Err(eyre!("Missing attribute: {}", missing));
+  return Err(report!("Missing attribute: {}", missing));
   ```
 
 - On newer versions of the compiler (e.g. 1.58 and later) this macro also
   supports format args captures.
 
   ```rust
-  return Err(eyre!("Missing attribute: {missing}"));
+  return Err(report!("Missing attribute: {missing}"));
   ```
 
 ## No-std support
@@ -186,7 +186,7 @@ https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c697
 
 The built in default handler has support for capturing backtrace using `rustc-1.65` or later.
 
-Backtraces are captured when an error is converted to an `eyre::Report` (such as using `?` or `eyre!`).
+Backtraces are captured when an error is converted to an `eyre::Report` (such as using `?` or `report!`).
 
 If using the nightly toolchain, backtraces will also be captured and accessed from other errors using [error_generic_member_access](https://github.com/rust-lang/rfcs/pull/2895) if available.
 
@@ -254,7 +254,7 @@ use eyre::{eyre, OptionExt, Result};
 
 let opt: Option<()> = None;
 let result_static: Result<()> = opt.ok_or_eyre("static error message");
-let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
+let result_dynamic: Result<()> = opt.ok_or_else(|| report!("{} error message", "dynamic"));
 ```
 
 **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which

@@ -1,4 +1,4 @@
-use color_eyre::{eyre::eyre, eyre::Report, Section};
+use color_eyre::{eyre::report, eyre::Report, Section};
 use thiserror::Error;
 
 fn main() -> Result<(), Report> {
@@ -16,7 +16,7 @@ fn join_errors(results: Vec<Result<(), SourceError>>) -> Result<(), Report> {
         .into_iter()
         .filter(Result::is_err)
         .map(Result::unwrap_err)
-        .fold(eyre!("encountered multiple errors"), |report, e| {
+        .fold(report!("encountered multiple errors"), |report, e| {
             report.error(e)
         });
 

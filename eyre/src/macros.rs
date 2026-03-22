@@ -1,6 +1,6 @@
 /// Return early with an error.
 ///
-/// This macro is equivalent to `return Err(eyre!(<args>))`.
+/// This macro is equivalent to `return Err(report!(<args>))`.
 ///
 /// # Example
 ///
@@ -51,19 +51,19 @@
 #[macro_export]
 macro_rules! bail {
     ($msg:literal $(,)?) => {
-        return $crate::private::Err($crate::eyre!($msg));
+        return $crate::private::Err($crate::report!($msg));
     };
     ($err:expr $(,)?) => {
-        return $crate::private::Err($crate::eyre!($err));
+        return $crate::private::Err($crate::report!($err));
     };
     ($fmt:expr, $($arg:tt)*) => {
-        return $crate::private::Err($crate::eyre!($fmt, $($arg)*));
+        return $crate::private::Err($crate::report!($fmt, $($arg)*));
     };
 }
 
 /// Return early with an error if a condition is not satisfied.
 ///
-/// This macro is equivalent to `if !$cond { return Err(eyre!(<other args>)); }`.
+/// This macro is equivalent to `if !$cond { return Err(report!(<other args>)); }`.
 ///
 /// Analogously to `assert!`, `ensure!` takes a condition and exits the function
 /// if the condition fails. Unlike `assert!`, `ensure!` returns an `eyre::Result`
@@ -112,17 +112,17 @@ macro_rules! ensure {
     };
     ($cond:expr, $msg:literal $(,)?) => {
         if !$cond {
-            return $crate::private::Err($crate::eyre!($msg));
+            return $crate::private::Err($crate::report!($msg));
         }
     };
     ($cond:expr, $err:expr $(,)?) => {
         if !$cond {
-            return $crate::private::Err($crate::eyre!($err));
+            return $crate::private::Err($crate::report!($err));
         }
     };
     ($cond:expr, $fmt:expr, $($arg:tt)*) => {
         if !$cond {
-            return $crate::private::Err($crate::eyre!($fmt, $($arg)*));
+            return $crate::private::Err($crate::report!($fmt, $($arg)*));
         }
     };
 }
@@ -142,7 +142,7 @@ macro_rules! ensure {
 ///
 /// fn lookup(key: &str) -> Result<V> {
 ///     if key.len() != 16 {
-///         return Err(eyre!("key length must be 16 characters, got {:?}", key));
+///         return Err(report!("key length must be 16 characters, got {:?}", key));
 ///     }
 ///
 ///     // ...
@@ -150,7 +150,7 @@ macro_rules! ensure {
 /// }
 /// ```
 #[macro_export]
-macro_rules! eyre {
+macro_rules! report {
     ($msg:literal $(,)?) => ({
         let error = $crate::private::format_err($crate::private::format_args!($msg));
         error

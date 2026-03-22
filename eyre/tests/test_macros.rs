@@ -2,7 +2,7 @@
 mod common;
 
 use self::common::*;
-use eyre::{ensure, eyre, Result};
+use eyre::{ensure, report, Result};
 use std::cell::Cell;
 use std::future::Future;
 use std::pin::Pin;
@@ -71,7 +71,7 @@ fn test_temporaries() {
         // time it's done evaluating, those will stick around until the
         // semicolon, which is on the other side of the await point, making the
         // enclosing future non-Send.
-        let _ = Ready(Some(eyre!("..."))).await;
+        let _ = Ready(Some(report!("..."))).await;
     });
 
     fn message(cell: Cell<&str>) -> &str {
@@ -79,7 +79,7 @@ fn test_temporaries() {
     }
 
     require_send_sync(async {
-        let _ = Ready(Some(eyre!(message(Cell::new("..."))))).await;
+        let _ = Ready(Some(report!(message(Cell::new("..."))))).await;
     });
 }
 
@@ -89,7 +89,7 @@ fn test_capture_format_args() {
     maybe_install_handler().unwrap();
 
     let var = 42;
-    let err = eyre!("interpolate {var}");
+    let err = report!("interpolate {var}");
     assert_eq!("interpolate 42", err.to_string());
 }
 
@@ -97,6 +97,6 @@ fn test_capture_format_args() {
 fn test_brace_escape() {
     maybe_install_handler().unwrap();
 
-    let err = eyre!("unterminated ${{..}} expression");
+    let err = report!("unterminated ${{..}} expression");
     assert_eq!("unterminated ${..} expression", err.to_string());
 }

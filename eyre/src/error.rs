@@ -30,10 +30,10 @@ impl Report {
     /// If the argument implements `std::error::Error`, prefer [`Report::new`]
     /// instead which preserves the underlying error's cause chain and
     /// backtrace. If the argument may or may not implement std::error::Error
-    /// now or in the future, use `eyre!(err)` which handles either way
+    /// now or in the future, use `report!(err)` which handles either way
     /// correctly.
     ///
-    /// `Report::msg("...")` is equivalent to `eyre!("...")` but occasionally
+    /// `Report::msg("...")` is equivalent to `report!("...")` but occasionally
     /// convenient in places where a function is preferable over a macro, such
     /// as iterator or stream combinators:
     ///
@@ -410,7 +410,7 @@ impl Report {
     /// # #[cfg(not(feature = "auto-install"))]
     /// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
     /// #
-    /// # let error: Report = eyre!("...");
+    /// # let error: Report = report!("...");
     /// # let root_cause = &error;
     /// #
     /// # let ret =

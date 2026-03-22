@@ -38,7 +38,7 @@ pub(crate) mod help;
 ///
 ///         if !output.status.success() {
 ///             let stderr = String::from_utf8_lossy(&output.stderr);
-///             Err(eyre!("cmd exited with non-zero status code"))
+///             Err(report!("cmd exited with non-zero status code"))
 ///                 .with_section(move || stdout.trim().to_string().header("Stdout:"))
 ///                 .with_section(move || stderr.trim().to_string().header("Stderr:"))
 ///         } else {
@@ -91,13 +91,13 @@ pub trait SectionExt: Sized {
     /// use color_eyre::{eyre::eyre, Section, SectionExt, eyre::Report};
     ///
     /// let all_in_header = "header\n   body\n   body";
-    /// let report = Err::<(), Report>(eyre!("an error occurred"))
+    /// let report = Err::<(), Report>(report!("an error occurred"))
     ///     .section(all_in_header)
     ///     .unwrap_err();
     ///
     /// let just_header = "header";
     /// let just_body = "body\nbody";
-    /// let report2 = Err::<(), Report>(eyre!("an error occurred"))
+    /// let report2 = Err::<(), Report>(report!("an error occurred"))
     ///     .section(just_body.header(just_header))
     ///     .unwrap_err();
     ///
@@ -151,7 +151,7 @@ pub trait Section: crate::private::Sealed {
     /// ```rust,should_panic
     /// use color_eyre::{eyre::eyre, eyre::Report, Section};
     ///
-    /// Err(eyre!("command failed"))
+    /// Err(report!("command failed"))
     ///     .section("Please report bugs to https://real.url/bugs")?;
     /// # Ok::<_, Report>(())
     /// ```
@@ -174,7 +174,7 @@ pub trait Section: crate::private::Sealed {
     ///
     /// let output = if !output.status.success() {
     ///     let stderr = String::from_utf8_lossy(&output.stderr);
-    ///     Err(eyre!("cmd exited with non-zero status code"))
+    ///     Err(report!("cmd exited with non-zero status code"))
     ///         .with_section(move || stderr.trim().to_string().header("Stderr:"))?
     /// } else {
     ///     String::from_utf8_lossy(&output.stdout)
@@ -202,7 +202,7 @@ pub trait Section: crate::private::Sealed {
     /// #[error("{0}")]
     /// struct StrError(&'static str);
     ///
-    /// Err(eyre!("command failed"))
+    /// Err(report!("command failed"))
     ///     .error(StrError("got one error"))
     ///     .error(StrError("got a second error"))?;
     /// # Ok::<_, Report>(())
@@ -224,7 +224,7 @@ pub trait Section: crate::private::Sealed {
     /// #[error("{0}")]
     /// struct StringError(String);
     ///
-    /// Err(eyre!("command failed"))
+    /// Err(report!("command failed"))
     ///     .with_error(|| StringError("got one error".into()))
     ///     .with_error(|| StringError("got a second error".into()))?;
     /// # Ok::<_, Report>(())

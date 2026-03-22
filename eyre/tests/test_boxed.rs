@@ -1,7 +1,7 @@
 mod common;
 
 use self::common::maybe_install_handler;
-use eyre::{eyre, Report};
+use eyre::{report, Report};
 use std::error::Error as StdError;
 use std::io;
 use thiserror::Error;
@@ -18,7 +18,7 @@ fn test_boxed_str() {
     maybe_install_handler().unwrap();
 
     let error = Box::<dyn StdError + Send + Sync>::from("oh no!");
-    let error: Report = eyre!(error);
+    let error: Report = report!(error);
     assert_eq!("oh no!", error.to_string());
     assert_eq!(
         "oh no!",
@@ -36,7 +36,7 @@ fn test_boxed_thiserror() {
     let error = MyError {
         _source: io::Error::new(io::ErrorKind::Other, "oh no!"),
     };
-    let error: Report = eyre!(error);
+    let error: Report = report!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }
 
@@ -44,8 +44,8 @@ fn test_boxed_thiserror() {
 fn test_boxed_eyre() {
     maybe_install_handler().unwrap();
 
-    let error: Report = eyre!("oh no!").wrap_err("it failed");
-    let error = eyre!(error);
+    let error: Report = report!("oh no!").wrap_err("it failed");
+    let error = report!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }
 
@@ -57,7 +57,7 @@ fn test_boxed_sources() {
         _source: io::Error::new(io::ErrorKind::Other, "oh no!"),
     };
     let error = Box::<dyn StdError + Send + Sync>::from(error);
-    let error: Report = eyre!(error).wrap_err("it failed");
+    let error: Report = report!(error).wrap_err("it failed");
     assert_eq!("it failed", error.to_string());
     assert_eq!("outer", error.source().unwrap().to_string());
     assert_eq!(

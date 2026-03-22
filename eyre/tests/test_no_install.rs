@@ -1,10 +1,10 @@
 #![cfg(not(feature = "auto-install"))]
 
-use eyre::{eyre, set_hook, DefaultHandler, Report};
+use eyre::{report, set_hook, DefaultHandler, Report};
 
 #[test]
 fn test_no_hook_panic() {
-    let panic_res = std::panic::catch_unwind(|| eyre!("this will never be displayed"));
+    let panic_res = std::panic::catch_unwind(|| report!("this will never be displayed"));
     assert!(panic_res.is_err());
 
     let downcast_res = panic_res.unwrap_err().downcast::<String>();
@@ -14,5 +14,5 @@ fn test_no_hook_panic() {
     );
 
     assert!(set_hook(Box::new(DefaultHandler::default_with)).is_ok());
-    let _error: Report = eyre!("this will be displayed if returned");
+    let _error: Report = report!("this will be displayed if returned");
 }

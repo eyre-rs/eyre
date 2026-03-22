@@ -8,7 +8,7 @@ fn main() -> eyre::Result<()> {
     install().unwrap();
 
     // construct a report with, hopefully, our custom handler!
-    let mut report = eyre::eyre!("hello from custom error town!");
+    let mut report = eyre::report!("hello from custom error town!");
 
     // manually set the custom msg for this report after it has been constructed
     if let Some(handler) = report.handler_mut().downcast_mut::<Handler>() {

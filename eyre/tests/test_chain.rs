@@ -1,10 +1,10 @@
 mod common;
 
 use self::common::maybe_install_handler;
-use eyre::{eyre, Report};
+use eyre::{report, Report};
 
 fn error() -> Report {
-    eyre!({ 0 }).wrap_err(1).wrap_err(2).wrap_err(3)
+    report!({ 0 }).wrap_err(1).wrap_err(2).wrap_err(3)
 }
 
 #[test]
