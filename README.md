@@ -91,7 +91,7 @@ avoid using `eyre::Report` as your public error type.
   the middle of.
 
   ```rust
-  use eyre::{WrapErr, Result};
+  use eyre::{ResultExt, Result};
 
   fn main() -> Result<()> {
       ...
@@ -225,8 +225,8 @@ eyre = { version = "0.6", features = ["anyhow"] }
 
 ### `Context` and `Option`
 
-As part of renaming `Context` to `WrapErr` we also intentionally do not
-implement `WrapErr` for `Option`. This decision was made because `wrap_err`
+As part of renaming `Context` to `ResultExt` we also intentionally do not
+implement `ResultExt` for `Option`. This decision was made because `wrap_err`
 implies that you're creating a new error that saves the old error as its
 `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 being somewhat meaningless.
@@ -263,7 +263,7 @@ implements `context` for options which you can import to make existing
 
 [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
-[`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
+[`eyre::ResultExt`]: https://docs.rs/eyre/*/eyre/trait.ResultExt.html
 [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 [`anyhow`]: https://github.com/dtolnay/anyhow
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html

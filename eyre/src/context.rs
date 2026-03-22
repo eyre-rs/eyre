@@ -1,5 +1,5 @@
 use crate::error::{ContextError, ErrorImpl};
-use crate::{Report, StdError, WrapErr};
+use crate::{Report, ResultExt, StdError};
 use core::fmt::{self, Debug, Display, Write};
 
 mod ext {
@@ -34,7 +34,7 @@ mod ext {
     }
 }
 
-impl<T, E> WrapErr<T, E> for Result<T, E>
+impl<T, E> ResultExt<T, E> for Result<T, E>
 where
     E: ext::StdError + Send + Sync + 'static,
 {
@@ -63,7 +63,7 @@ where
 #[cfg(feature = "anyhow")]
 impl<T, E> crate::ContextCompat<T> for Result<T, E>
 where
-    Self: WrapErr<T, E>,
+    Self: ResultExt<T, E>,
 {
     #[track_caller]
     fn context<D>(self, msg: D) -> crate::Result<T, Report>

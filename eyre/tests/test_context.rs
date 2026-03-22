@@ -3,7 +3,7 @@ mod drop;
 
 use crate::common::maybe_install_handler;
 use crate::drop::{DetectDrop, Flag};
-use eyre::{Report, Result, WrapErr};
+use eyre::{Report, Result, ResultExt};
 use std::fmt::{self, Display};
 use thiserror::Error;
 

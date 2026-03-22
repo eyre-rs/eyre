@@ -727,7 +727,7 @@ impl HookBuilder {
         };
 
         #[cfg(feature = "capture-spantrace")]
-        eyre::WrapErr::wrap_err(color_spantrace::set_theme(self.theme.into()), "could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set")?;
+        eyre::ResultExt::wrap_err(color_spantrace::set_theme(self.theme.into()), "could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set")?;
 
         Ok((panic_hook, eyre_hook))
     }
