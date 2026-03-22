@@ -10,6 +10,7 @@ fn main() {
     println!("cargo:rustc-check-cfg=cfg(generic_member_access)");
     println!("cargo:rustc-check-cfg=cfg(backtrace)");
     println!("cargo:rustc-check-cfg=cfg(docsrs)");
+
     let ac = autocfg::new();
 
     // https://github.com/rust-lang/rust/issues/99301 [nightly]

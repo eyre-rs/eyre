@@ -42,7 +42,7 @@ jobs:
           - stable
           - beta
           - nightly
-          - 1.65.0 # msrv
+          - 1.85.0 # msrv
         features:
           - "" # default
           - --no-default-features
@@ -52,12 +52,6 @@ jobs:
           - --no-default-features --features issue-url
           - --features pyo3
           - --all-features
-        # skip the following because pyo3 doesn't support this msrv
-        exclude:
-          - rust: 1.65.0
-            features: --features pyo3
-          - rust: 1.65.0
-            features: --all-features
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
