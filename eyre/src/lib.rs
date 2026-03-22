@@ -283,7 +283,7 @@
 //! `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 //! being somewhat meaningless.
 //!
-//! Instead `eyre` offers [`OptionExt::ok_or_eyre`] to yield _static_ errors from `None`,
+//! Instead `eyre` offers [`OptionExt::ok_or_report`] to yield _static_ errors from `None`,
 //! and intends for users to use the combinator functions provided by
 //! `std`, converting `Option`s to `Result`s, for _dynamic_ errors.
 //! So where you would write this with
@@ -306,7 +306,7 @@
 //! # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 //! #
 //! let opt: Option<()> = None;
-//! let result_static: Result<()> = opt.ok_or_eyre("static error message");
+//! let result_static: Result<()> = opt.ok_or_report("static error message");
 //! let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
 //! ```
 //!
@@ -1125,7 +1125,7 @@ pub trait WrapErr<T, E>: context::private::Sealed {
         F: FnOnce() -> D;
 }
 
-/// Provides the [`ok_or_eyre`][OptionExt::ok_or_eyre] method for [`Option`].
+/// Provides the [`ok_or_report`][OptionExt::ok_or_report] method for [`Option`].
 ///
 /// This trait is sealed and cannot be implemented for types outside of
 /// `eyre`.
@@ -1139,12 +1139,12 @@ pub trait WrapErr<T, E>: context::private::Sealed {
 ///
 /// let option: Option<()> = None;
 ///
-/// let result = option.ok_or_eyre("static str error");
+/// let result = option.ok_or_report("static str error");
 ///
 /// assert_eq!(result.unwrap_err().to_string(), "static str error");
 /// ```
 ///
-/// # `ok_or_eyre` vs `ok_or_else`
+/// # `ok_or_report` vs `ok_or_else`
 ///
 /// If string interpolation is required for the generated [report][Report],
 /// use [`ok_or_else`][Option::ok_or_else] instead,
@@ -1162,7 +1162,7 @@ pub trait WrapErr<T, E>: context::private::Sealed {
 /// assert_eq!(result.unwrap_err().to_string(), "dynamic error");
 /// ```
 ///
-/// `ok_or_eyre` incurs no runtime cost, as the error object
+/// `ok_or_report` incurs no runtime cost, as the error object
 /// is constructed from the provided static argument
 /// only in the `None` case.
 pub trait OptionExt<T>: context::private::Sealed {
@@ -1170,12 +1170,12 @@ pub trait OptionExt<T>: context::private::Sealed {
     /// mapping [`Some(v)`][Option::Some] to [`Ok(v)`][Result::Ok]
     /// and [`None`] to [`Report`].
     ///
-    /// `ok_or_eyre` allows for eyre [`Report`] error objects
+    /// `ok_or_report` allows for eyre [`Report`] error objects
     /// to be lazily created from static messages in the `None` case.
     ///
     /// For dynamic error messages, use [`ok_or_else`][Option::ok_or_else],
     /// invoking [`eyre!`] in the closure to perform string interpolation.
-    fn ok_or_eyre<M>(self, message: M) -> crate::Result<T>
+    fn ok_or_report<M>(self, message: M) -> crate::Result<T>
     where
         M: Debug + Display + Send + Sync + 'static;
 }
