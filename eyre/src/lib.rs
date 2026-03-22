@@ -382,7 +382,6 @@ use core::fmt::{Debug, Display};
 
 use std::error::Error as StdError;
 
-pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
