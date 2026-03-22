@@ -362,6 +362,19 @@
     clippy::wrong_self_convention
 )]
 
+/// Contains commonly imported items.
+pub mod prelude {
+    pub use crate::bail;
+    pub use crate::ensure;
+    pub use crate::report;
+
+    pub use crate::Report;
+    pub use crate::Result;
+
+    pub use crate::OptionExt;
+    pub use crate::ResultExt;
+}
+
 extern crate alloc;
 
 #[macro_use]
