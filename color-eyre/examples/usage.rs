@@ -1,4 +1,4 @@
-use color_eyre::{eyre::Report, eyre::WrapErr, Section};
+use color_eyre::{eyre::Report, eyre::ResultExt, Section};
 use tracing::{info, instrument};
 
 #[instrument]

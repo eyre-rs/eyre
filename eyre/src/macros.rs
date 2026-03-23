@@ -140,7 +140,7 @@ macro_rules! ensure {
 /// ```
 /// # type V = ();
 /// #
-/// use eyre::{eyre, Result};
+/// use eyre::{report, Result};
 ///
 /// fn lookup(key: &str) -> Result<V> {
 ///     if key.len() != 16 {

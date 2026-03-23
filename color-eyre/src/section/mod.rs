@@ -21,7 +21,7 @@ pub(crate) mod help;
 /// # Examples
 ///
 /// ```rust
-/// use color_eyre::{eyre::eyre, SectionExt, Section, eyre::Report};
+/// use color_eyre::{eyre::report, SectionExt, Section, eyre::Report};
 /// use std::process::Command;
 /// use tracing::instrument;
 ///
@@ -88,7 +88,7 @@ pub trait SectionExt: Sized {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use color_eyre::{eyre::eyre, Section, SectionExt, eyre::Report};
+    /// use color_eyre::{eyre::report, Section, SectionExt, eyre::Report};
     ///
     /// let all_in_header = "header\n   body\n   body";
     /// let report = Err::<(), Report>(report!("an error occurred"))
@@ -149,7 +149,7 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section};
+    /// use color_eyre::{eyre::report, eyre::Report, Section};
     ///
     /// Err(report!("command failed"))
     ///     .section("Please report bugs to https://real.url/bugs")?;
@@ -165,7 +165,7 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section, SectionExt};
+    /// use color_eyre::{eyre::report, eyre::Report, Section, SectionExt};
     ///
     /// # #[cfg(not(miri))]
     /// # {
@@ -195,7 +195,7 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section};
+    /// use color_eyre::{eyre::report, eyre::Report, Section};
     /// use thiserror::Error;
     ///
     /// #[derive(Debug, Error)]
@@ -217,7 +217,7 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section};
+    /// use color_eyre::{eyre::report, eyre::Report, Section};
     /// use thiserror::Error;
     ///
     /// #[derive(Debug, Error)]

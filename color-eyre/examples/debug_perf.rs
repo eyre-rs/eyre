@@ -2,7 +2,7 @@
 
 use color_eyre::{
     eyre::Report,
-    eyre::{report, WrapErr},
+    eyre::{report, ResultExt},
     Section,
 };
 use tracing::instrument;
