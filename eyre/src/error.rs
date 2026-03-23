@@ -913,6 +913,3 @@ impl AsRef<dyn StdError> for Report {
         &**self
     }
 }
-
-#[cfg(feature = "pyo3")]
-mod pyo3_compat;
