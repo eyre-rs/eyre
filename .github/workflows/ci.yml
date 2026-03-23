@@ -50,6 +50,7 @@ jobs:
           - --no-default-features --features auto-install
           - --no-default-features --features capture-spantrace
           - --no-default-features --features issue-url
+          - --no-default-features --features anyhow
           - --features pyo3
           - --all-features
     steps:
