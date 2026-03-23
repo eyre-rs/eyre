@@ -13,7 +13,7 @@ pub fn bail_fmt() -> Result<()> {
 }
 
 pub fn bail_error() -> Result<()> {
-    bail!(io::Error::new(io::ErrorKind::Other, "oh no!"));
+    bail!(io::Error::other("oh no!"));
 }
 
 // Tests are multithreaded- use OnceCell to install hook once if auto-install
