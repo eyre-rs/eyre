@@ -1,6 +1,6 @@
 use color_eyre::{
     eyre::Report,
-    eyre::{eyre, WrapErr},
+    eyre::{eyre, ResultExt},
     Section, SectionExt,
 };
 use std::process::Command;

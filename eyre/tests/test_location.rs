@@ -44,7 +44,7 @@ fn test_wrap_err() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
-    use eyre::WrapErr;
+    use eyre::ResultExt;
     let err = read_path("totally_fake_path")
         .wrap_err("oopsie")
         .unwrap_err();
@@ -74,7 +74,7 @@ fn test_wrap_err_with() {
         Box::new(LocationHandler::new(expected_location))
     }));
 
-    use eyre::WrapErr;
+    use eyre::ResultExt;
     let err = read_path("totally_fake_path")
         .wrap_err_with(|| "oopsie")
         .unwrap_err();

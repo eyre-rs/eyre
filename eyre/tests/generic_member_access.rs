@@ -8,7 +8,7 @@ mod common;
 fn generic_member_access() {
     use crate::common::maybe_install_handler;
 
-    use eyre::WrapErr;
+    use eyre::ResultExt;
     use std::backtrace::Backtrace;
     use std::fmt::Display;
 

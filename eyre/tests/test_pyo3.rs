@@ -2,7 +2,7 @@
 
 use pyo3::prelude::*;
 
-use eyre::{bail, Result, WrapErr};
+use eyre::{bail, Result, ResultExt};
 use std::ffi::CStr;
 
 fn f() -> Result<()> {
