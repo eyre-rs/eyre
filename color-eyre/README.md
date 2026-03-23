@@ -209,7 +209,7 @@ For an example of how to setup custom filters, check out [`examples/custom_filte
 [`eyre::Report`]: https://docs.rs/eyre/*/eyre/struct.Report.html
 [`eyre::Result`]: https://docs.rs/eyre/*/eyre/type.Result.html
 [`Handler`]: https://docs.rs/color-eyre/*/color_eyre/struct.Handler.html
-[`examples/usage.rs`]: https://github.com/eyre-rs/color-eyre/blob/master/examples/usage.rs
+[`examples/usage.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/usage.rs
 [`examples/custom_filter.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_filter.rs
 [`examples/custom_section.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_section.rs
 [`examples/multiple_errors.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/multiple_errors.rs

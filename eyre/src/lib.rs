@@ -171,8 +171,8 @@
 //!   # ;
 //!   ```
 //!
-//! - If using the nightly channel, a backtrace is captured and printed with the
-//!   error if the underlying error type does not already provide its own. In order
+//! - A backtrace is captured and printed with the error. On nightly,
+//!   eyre will use the underlying error's backtrace if it has one. In order
 //!   to see backtraces, they must be enabled through the environment variables
 //!   described in [`std::backtrace`]:
 //!
@@ -220,16 +220,36 @@
 //!   # }
 //!   ```
 //!
-//! - On newer versions of the compiler (i.e. 1.58 and later) this macro also
-//!   supports format args captures.
+//!   A `bail!` macro is provided as a shorthand for the same early return.
+//!
+//!   ```rust
+//!   # use eyre::{bail, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   bail!("Missing attribute: {}", missing);
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   This macro also supports format args captures.
 //!
 //!   ```rust
 //!   # use eyre::{eyre, Result};
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   # #[cfg(not(eyre_no_fmt_args_capture))]
 //!   return Err(eyre!("Missing attribute: {missing}"));
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   ```rust
+//!   # use eyre::{bail, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   bail!("Missing attribute: {missing}");
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -267,12 +287,12 @@
 //!
 //! ### Disabling the compatibility layer
 //!
-//! The `anyhow` compatibility layer is enabled by default.
-//! If you do not need anyhow compatibility, it is advisable
-//! to disable the `"anyhow"` feature:
+//! The `anyhow` compatibility layer is disabled by default.
+//! If you need anyhow compatibility, it is advisable
+//! to enable the `"anyhow"` feature:
 //!
 //! ```toml
-//! eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+//! eyre = { version = "0.6", features = ["anyhow"] }
 //! ```
 //!
 //! ### `Context` and `Option`
@@ -323,17 +343,17 @@
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
 //! [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
-//! [`color-eyre`]: https://github.com/eyre-rs/color-eyre
+//! [`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 //! [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-//! [`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
-//! [`color-spantrace`]: https://github.com/eyre-rs/color-spantrace
+//! [`simple-eyre`]: https://github.com/eyre-rs/eyre/tree/master/simple-eyre
+//! [`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 //! [`color-backtrace`]: https://github.com/athre0z/color-backtrace
-#![doc(html_root_url = "https://docs.rs/eyre/0.6.11")]
 #![cfg_attr(
     nightly,
     feature(rustdoc_missing_doc_code_examples),
     warn(rustdoc::missing_doc_code_examples)
 )]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
     missing_docs,
@@ -356,7 +376,6 @@
     while_true
 )]
 #![cfg_attr(generic_member_access, feature(error_generic_member_access))]
-#![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(
     clippy::needless_doctest_main,
     clippy::new_ret_no_self,
@@ -382,19 +401,12 @@ use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
 use std::error::Error as StdError;
+use std::sync::OnceLock;
 
-pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
 use ptr::OwnedPtr;
-use std::sync::OnceLock;
-#[cfg(feature = "anyhow")]
-#[doc(hidden)]
-pub use DefaultHandler as DefaultContext;
-#[cfg(feature = "anyhow")]
-#[doc(hidden)]
-pub use EyreHandler as EyreContext;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
@@ -721,11 +733,11 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
         error: &(dyn StdError + 'static),
         f: &mut core::fmt::Formatter<'_>,
     ) -> core::fmt::Result {
-        write!(f, "{}", error)?;
+        write!(f, "{error}")?;
 
         if f.alternate() {
             for cause in crate::chain::Chain::new(error).skip(1) {
-                write!(f, ": {}", cause)?;
+                write!(f, ": {cause}")?;
             }
         }
 
@@ -815,7 +827,7 @@ impl EyreHandler for DefaultHandler {
             return core::fmt::Debug::fmt(error, f);
         }
 
-        write!(f, "{}", error)?;
+        write!(f, "{error}")?;
 
         if let Some(cause) = error.source() {
             write!(f, "\n\nCaused by:")?;
@@ -823,9 +835,9 @@ impl EyreHandler for DefaultHandler {
             for (n, error) in crate::chain::Chain::new(cause).enumerate() {
                 writeln!(f)?;
                 if multiple {
-                    write!(indenter::indented(f).ind(n), "{}", error)?;
+                    write!(indenter::indented(f).ind(n), "{error}")?;
                 } else {
-                    write!(indenter::indented(f), "{}", error)?;
+                    write!(indenter::indented(f), "{error}")?;
                 }
             }
         }
@@ -834,7 +846,7 @@ impl EyreHandler for DefaultHandler {
         {
             if let Some(location) = self.location {
                 write!(f, "\n\nLocation:\n")?;
-                write!(indenter::indented(f), "{}", location)?;
+                write!(indenter::indented(f), "{location}")?;
             }
         }
 
@@ -1302,9 +1314,6 @@ pub mod private {
     #[cold]
     #[cfg_attr(track_caller, track_caller)]
     pub fn format_err(args: Arguments<'_>) -> Report {
-        #[cfg(eyre_no_fmt_arguments_as_str)]
-        let fmt_arguments_as_str: Option<&str> = None;
-        #[cfg(not(eyre_no_fmt_arguments_as_str))]
         let fmt_arguments_as_str = args.as_str();
 
         if let Some(message) = fmt_arguments_as_str {

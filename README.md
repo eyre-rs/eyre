@@ -62,7 +62,7 @@ avoid using `eyre::Report` as your public error type.
     public API as well, and makes changing any of those libraries into an
     undetectable runtime breakage.
 - If many of your errors are constructed from strings you encourage your users
-  to use string comparision for reacting to specific errors which is brittle
+  to use string comparison for reacting to specific errors which is brittle
   and turns updating error messages into a potentially undetectable runtime
   breakage.
 
@@ -122,12 +122,9 @@ avoid using `eyre::Report` as your public error type.
   }
   ```
 
-- If using rust >1.65, a backtrace is captured and printed with the
-  error.
-
-  On nightly eyre will use the underlying error's backtrace if it has one.
-
-  In order to see backtraces, they must be enabled through the environment variables
+- A backtrace is captured and printed with the error. On nightly,
+  eyre will use the underlying error's backtrace if it has one. In order
+  to see backtraces, they must be enabled through the environment variables
   described in [`std::backtrace`]:
 
   - If you want panics and errors to both have backtraces, set
@@ -168,11 +165,20 @@ avoid using `eyre::Report` as your public error type.
   return Err(eyre!("Missing attribute: {}", missing));
   ```
 
-- On newer versions of the compiler (e.g. 1.58 and later) this macro also
-  supports format args captures.
+  A `bail!` macro is provided as a shorthand for the same early return.
+
+  ```rust
+  bail!("Missing attribute: {}", missing);
+  ```
+
+  This macro also supports format args captures.
 
   ```rust
   return Err(eyre!("Missing attribute: {missing}"));
+  ```
+
+  ```rust
+  bail!("Missing attribute: {missing}");
   ```
 
 ## No-std support
@@ -215,12 +221,12 @@ vice-versa by `re-exporting` all of the renamed APIs with the names used in
 
 ### Disabling the compatibility layer
 
-The `anyhow` compatibility layer is enabled by default.
-If you do not need anyhow compatibility, it is advisable
-to disable the `"anyhow"` feature:
+The `anyhow` compatibility layer is disabled by default.
+If you need anyhow compatibility, it is advisable
+to enable the `"anyhow"` feature:
 
 ```toml
-eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+eyre = { version = "0.6", features = ["anyhow"] }
 ```
 
 ### `Context` and `Option`
@@ -270,7 +276,7 @@ implements `context` for options which you can import to make existing
 [`stable-eyre`]: https://github.com/eyre-rs/stable-eyre
 [`color-eyre`]: https://github.com/eyre-rs/eyre/tree/master/color-eyre
 [`jane-eyre`]: https://github.com/yaahc/jane-eyre
-[`simple-eyre`]: https://github.com/eyre-rs/simple-eyre
+[`simple-eyre`]: https://github.com/eyre-rs/eyre/tree/master/simple-eyre
 [`color-spantrace`]: https://github.com/eyre-rs/eyre/tree/master/color-spantrace
 [`color-backtrace`]: https://github.com/athre0z/color-backtrace
 

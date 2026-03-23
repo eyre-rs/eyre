@@ -1,4 +1,5 @@
 //! Helpers for adding custom sections to error reports
+#![allow(deprecated)] // for PanicHook until we bump MSRV
 use crate::writers::WriterExt;
 use std::fmt::{self, Display};
 

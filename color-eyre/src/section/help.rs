@@ -275,7 +275,7 @@ impl Display for HelpInfo {
                 "Suggestion".style(theme.help_info_suggestion),
                 suggestion
             ),
-            HelpInfo::Custom(section) => write!(f, "{}", section),
+            HelpInfo::Custom(section) => write!(f, "{section}"),
             HelpInfo::Error(error, theme) => {
                 // a lot here
                 let errors = std::iter::successors(
@@ -300,19 +300,19 @@ impl fmt::Debug for HelpInfo {
         match self {
             HelpInfo::Note(note, ..) => f
                 .debug_tuple("Note")
-                .field(&format_args!("{}", note))
+                .field(&format_args!("{note}"))
                 .finish(),
             HelpInfo::Warning(warning, ..) => f
                 .debug_tuple("Warning")
-                .field(&format_args!("{}", warning))
+                .field(&format_args!("{warning}"))
                 .finish(),
             HelpInfo::Suggestion(suggestion, ..) => f
                 .debug_tuple("Suggestion")
-                .field(&format_args!("{}", suggestion))
+                .field(&format_args!("{suggestion}"))
                 .finish(),
             HelpInfo::Custom(custom, ..) => f
                 .debug_tuple("CustomSection")
-                .field(&format_args!("{}", custom))
+                .field(&format_args!("{custom}"))
                 .finish(),
             HelpInfo::Error(error, ..) => f.debug_tuple("Error").field(error).finish(),
         }

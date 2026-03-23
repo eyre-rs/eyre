@@ -101,7 +101,7 @@ our more experienced community members will be happy to help.
 
 You can improve Eyre's ecosystem by building your own
 [EyreHandler](https://docs.rs/eyre/0.6.8/eyre/trait.EyreHandler.html) crates
-like [color-eyre](https://github.com/eyre-rs/color-eyre/). The customizable
+like [color-eyre](https://github.com/eyre-rs/eyre/tree/master/color-eyre/). The customizable
 reporting of `eyre` is it's secret sauce, using that customizability in
 creative ways and sharing your work is one of the best ways you can inspire
 others and help grow our community.
@@ -164,8 +164,7 @@ There are three main places you can check for things to review:
 
 1. Pull request which are ready and in need of more reviews on
    [eyre](https://github.com/eyre-rs/eyre/pulls?q=is%3Aopen+is%3Apr+-label%3AS-Ready-For-Final-Review+-draft%3A%3Atrue+-label%3AS-Needs-RFC+-reviewed-by%3A%40me+-author%3A%40me)
-2. Pull requests on [eyre](https://github.com/eyre-rs/eyre/pulls) and the
-   [color-eyre](https://github.com/eyre-rs/color-eyre/pulls) repos.
+2. Pull requests on [eyre](https://github.com/eyre-rs/eyre/pulls) repo.
 
 Not even our Circle Members are exempt from reviews! By giving feedback on this
 work (and related supporting work), you can help us make sure our releases are

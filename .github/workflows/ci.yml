@@ -22,7 +22,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -36,45 +36,27 @@ jobs:
     name: Test Suite
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         rust:
           - stable
           - beta
           - nightly
+          - 1.85.0 # msrv
         features:
-          - # default
+          - "" # default
           - --no-default-features
           - --no-default-features --features track-caller
           - --no-default-features --features auto-install
+          - --no-default-features --features capture-spantrace
+          - --no-default-features --features issue-url
           - --features pyo3
           - --all-features
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all ${{ matrix.features }}
-
-  test-msrv:
-    name: Test Suite
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        features:
-          - # default
-          - --no-default-features
-          - --no-default-features --features track-caller
-          - --no-default-features --features auto-install
-          # skip `--features pyo3` and `--all-features` because pyo3 doesn't support this msrv
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.65
           override: true
       - uses: actions-rs/cargo@v1
         with:
@@ -85,10 +67,11 @@ jobs:
     name: Test Suite
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -99,6 +82,23 @@ jobs:
           command: test
           args: --all
 
+  # Fix failing tests
+  # test-wasm:
+  #   name: Test Suite (wasm)
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         target: wasm32-unknown-unknown
+  #         toolchain: stable
+  #         override: true
+  #     - name: install test runner for wasm
+  #       run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  #     - name: run wasm tests
+  #       run: wasm-pack test --node
+  #       working-directory: color-eyre
+
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
@@ -107,7 +107,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -116,7 +116,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --check
+          args: --all --check
 
   clippy:
     name: Clippy
@@ -126,7 +126,7 @@ jobs:
         rust:
           - stable
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
@@ -140,7 +140,7 @@ jobs:
     name: Miri
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
