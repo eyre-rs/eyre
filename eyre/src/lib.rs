@@ -401,11 +401,11 @@ use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
 use std::error::Error as StdError;
+use std::sync::OnceLock;
 
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
-use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
 #[doc(hidden)]
 pub use Report as ErrReport;
@@ -497,7 +497,7 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
-static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+static HOOK: OnceLock<ErrorHook> = OnceLock::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]

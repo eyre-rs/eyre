@@ -109,7 +109,6 @@ dependencies = [
  "color-spantrace",
  "eyre",
  "indenter",
- "once_cell",
  "owo-colors",
  "pretty_assertions",
  "rustversion",
@@ -126,7 +125,6 @@ name = "color-spantrace"
 version = "0.3.0"
 dependencies = [
  "ansi-parser",
- "once_cell",
  "owo-colors",
  "tracing",
  "tracing-core",
@@ -165,7 +163,6 @@ dependencies = [
  "backtrace",
  "futures",
  "indenter",
- "once_cell",
  "pyo3",
  "rustversion",
  "syn",
