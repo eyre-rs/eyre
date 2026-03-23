@@ -8,9 +8,7 @@ fn main() {
     println!("cargo:rustc-check-cfg=cfg(nightly)");
     println!("cargo:rustc-check-cfg=cfg(track_caller)");
     println!("cargo:rustc-check-cfg=cfg(generic_member_access)");
-    println!("cargo:rustc-check-cfg=cfg(eyre_no_fmt_args_capture)");
     println!("cargo:rustc-check-cfg=cfg(backtrace)");
-    println!("cargo:rustc-check-cfg=cfg(eyre_no_fmt_arguments_as_str)");
     println!("cargo:rustc-check-cfg=cfg(docsrs)");
     let ac = autocfg::new();
 
@@ -24,14 +22,6 @@ fn main() {
 
     // https://github.com/rust-lang/rust/issues/47809 [rustc-1.46]
     ac.emit_expression_cfg("std::panic::Location::caller", "track_caller");
-
-    if ac.probe_rustc_version(1, 52) {
-        autocfg::emit("eyre_no_fmt_arguments_as_str");
-    }
-
-    if ac.probe_rustc_version(1, 58) {
-        autocfg::emit("eyre_no_fmt_args_capture");
-    }
 
     if ac.probe_rustc_version(1, 65) {
         autocfg::emit("backtrace")
