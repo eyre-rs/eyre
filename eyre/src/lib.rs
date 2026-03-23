@@ -171,8 +171,8 @@
 //!   # ;
 //!   ```
 //!
-//! - If using the nightly channel, a backtrace is captured and printed with the
-//!   error if the underlying error type does not already provide its own. In order
+//! - A backtrace is captured and printed with the error. On nightly,
+//!   eyre will use the underlying error's backtrace if it has one. In order
 //!   to see backtraces, they must be enabled through the environment variables
 //!   described in [`std::backtrace`]:
 //!
@@ -220,16 +220,36 @@
 //!   # }
 //!   ```
 //!
-//! - On newer versions of the compiler (i.e. 1.58 and later) this macro also
-//!   supports format args captures.
+//!   A `bail!` macro is provided as a shorthand for the same early return.
+//!
+//!   ```rust
+//!   # use eyre::{bail, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   bail!("Missing attribute: {}", missing);
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   This macro also supports format args captures.
 //!
 //!   ```rust
 //!   # use eyre::{eyre, Result};
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   # #[cfg(not(eyre_no_fmt_args_capture))]
 //!   return Err(eyre!("Missing attribute: {missing}"));
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   ```rust
+//!   # use eyre::{bail, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   bail!("Missing attribute: {missing}");
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -381,12 +401,11 @@ use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
 use std::error::Error as StdError;
+use std::sync::OnceLock;
 
-pub use eyre as format_err;
 /// Compatibility re-export of `eyre` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use eyre as anyhow;
-use once_cell::sync::OnceCell;
 use ptr::OwnedPtr;
 #[doc(hidden)]
 pub use Report as ErrReport;
@@ -478,7 +497,7 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
-static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+static HOOK: OnceLock<ErrorHook> = OnceLock::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]
@@ -1295,9 +1314,6 @@ pub mod private {
     #[cold]
     #[cfg_attr(track_caller, track_caller)]
     pub fn format_err(args: Arguments<'_>) -> Report {
-        #[cfg(eyre_no_fmt_arguments_as_str)]
-        let fmt_arguments_as_str: Option<&str> = None;
-        #[cfg(not(eyre_no_fmt_arguments_as_str))]
         let fmt_arguments_as_str = args.as_str();
 
         if let Some(message) = fmt_arguments_as_str {

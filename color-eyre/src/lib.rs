@@ -334,11 +334,6 @@
 //! [`examples/custom_filter.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_filter.rs
 //! [`examples/custom_section.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/custom_section.rs
 //! [`examples/multiple_errors.rs`]: https://github.com/eyre-rs/eyre/blob/master/color-eyre/examples/multiple_errors.rs
-#![cfg_attr(
-    nightly,
-    feature(rustdoc_missing_doc_code_examples),
-    warn(rustdoc::missing_doc_code_examples)
-)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![warn(
     missing_debug_implementations,
