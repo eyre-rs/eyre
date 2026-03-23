@@ -60,7 +60,7 @@ fn test_fmt_source() {
 fn test_io_source() {
     maybe_install_handler().unwrap();
 
-    let io = io::Error::new(io::ErrorKind::Other, "oh no!");
+    let io = io::Error::other("oh no!");
     let error: Report = report!(TestError::Io(io));
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }

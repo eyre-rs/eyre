@@ -136,7 +136,7 @@
 //!   mutable reference as needed.
 //!
 //!   ```rust
-//!   # use eyre::{Report, eyre};
+//!   # use eyre::{Report, report};
 //!   # use std::fmt::{self, Display};
 //!   # use std::task::Poll;
 //!   #
@@ -171,8 +171,8 @@
 //!   # ;
 //!   ```
 //!
-//! - If using the nightly channel, a backtrace is captured and printed with the
-//!   error if the underlying error type does not already provide its own. In order
+//! - A backtrace is captured and printed with the error. On nightly,
+//!   eyre will use the underlying error's backtrace if it has one. In order
 //!   to see backtraces, they must be enabled through the environment variables
 //!   described in [`std::backtrace`]:
 //!
@@ -220,16 +220,36 @@
 //!   # }
 //!   ```
 //!
-//! - On newer versions of the compiler (i.e. 1.58 and later) this macro also
-//!   supports format args captures.
+//!   A `bail!` macro is provided as a shorthand for the same early return.
 //!
 //!   ```rust
-//!   # use eyre::{eyre, Result};
+//!   # use eyre::{bail, Result};
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   # #[cfg(not(eyre_no_fmt_args_capture))]
+//!   bail!("Missing attribute: {}", missing);
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   This macro also supports format args captures.
+//!
+//!   ```rust
+//!   # use eyre::{report, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
 //!   return Err(report!("Missing attribute: {missing}"));
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   ```rust
+//!   # use eyre::{bail, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   bail!("Missing attribute: {missing}");
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -380,9 +400,10 @@ use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
+
 use ptr::OwnedPtr;
-/// Compatibility re-export of `eyre` for interop with `anyhow`
+/// Compatibility re-export of `report` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use report as anyhow;
 use std::error::Error as StdError;
@@ -476,7 +497,7 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
-static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+static HOOK: OnceLock<ErrorHook> = OnceLock::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]
@@ -999,7 +1020,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///
 /// ```rust
 /// use std::error::Error;
-/// use eyre::{WrapErr, Report, eyre};
+/// use eyre::{WrapErr, Report, report};
 ///
 /// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
 ///     err.map_err(|e| report!(e)).wrap_err("saw a downstream error")
@@ -1151,7 +1172,7 @@ pub trait WrapErr<T, E>: context::private::Sealed {
 /// ```
 /// # #[cfg(not(feature = "auto-install"))]
 /// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
-/// use eyre::eyre;
+/// use eyre::report;
 ///
 /// let option: Option<()> = None;
 ///
@@ -1214,7 +1235,7 @@ pub trait OptionExt<T>: context::private::Sealed {
 /// We encourage you to use this:
 ///
 /// ```rust
-/// use eyre::eyre;
+/// use eyre::report;
 ///
 /// fn get_thing(mut things: impl Iterator<Item = u32>) -> eyre::Result<u32> {
 ///     things
@@ -1293,9 +1314,6 @@ pub mod private {
     #[cold]
     #[cfg_attr(track_caller, track_caller)]
     pub fn format_err(args: Arguments<'_>) -> Report {
-        #[cfg(eyre_no_fmt_arguments_as_str)]
-        let fmt_arguments_as_str: Option<&str> = None;
-        #[cfg(not(eyre_no_fmt_arguments_as_str))]
         let fmt_arguments_as_str = args.as_str();
 
         if let Some(message) = fmt_arguments_as_str {

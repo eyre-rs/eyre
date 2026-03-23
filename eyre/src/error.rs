@@ -388,7 +388,7 @@ impl Report {
     /// # Example
     ///
     /// ```
-    /// # use eyre::{Report, eyre};
+    /// # use eyre::{Report, report};
     /// # use std::fmt::{self, Display};
     /// # use std::task::Poll;
     /// #

@@ -34,7 +34,7 @@ fn test_boxed_thiserror() {
     maybe_install_handler().unwrap();
 
     let error = MyError {
-        _source: io::Error::new(io::ErrorKind::Other, "oh no!"),
+        _source: io::Error::other("oh no!"),
     };
     let error: Report = report!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
@@ -54,7 +54,7 @@ fn test_boxed_sources() {
     maybe_install_handler().unwrap();
 
     let error = MyError {
-        _source: io::Error::new(io::ErrorKind::Other, "oh no!"),
+        _source: io::Error::other("oh no!"),
     };
     let error = Box::<dyn StdError + Send + Sync>::from(error);
     let error: Report = report!(error).wrap_err("it failed");
