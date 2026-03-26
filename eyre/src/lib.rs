@@ -950,7 +950,7 @@ pub struct Chain<'a> {
 ///     Ok(())
 /// }
 /// ```
-pub type Result<T, E = Report> = core::result::Result<T, E>;
+pub type Result<T = (), E = Report> = core::result::Result<T, E>;
 
 /// Provides the `wrap_err` method for `Result`.
 ///
