@@ -1,4 +1,4 @@
-use color_eyre::{eyre::eyre, eyre::Report, Section};
+use color_eyre::{Section, eyre::Report, eyre::eyre};
 use thiserror::Error;
 
 fn main() -> Result<(), Report> {
@@ -35,7 +35,9 @@ fn get_errors() -> Vec<Result<(), SourceError>> {
             msg: "The machine is unreachable",
         }),
         Err(SourceError {
-            _source: StrError("The file you're parsing is literally written in c++ instead of rust, what the hell"),
+            _source: StrError(
+                "The file you're parsing is literally written in c++ instead of rust, what the hell",
+            ),
             msg: "The file could not be parsed",
         }),
     ]

@@ -1,8 +1,8 @@
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::SeqCst;
-use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct Flag {

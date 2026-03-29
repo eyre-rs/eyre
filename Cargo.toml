@@ -8,7 +8,7 @@ members = [
 
 [workspace.package]
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
-edition = "2018"
+edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/eyre-rs/eyre"
 readme = "README.md"

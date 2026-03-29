@@ -4,7 +4,7 @@
 
 //! See "tests/theme.rs" for more information.
 
-use color_eyre::{eyre::Report, Section};
+use color_eyre::{Section, eyre::Report};
 
 #[rustfmt::skip]
 #[derive(Debug, thiserror::Error)]
@@ -39,12 +39,12 @@ fn main() {
 }
 
 fn setup() {
-    std::env::set_var("RUST_BACKTRACE", "1");
+    unsafe { std::env::set_var("RUST_BACKTRACE", "1") };
 
     #[cfg(feature = "capture-spantrace")]
     {
         use tracing_subscriber::prelude::*;
-        use tracing_subscriber::{fmt, EnvFilter};
+        use tracing_subscriber::{EnvFilter, fmt};
 
         let fmt_layer = fmt::layer().with_target(false);
         let filter_layer = EnvFilter::try_from_default_env()

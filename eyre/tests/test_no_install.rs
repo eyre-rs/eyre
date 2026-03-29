@@ -1,6 +1,6 @@
 #![cfg(not(feature = "auto-install"))]
 
-use eyre::{eyre, set_hook, DefaultHandler, Report};
+use eyre::{DefaultHandler, Report, eyre, set_hook};
 
 #[test]
 fn test_no_hook_panic() {
