@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use eyre::{bail, set_hook, DefaultHandler, InstallError, Result};
+use eyre::{DefaultHandler, InstallError, Result, bail, set_hook};
 use std::io;
 use std::sync::OnceLock;
 

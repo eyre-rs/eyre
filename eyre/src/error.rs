@@ -1,6 +1,6 @@
+use crate::EyreHandler;
 use crate::chain::Chain;
 use crate::ptr::{MutPtr, OwnedPtr, RefPtr};
-use crate::EyreHandler;
 use crate::{Report, StdError};
 use core::any::TypeId;
 use core::fmt::{self, Debug, Display};

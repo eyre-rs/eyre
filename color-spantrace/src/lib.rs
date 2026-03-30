@@ -82,7 +82,7 @@
     while_true
 )]
 
-use owo_colors::{style, Style};
+use owo_colors::{Style, style};
 use std::env;
 use std::fmt;
 use std::fs::File;

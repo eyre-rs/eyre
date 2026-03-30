@@ -403,10 +403,6 @@ use core::fmt::{Debug, Display};
 use std::error::Error as StdError;
 use std::sync::OnceLock;
 
-/// Compatibility re-export of `eyre` for interop with `anyhow`
-#[cfg(feature = "anyhow")]
-pub use eyre as anyhow;
-use ptr::OwnedPtr;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
@@ -415,6 +411,10 @@ pub use Report as Error;
 /// Compatibility re-export of `ResultExt` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use ResultExt as Context;
+/// Compatibility re-export of `eyre` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
+pub use eyre as anyhow;
+use ptr::OwnedPtr;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
 ///

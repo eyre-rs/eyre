@@ -72,7 +72,7 @@
 //!
 //! ```rust
 //! if std::env::var("RUST_SPANTRACE").is_err() {
-//!     std::env::set_var("RUST_SPANTRACE", "0");
+//!     unsafe { std::env::set_var("RUST_SPANTRACE", "0") };
 //! }
 //! ```
 //!
@@ -359,6 +359,8 @@
 
 use std::sync::Arc;
 
+#[doc(hidden)]
+pub use Handler as Context;
 use backtrace::Backtrace;
 pub use eyre;
 #[doc(hidden)]
@@ -366,14 +368,12 @@ pub use eyre::Report;
 #[doc(hidden)]
 pub use eyre::Result;
 pub use owo_colors;
-use section::help::HelpInfo;
 #[doc(hidden)]
 pub use section::Section as Help;
+use section::help::HelpInfo;
 pub use section::{IndentedSection, Section, SectionExt};
 #[cfg(feature = "capture-spantrace")]
 use tracing_error::SpanTrace;
-#[doc(hidden)]
-pub use Handler as Context;
 
 pub mod config;
 mod fmt;
@@ -418,6 +418,7 @@ pub struct Handler {
 
 /// The kind of type erased error being reported
 #[cfg(feature = "issue-url")]
+#[expect(missing_debug_implementations)]
 pub enum ErrorKind<'a> {
     /// A non recoverable error aka `panic!`
     NonRecoverable(&'a dyn std::any::Any),

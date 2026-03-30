@@ -1,11 +1,11 @@
 use crate::{
+    Handler,
     config::BacktraceFormatter,
     section::help::HelpInfo,
     writers::{EnvSection, WriterExt},
-    Handler,
 };
 use backtrace::Backtrace;
-use indenter::{indented, Format};
+use indenter::{Format, indented};
 use std::fmt::Write;
 #[cfg(feature = "capture-spantrace")]
 use tracing_error::{ExtractSpanTrace, SpanTrace};

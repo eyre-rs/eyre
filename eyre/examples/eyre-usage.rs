@@ -1,4 +1,4 @@
-use eyre::{eyre, Report, ResultExt};
+use eyre::{Report, ResultExt, eyre};
 
 fn main() -> Result<(), Report> {
     let e: Report = eyre!("oh no this program is just bad!");
