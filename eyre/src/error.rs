@@ -1,6 +1,6 @@
+use crate::EyreHandler;
 use crate::chain::Chain;
 use crate::ptr::{MutPtr, OwnedPtr, RefPtr};
-use crate::EyreHandler;
 use crate::{Report, StdError};
 use core::any::TypeId;
 use core::fmt::{self, Debug, Display};
@@ -913,6 +913,3 @@ impl AsRef<dyn StdError> for Report {
         &**self
     }
 }
-
-#[cfg(feature = "pyo3")]
-mod pyo3_compat;

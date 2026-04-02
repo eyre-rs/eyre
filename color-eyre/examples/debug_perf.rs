@@ -1,9 +1,9 @@
 //! example for manually testing the perf of color-eyre in debug vs release
 
 use color_eyre::{
-    eyre::Report,
-    eyre::{report, ResultExt},
     Section,
+    eyre::Report,
+    eyre::{ResultExt, report},
 };
 use tracing::instrument;
 
@@ -41,7 +41,7 @@ fn time_report_inner() {
 fn install_tracing() {
     use tracing_error::ErrorLayer;
     use tracing_subscriber::prelude::*;
-    use tracing_subscriber::{fmt, EnvFilter};
+    use tracing_subscriber::{EnvFilter, fmt};
 
     let fmt_layer = fmt::layer().with_target(false);
     let filter_layer = EnvFilter::try_from_default_env()

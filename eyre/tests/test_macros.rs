@@ -2,7 +2,7 @@
 mod common;
 
 use self::common::*;
-use eyre::{ensure, report, Result};
+use eyre::{Result, ensure, report};
 use std::cell::Cell;
 use std::future::Future;
 use std::pin::Pin;

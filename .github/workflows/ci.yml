@@ -50,7 +50,6 @@ jobs:
           - --no-default-features --features auto-install
           - --no-default-features --features capture-spantrace
           - --no-default-features --features issue-url
-          - --features pyo3
           - --all-features
     steps:
       - uses: actions/checkout@v4

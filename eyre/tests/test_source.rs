@@ -1,7 +1,7 @@
 mod common;
 
 use self::common::maybe_install_handler;
-use eyre::{report, Report};
+use eyre::{Report, report};
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;

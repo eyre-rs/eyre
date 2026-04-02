@@ -1,7 +1,7 @@
 use color_eyre::{
-    eyre::Report,
-    eyre::{report, ResultExt},
     Section, SectionExt,
+    eyre::Report,
+    eyre::{ResultExt, report},
 };
 use std::process::Command;
 use tracing::instrument;
@@ -41,7 +41,7 @@ fn main() -> Result<(), Report> {
 fn install_tracing() {
     use tracing_error::ErrorLayer;
     use tracing_subscriber::prelude::*;
-    use tracing_subscriber::{fmt, EnvFilter};
+    use tracing_subscriber::{EnvFilter, fmt};
 
     let fmt_layer = fmt::layer().with_target(false);
     let filter_layer = EnvFilter::try_from_default_env()

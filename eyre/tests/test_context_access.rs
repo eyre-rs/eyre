@@ -6,7 +6,7 @@ use crate::common::maybe_install_handler;
 
 #[test]
 fn test_context() {
-    use eyre::{report, Report};
+    use eyre::{Report, report};
 
     maybe_install_handler().unwrap();
 

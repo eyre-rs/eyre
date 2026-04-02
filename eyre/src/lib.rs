@@ -400,13 +400,9 @@ use crate::backtrace::Backtrace;
 use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
+use std::error::Error as StdError;
 use std::sync::OnceLock;
 
-use ptr::OwnedPtr;
-/// Compatibility re-export of `report` for interop with `anyhow`
-#[cfg(feature = "anyhow")]
-pub use report as anyhow;
-use std::error::Error as StdError;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
@@ -415,6 +411,10 @@ pub use Report as Error;
 /// Compatibility re-export of `ResultExt` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use ResultExt as Context;
+use ptr::OwnedPtr;
+/// Compatibility re-export of `report!` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
+pub use report as anyhow;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
 ///
@@ -950,7 +950,7 @@ pub struct Chain<'a> {
 ///     Ok(())
 /// }
 /// ```
-pub type Result<T, E = Report> = core::result::Result<T, E>;
+pub type Result<T = (), E = Report> = core::result::Result<T, E>;
 
 /// Provides the `wrap_err` method for `Result`.
 ///

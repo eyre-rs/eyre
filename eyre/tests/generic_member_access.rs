@@ -21,7 +21,7 @@ fn generic_member_access() {
 
     maybe_install_handler().unwrap();
 
-    std::env::set_var("RUST_BACKTRACE", "1");
+    unsafe { std::env::set_var("RUST_BACKTRACE", "1") };
 
     #[derive(Debug, PartialEq)]
     struct MyCupcake(String);
