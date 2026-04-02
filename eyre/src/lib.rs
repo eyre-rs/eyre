@@ -100,7 +100,7 @@
 //!   #     }
 //!   # }
 //!   #
-//!   use eyre::{WrapErr, Result};
+//!   use eyre::{ResultExt, Result};
 //!
 //!   fn main() -> Result<()> {
 //!       # return Ok(());
@@ -171,8 +171,8 @@
 //!   # ;
 //!   ```
 //!
-//! - If using the nightly channel, a backtrace is captured and printed with the
-//!   error if the underlying error type does not already provide its own. In order
+//! - A backtrace is captured and printed with the error. On nightly,
+//!   eyre will use the underlying error's backtrace if it has one. In order
 //!   to see backtraces, they must be enabled through the environment variables
 //!   described in [`std::backtrace`]:
 //!
@@ -220,16 +220,36 @@
 //!   # }
 //!   ```
 //!
-//! - On newer versions of the compiler (i.e. 1.58 and later) this macro also
-//!   supports format args captures.
+//!   A `bail!` macro is provided as a shorthand for the same early return.
+//!
+//!   ```rust
+//!   # use eyre::{bail, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   bail!("Missing attribute: {}", missing);
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   This macro also supports format args captures.
 //!
 //!   ```rust
 //!   # use eyre::{eyre, Result};
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   # #[cfg(not(eyre_no_fmt_args_capture))]
 //!   return Err(eyre!("Missing attribute: {missing}"));
+//!   #     Ok(())
+//!   # }
+//!   ```
+//!
+//!   ```rust
+//!   # use eyre::{bail, Result};
+//!   #
+//!   # fn demo() -> Result<()> {
+//!   #     let missing = "...";
+//!   bail!("Missing attribute: {missing}");
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -277,8 +297,8 @@
 //!
 //! ### `Context` and `Option`
 //!
-//! As part of renaming `Context` to `WrapErr` we also intentionally do not
-//! implement `WrapErr` for `Option`. This decision was made because `wrap_err`
+//! As part of renaming `Context` to `ResultExt` we also intentionally do not
+//! implement `ResultExt` for `Option`. This decision was made because `wrap_err`
 //! implies that you're creating a new error that saves the old error as its
 //! `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 //! being somewhat meaningless.
@@ -318,7 +338,7 @@
 //!
 //! [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 //! [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
-//! [`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
+//! [`eyre::ResultExt`]: https://docs.rs/eyre/*/eyre/trait.ResultExt.html
 //! [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 //! [`anyhow`]: https://github.com/dtolnay/anyhow
 //! [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html
@@ -394,20 +414,20 @@ use crate::error::ErrorImpl;
 use core::fmt::{Debug, Display};
 
 use std::error::Error as StdError;
+use std::sync::OnceLock;
 
-/// Compatibility re-export of `eyre` for interop with `anyhow`
-#[cfg(feature = "anyhow")]
-pub use eyre as anyhow;
-use once_cell::sync::OnceCell;
-use ptr::OwnedPtr;
 #[doc(hidden)]
 pub use Report as ErrReport;
 /// Compatibility re-export of `Report` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use Report as Error;
-/// Compatibility re-export of `WrapErr` for interop with `anyhow`
+/// Compatibility re-export of `ResultExt` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
-pub use WrapErr as Context;
+pub use ResultExt as Context;
+/// Compatibility re-export of `eyre` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
+pub use eyre as anyhow;
+use ptr::OwnedPtr;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
 ///
@@ -452,7 +472,7 @@ pub use WrapErr as Context;
 ///              at /git/eyre/src/backtrace.rs:26
 ///    1: core::result::Result<T,E>::map_err
 ///              at /git/rustc/src/libcore/result.rs:596
-///    2: eyre::context::<impl eyre::WrapErr<T,E,H> for core::result::Result<T,E>>::wrap_err_with
+///    2: eyre::context::<impl eyre::ResultExt<T,E,H> for core::result::Result<T,E>>::wrap_err_with
 ///              at /git/eyre/src/context.rs:58
 ///    3: testing::main
 ///              at src/main.rs:5
@@ -490,7 +510,7 @@ pub struct Report {
 type ErrorHook =
     Box<dyn Fn(&(dyn StdError + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static>;
 
-static HOOK: OnceCell<ErrorHook> = OnceCell::new();
+static HOOK: OnceLock<ErrorHook> = OnceLock::new();
 
 /// Error indicating that `set_hook` was unable to install the provided ErrorHook
 #[derive(Debug, Clone, Copy)]
@@ -943,7 +963,7 @@ pub struct Chain<'a> {
 ///     Ok(())
 /// }
 /// ```
-pub type Result<T, E = Report> = core::result::Result<T, E>;
+pub type Result<T = (), E = Report> = core::result::Result<T, E>;
 
 /// Provides the `wrap_err` method for `Result`.
 ///
@@ -953,7 +973,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 /// # Example
 ///
 /// ```
-/// use eyre::{WrapErr, Result};
+/// use eyre::{ResultExt, Result};
 /// use std::fs;
 /// use std::path::PathBuf;
 ///
@@ -1002,7 +1022,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///
 /// ```rust,compile_fail
 /// use std::error::Error;
-/// use eyre::{WrapErr, Report};
+/// use eyre::{ResultExt, Report};
 ///
 /// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
 ///     err.wrap_err("saw a downstream error")
@@ -1013,7 +1033,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///
 /// ```rust
 /// use std::error::Error;
-/// use eyre::{WrapErr, Report, eyre};
+/// use eyre::{ResultExt, Report, eyre};
 ///
 /// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
 ///     err.map_err(|e| eyre!(e)).wrap_err("saw a downstream error")
@@ -1049,7 +1069,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///     #     bail!(SuspiciousError);
 ///     # }
 ///     #
-///     use eyre::{WrapErr, Result};
+///     use eyre::{ResultExt, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().wrap_err("Failed to complete the work")?;
@@ -1091,7 +1111,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 ///     #     bail!("no such file or directory");
 ///     # }
 ///     #
-///     use eyre::{WrapErr, Result};
+///     use eyre::{ResultExt, Result};
 ///
 ///     fn do_it() -> Result<()> {
 ///         helper().wrap_err(HelperFailed)?;
@@ -1121,7 +1141,7 @@ pub type Result<T, E = Report> = core::result::Result<T, E>;
 /// constructing the error object. `wrap_err_with` avoids this cost through lazy evaluation. This
 /// cost is proportional to the cost of the currently installed [`EyreHandler`]'s creation step.
 /// `wrap_err` is useful in cases where an constructed error object already exists.
-pub trait WrapErr<T, E>: context::private::Sealed {
+pub trait ResultExt<T, E>: context::private::Sealed {
     /// Wrap the error value with a new adhoc error
     #[cfg_attr(track_caller, track_caller)]
     fn wrap_err<D>(self, msg: D) -> Result<T, Report>
@@ -1198,9 +1218,9 @@ pub trait OptionExt<T>: context::private::Sealed {
 /// This trait is sealed and cannot be implemented for types outside of
 /// `eyre`.
 ///
-/// ## Why Doesn't `Eyre` impl `WrapErr` for `Option`?
+/// ## Why Doesn't `Eyre` impl `ResultExt` for `Option`?
 ///
-/// `eyre` doesn't impl `WrapErr` for `Option` because `wrap_err` implies that you're creating a
+/// `eyre` doesn't impl `ResultExt` for `Option` because `wrap_err` implies that you're creating a
 /// new error that saves the previous error as its `source`. Calling `wrap_err` on an `Option` is
 /// meaningless because there is no source error. `anyhow` avoids this issue by using a different
 /// mental model where you're adding "context" to an error, though this not a mental model for
@@ -1307,9 +1327,6 @@ pub mod private {
     #[cold]
     #[cfg_attr(track_caller, track_caller)]
     pub fn format_err(args: Arguments<'_>) -> Report {
-        #[cfg(eyre_no_fmt_arguments_as_str)]
-        let fmt_arguments_as_str: Option<&str> = None;
-        #[cfg(not(eyre_no_fmt_arguments_as_str))]
         let fmt_arguments_as_str = args.as_str();
 
         if let Some(message) = fmt_arguments_as_str {

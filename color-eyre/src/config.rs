@@ -6,8 +6,8 @@ use crate::{
     writers::{EnvSection, WriterExt},
 };
 use fmt::Display;
-use indenter::{indented, Format};
-use owo_colors::{style, OwoColorize, Style};
+use indenter::{Format, indented};
+use owo_colors::{OwoColorize, Style, style};
 use std::env;
 use std::fmt::Write as _;
 use std::{fmt, path::PathBuf, sync::Arc};
@@ -388,6 +388,7 @@ impl Frame {
 }
 
 /// Builder for customizing the behavior of the global panic and error report hooks
+#[expect(missing_debug_implementations)]
 pub struct HookBuilder {
     filters: Vec<Box<FilterCallback>>,
     capture_span_trace_by_default: bool,
@@ -727,7 +728,10 @@ impl HookBuilder {
         };
 
         #[cfg(feature = "capture-spantrace")]
-        eyre::WrapErr::wrap_err(color_spantrace::set_theme(self.theme.into()), "could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set")?;
+        eyre::ResultExt::wrap_err(
+            color_spantrace::set_theme(self.theme.into()),
+            "could not set the provided `Theme` via `color_spantrace::set_theme` globally as another was already set",
+        )?;
 
         Ok((panic_hook, eyre_hook))
     }
@@ -821,6 +825,7 @@ impl PanicMessage for DefaultPanicMessage {
 }
 
 /// A type representing an error report for a panic.
+#[expect(missing_debug_implementations)]
 pub struct PanicReport<'a> {
     hook: &'a PanicHook,
     panic_info: &'a std::panic::PanicInfo<'a>,
@@ -905,6 +910,7 @@ impl fmt::Display for PanicReport<'_> {
 }
 
 /// A panic reporting hook
+#[expect(missing_debug_implementations)]
 pub struct PanicHook {
     filters: Arc<[Box<FilterCallback>]>,
     section: Option<Box<dyn Display + Send + Sync + 'static>>,
@@ -987,6 +993,7 @@ impl PanicHook {
 }
 
 /// An eyre reporting hook used to construct `EyreHandler`s
+#[expect(missing_debug_implementations)]
 pub struct EyreHook {
     filters: Arc<[Box<FilterCallback>]>,
     #[cfg(feature = "capture-spantrace")]

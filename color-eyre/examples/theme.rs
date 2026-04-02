@@ -1,4 +1,4 @@
-use color_eyre::{config::Theme, eyre::Report, owo_colors::style, Section};
+use color_eyre::{Section, config::Theme, eyre::Report, owo_colors::style};
 
 /// To experiment with theme values, edit `theme()` below and execute `cargo run --example theme`
 fn theme() -> Theme {
@@ -36,12 +36,12 @@ fn main() {
 }
 
 fn setup() {
-    std::env::set_var("RUST_LIB_BACKTRACE", "full");
+    unsafe { std::env::set_var("RUST_LIB_BACKTRACE", "full") };
 
     #[cfg(feature = "capture-spantrace")]
     {
         use tracing_subscriber::prelude::*;
-        use tracing_subscriber::{fmt, EnvFilter};
+        use tracing_subscriber::{EnvFilter, fmt};
 
         let fmt_layer = fmt::layer().with_target(false);
         let filter_layer = EnvFilter::try_from_default_env()

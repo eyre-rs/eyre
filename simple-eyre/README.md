@@ -21,7 +21,7 @@ Then install the hook handler before constructing any `eyre::Report` types.
 # Example
 
 ```rust,should_panic
-use simple_eyre::eyre::{eyre, WrapErr, Report};
+use simple_eyre::eyre::{eyre, ResultExt, Report};
 
 fn main() -> Result<(), Report> {
     simple_eyre::install()?;

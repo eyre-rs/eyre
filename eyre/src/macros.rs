@@ -49,6 +49,7 @@
 /// # }
 /// ```
 #[macro_export]
+#[clippy::format_args]
 macro_rules! bail {
     ($msg:literal $(,)?) => {
         return $crate::private::Err($crate::eyre!($msg));
@@ -106,6 +107,7 @@ macro_rules! bail {
 /// # }
 /// ```
 #[macro_export]
+#[clippy::format_args]
 macro_rules! ensure {
     ($cond:expr $(,)?) => {
         $crate::ensure!($cond, concat!("Condition failed: `", stringify!($cond), "`"))
@@ -150,6 +152,7 @@ macro_rules! ensure {
 /// }
 /// ```
 #[macro_export]
+#[clippy::format_args]
 macro_rules! eyre {
     ($msg:literal $(,)?) => ({
         let error = $crate::private::format_err($crate::private::format_args!($msg));

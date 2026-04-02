@@ -1,8 +1,8 @@
 //! Provides an extension trait for attaching `Section` to error reports.
 use crate::{
+    Section,
     config::Theme,
     eyre::{Report, Result},
-    Section,
 };
 use indenter::indented;
 use owo_colors::OwoColorize;

@@ -91,7 +91,7 @@ avoid using `eyre::Report` as your public error type.
   the middle of.
 
   ```rust
-  use eyre::{WrapErr, Result};
+  use eyre::{ResultExt, Result};
 
   fn main() -> Result<()> {
       ...
@@ -122,12 +122,9 @@ avoid using `eyre::Report` as your public error type.
   }
   ```
 
-- If using rust >1.65, a backtrace is captured and printed with the
-  error.
-
-  On nightly eyre will use the underlying error's backtrace if it has one.
-
-  In order to see backtraces, they must be enabled through the environment variables
+- A backtrace is captured and printed with the error. On nightly,
+  eyre will use the underlying error's backtrace if it has one. In order
+  to see backtraces, they must be enabled through the environment variables
   described in [`std::backtrace`]:
 
   - If you want panics and errors to both have backtraces, set
@@ -168,11 +165,20 @@ avoid using `eyre::Report` as your public error type.
   return Err(eyre!("Missing attribute: {}", missing));
   ```
 
-- On newer versions of the compiler (e.g. 1.58 and later) this macro also
-  supports format args captures.
+  A `bail!` macro is provided as a shorthand for the same early return.
+
+  ```rust
+  bail!("Missing attribute: {}", missing);
+  ```
+
+  This macro also supports format args captures.
 
   ```rust
   return Err(eyre!("Missing attribute: {missing}"));
+  ```
+
+  ```rust
+  bail!("Missing attribute: {missing}");
   ```
 
 ## No-std support
@@ -225,8 +231,8 @@ eyre = { version = "0.6", features = ["anyhow"] }
 
 ### `Context` and `Option`
 
-As part of renaming `Context` to `WrapErr` we also intentionally do not
-implement `WrapErr` for `Option`. This decision was made because `wrap_err`
+As part of renaming `Context` to `ResultExt` we also intentionally do not
+implement `ResultExt` for `Option`. This decision was made because `wrap_err`
 implies that you're creating a new error that saves the old error as its
 `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 being somewhat meaningless.
@@ -263,7 +269,7 @@ implements `context` for options which you can import to make existing
 
 [Report]: https://docs.rs/eyre/*/eyre/struct.Report.html
 [`eyre::EyreHandler`]: https://docs.rs/eyre/*/eyre/trait.EyreHandler.html
-[`eyre::WrapErr`]: https://docs.rs/eyre/*/eyre/trait.WrapErr.html
+[`eyre::ResultExt`]: https://docs.rs/eyre/*/eyre/trait.ResultExt.html
 [`anyhow::Context`]: https://docs.rs/anyhow/*/anyhow/trait.Context.html
 [`anyhow`]: https://github.com/dtolnay/anyhow
 [`tracing_error::SpanTrace`]: https://docs.rs/tracing-error/*/tracing_error/struct.SpanTrace.html

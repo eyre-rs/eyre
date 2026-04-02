@@ -1,6 +1,7 @@
 use crate::StdError;
 use core::fmt::{self, Debug, Display};
 
+#[cfg_attr(not(feature = "anyhow"), expect(unused))]
 #[repr(transparent)]
 pub(crate) struct DisplayError<M>(pub(crate) M);
 
@@ -10,6 +11,7 @@ pub(crate) struct DisplayError<M>(pub(crate) M);
 /// Its Debug and Display impls are the same as the wrapped type.
 pub(crate) struct MessageError<M>(pub(crate) M);
 
+#[cfg_attr(not(feature = "anyhow"), expect(unused))]
 pub(crate) struct NoneError;
 
 impl<M> Debug for DisplayError<M>

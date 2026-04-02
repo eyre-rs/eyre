@@ -1,6 +1,6 @@
+use crate::EyreHandler;
 use crate::chain::Chain;
 use crate::ptr::{MutPtr, OwnedPtr, RefPtr};
-use crate::EyreHandler;
 use crate::{Report, StdError};
 use core::any::TypeId;
 use core::fmt::{self, Debug, Display};
@@ -218,10 +218,10 @@ impl Report {
     /// Create a new error from an error message to wrap the existing error.
     ///
     /// For attaching a higher level error message to a `Result` as it is propagated, the
-    /// [`WrapErr`][crate::WrapErr] extension trait may be more convenient than this function.
+    /// [`ResultExt`][crate::ResultExt] extension trait may be more convenient than this function.
     ///
     /// The primary reason to use `error.wrap_err(...)` instead of `result.wrap_err(...)` via the
-    /// `WrapErr` trait would be if the message needs to depend on some data held by the underlying
+    /// `ResultExt` trait would be if the message needs to depend on some data held by the underlying
     /// error:
     ///
     /// ```
@@ -343,7 +343,7 @@ impl Report {
     /// the message `D` **or** the type of the error on which the message has been attached. For
     /// details about the interaction between message and downcasting, [see here].
     ///
-    /// [see here]: trait.WrapErr.html#effect-on-downcasting
+    /// [see here]: trait.ResultExt.html#effect-on-downcasting
     pub fn is<E>(&self) -> bool
     where
         E: Display + Debug + Send + Sync + 'static,
@@ -913,6 +913,3 @@ impl AsRef<dyn StdError> for Report {
         &**self
     }
 }
-
-#[cfg(feature = "pyo3")]
-mod pyo3_compat;

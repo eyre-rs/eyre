@@ -1,7 +1,7 @@
 mod common;
 
 use self::common::maybe_install_handler;
-use eyre::{bail, Result, WrapErr};
+use eyre::{Result, ResultExt, bail};
 use std::io;
 
 fn f() -> Result<()> {

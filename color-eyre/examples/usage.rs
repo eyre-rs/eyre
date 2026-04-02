@@ -1,4 +1,4 @@
-use color_eyre::{eyre::Report, eyre::WrapErr, Section};
+use color_eyre::{Section, eyre::Report, eyre::ResultExt};
 use tracing::{info, instrument};
 
 #[instrument]
@@ -15,7 +15,7 @@ fn main() -> Result<(), Report> {
 fn install_tracing() {
     use tracing_error::ErrorLayer;
     use tracing_subscriber::prelude::*;
-    use tracing_subscriber::{fmt, EnvFilter};
+    use tracing_subscriber::{EnvFilter, fmt};
 
     let fmt_layer = fmt::layer().with_target(false);
     let filter_layer = EnvFilter::try_from_default_env()

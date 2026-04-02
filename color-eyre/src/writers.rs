@@ -1,4 +1,4 @@
-use crate::config::{lib_verbosity, panic_verbosity, Verbosity};
+use crate::config::{Verbosity, lib_verbosity, panic_verbosity};
 use fmt::Write;
 use std::fmt::{self, Display};
 #[cfg(feature = "capture-spantrace")]
@@ -165,8 +165,8 @@ pub(crate) struct FormattedSpanTrace<'a>(pub(crate) &'a SpanTrace);
 #[cfg(feature = "capture-spantrace")]
 impl fmt::Display for FormattedSpanTrace<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use indenter::indented;
         use indenter::Format;
+        use indenter::indented;
 
         if self.0.status() == SpanTraceStatus::CAPTURED {
             write!(

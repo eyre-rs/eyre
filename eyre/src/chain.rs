@@ -66,7 +66,7 @@ impl<'a> Iterator for Chain<'a> {
 impl DoubleEndedIterator for Chain<'_> {
     fn next_back(&mut self) -> Option<Self::Item> {
         match &mut self.state {
-            Linked { mut next } => {
+            &mut Linked { mut next } => {
                 let mut rest = Vec::new();
                 while let Some(cause) = next {
                     next = cause.source();
@@ -85,7 +85,7 @@ impl DoubleEndedIterator for Chain<'_> {
 impl ExactSizeIterator for Chain<'_> {
     fn len(&self) -> usize {
         match &self.state {
-            Linked { mut next } => {
+            &Linked { mut next } => {
                 let mut len = 0;
                 while let Some(cause) = next {
                     next = cause.source();

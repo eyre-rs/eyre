@@ -12,16 +12,9 @@ use std::io;
 fn test_downcast() {
     maybe_install_handler().unwrap();
 
-    #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
         bail_literal().unwrap_err().downcast::<&str>().unwrap(),
-    );
-
-    #[cfg(eyre_no_fmt_arguments_as_str)]
-    assert_eq!(
-        "oh no!",
-        bail_literal().unwrap_err().downcast::<String>().unwrap(),
     );
 
     assert_eq!(
@@ -42,19 +35,9 @@ fn test_downcast() {
 fn test_downcast_ref() {
     maybe_install_handler().unwrap();
 
-    #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
         *bail_literal().unwrap_err().downcast_ref::<&str>().unwrap(),
-    );
-
-    #[cfg(eyre_no_fmt_arguments_as_str)]
-    assert_eq!(
-        "oh no!",
-        *bail_literal()
-            .unwrap_err()
-            .downcast_ref::<String>()
-            .unwrap(),
     );
 
     assert_eq!(
@@ -75,19 +58,9 @@ fn test_downcast_ref() {
 fn test_downcast_mut() {
     maybe_install_handler().unwrap();
 
-    #[cfg(not(eyre_no_fmt_arguments_as_str))]
     assert_eq!(
         "oh no!",
         *bail_literal().unwrap_err().downcast_mut::<&str>().unwrap(),
-    );
-
-    #[cfg(eyre_no_fmt_arguments_as_str)]
-    assert_eq!(
-        "oh no!",
-        *bail_literal()
-            .unwrap_err()
-            .downcast_mut::<String>()
-            .unwrap(),
     );
 
     assert_eq!(

@@ -2,7 +2,7 @@
 mod common;
 
 use self::common::*;
-use eyre::{ensure, eyre, Result};
+use eyre::{Result, ensure, eyre};
 use std::cell::Cell;
 use std::future::Future;
 use std::pin::Pin;
@@ -84,7 +84,6 @@ fn test_temporaries() {
 }
 
 #[test]
-#[cfg(not(eyre_no_fmt_args_capture))]
 fn test_capture_format_args() {
     maybe_install_handler().unwrap();
 

@@ -8,7 +8,7 @@ mod common;
 fn generic_member_access() {
     use crate::common::maybe_install_handler;
 
-    use eyre::WrapErr;
+    use eyre::ResultExt;
     use std::backtrace::Backtrace;
     use std::fmt::Display;
 
@@ -21,7 +21,7 @@ fn generic_member_access() {
 
     maybe_install_handler().unwrap();
 
-    std::env::set_var("RUST_BACKTRACE", "1");
+    unsafe { std::env::set_var("RUST_BACKTRACE", "1") };
 
     #[derive(Debug, PartialEq)]
     struct MyCupcake(String);
