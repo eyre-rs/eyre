@@ -28,12 +28,12 @@ url = "2.1.1"
 # dev-dependencies
 futures = { version = "0.3", default-features = false }
 rustversion = "1.0"
-thiserror = "1.0"
-trybuild = { version = "=1.0.89" } # pinned due to MSRV
+thiserror = "2.0"
+trybuild = "1.0.116"
 anyhow = "1.0.28"
 syn = { version = "2.0", features = ["full"] }
 wasm-bindgen-test = "0.3.15"
-tracing-subscriber = "0.3.4"
+tracing-subscriber = "0.3.20"
 tracing = "0.1.29"
 ansi-parser = "0.9" # used for testing color schemes
 pretty_assertions = "1.0.0"
