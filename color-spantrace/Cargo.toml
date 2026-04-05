@@ -13,14 +13,14 @@ rust-version = { workspace = true }
 include = { workspace = true }
 
 [dependencies]
-tracing-error = "0.2.0"
-tracing-core = "0.1.21"
+tracing-error = { workspace = true }
+tracing-core = { workspace = true }
 owo-colors = { workspace = true }
 
 [dev-dependencies]
-tracing-subscriber = "0.3.4"
-tracing = "0.1.29"
-ansi-parser = "0.9" # used for testing color schemes
+tracing-subscriber = { workspace = true }
+tracing = { workspace = true }
+ansi-parser = { workspace = true }
 
 [package.metadata.docs.rs]
 all-features = true
