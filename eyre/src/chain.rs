@@ -21,10 +21,10 @@ impl<'a> Chain<'a> {
     /// # Example
     ///
     /// ```rust
-    /// use std::error::Error;
-    /// use std::fmt::{self, Write};
     /// use eyre::Chain;
     /// use indenter::indented;
+    /// use std::error::Error;
+    /// use std::fmt::{self, Write};
     ///
     /// fn report(error: &(dyn Error + 'static), f: &mut fmt::Formatter<'_>) -> fmt::Result {
     ///     let mut errors = Chain::new(error).enumerate();

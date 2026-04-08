@@ -2,7 +2,6 @@
 #[test]
 fn disabled() {
     use color_eyre::eyre;
-    use eyre::eyre;
 
     color_eyre::config::HookBuilder::default()
         .display_location_section(false)

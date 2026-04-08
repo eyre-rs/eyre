@@ -420,9 +420,7 @@ impl HookBuilder {
     /// ```rust
     /// use color_eyre::config::HookBuilder;
     ///
-    /// HookBuilder::new()
-    ///     .install()
-    ///     .unwrap();
+    /// HookBuilder::new().install().unwrap();
     /// ```
     pub fn new() -> Self {
         Self::blank()
@@ -480,9 +478,9 @@ impl HookBuilder {
     /// # Examples
     ///
     /// ```rust
-    /// use std::{panic::Location, fmt};
     /// use color_eyre::section::PanicMessage;
     /// use owo_colors::OwoColorize;
+    /// use std::{fmt, panic::Location};
     ///
     /// struct MyPanicMessage;
     ///
@@ -492,7 +490,11 @@ impl HookBuilder {
     ///     .unwrap();
     ///
     /// impl PanicMessage for MyPanicMessage {
-    ///     fn display(&self, pi: &std::panic::PanicInfo<'_>, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    ///     fn display(
+    ///         &self,
+    ///         pi: &std::panic::PanicInfo<'_>,
+    ///         f: &mut fmt::Formatter<'_>,
+    ///     ) -> fmt::Result {
     ///         writeln!(f, "{}", "The application panicked (crashed).".red())?;
     ///
     ///         // Print panic message.
@@ -513,7 +515,11 @@ impl HookBuilder {
     ///             write!(f, ":")?;
     ///             write!(f, "{}", loc.line().purple())?;
     ///
-    ///             write!(f, "\n\nConsider reporting the bug at {}", custom_url(loc, payload))?;
+    ///             write!(
+    ///                 f,
+    ///                 "\n\nConsider reporting the bug at {}",
+    ///                 custom_url(loc, payload)
+    ///             )?;
     ///         } else {
     ///             write!(f, "<unknown>")?;
     ///         }
@@ -603,7 +609,6 @@ impl HookBuilder {
     ///     })
     ///     .install()
     ///     .unwrap();
-    ///
     #[cfg(feature = "issue-url")]
     pub fn issue_filter<F>(mut self, predicate: F) -> Self
     where
@@ -643,9 +648,7 @@ impl HookBuilder {
     /// ```rust
     /// color_eyre::config::HookBuilder::default()
     ///     .add_frame_filter(Box::new(|frames| {
-    ///         let filters = &[
-    ///             "uninteresting_function",
-    ///         ];
+    ///         let filters = &["uninteresting_function"];
     ///
     ///         frames.retain(|frame| {
     ///             !filters.iter().any(|f| {
@@ -668,7 +671,7 @@ impl HookBuilder {
     }
 
     /// Install the given Hook as the global error report hook
-    pub fn install(self) -> Result<(), crate::eyre::Report> {
+    pub fn install(self) -> Result<(), crate::Report> {
         let (panic_hook, eyre_hook) = self.try_into_hooks()?;
         eyre_hook.install()?;
         panic_hook.install();
@@ -689,7 +692,7 @@ impl HookBuilder {
 
     /// Create a `PanicHook` and `EyreHook` from this `HookBuilder`.
     /// This can be used if you want to combine these handlers with other handlers.
-    pub fn try_into_hooks(self) -> Result<(PanicHook, EyreHook), crate::eyre::Report> {
+    pub fn try_into_hooks(self) -> Result<(PanicHook, EyreHook), crate::Report> {
         let theme = self.theme;
         #[cfg(feature = "issue-url")]
         let metadata = Arc::new(self.issue_metadata);
@@ -1065,8 +1068,8 @@ impl EyreHook {
     }
 
     /// Installs self as the global eyre handling hook via `eyre::set_hook`
-    pub fn install(self) -> Result<(), crate::eyre::InstallError> {
-        crate::eyre::set_hook(self.into_eyre_hook())
+    pub fn install(self) -> Result<(), crate::InstallError> {
+        crate::set_hook(self.into_eyre_hook())
     }
 
     /// Convert the self into the boxed type expected by `eyre::set_hook`.
