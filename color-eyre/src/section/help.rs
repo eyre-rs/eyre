@@ -1,9 +1,5 @@
 //! Provides an extension trait for attaching `Section` to error reports.
-use crate::{
-    Section,
-    config::Theme,
-    eyre::{Report, Result},
-};
+use crate::{Report, Result, Section, config::Theme};
 use indenter::indented;
 use owo_colors::OwoColorize;
 use std::fmt::Write;

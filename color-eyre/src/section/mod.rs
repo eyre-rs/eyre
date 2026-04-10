@@ -21,7 +21,7 @@ pub(crate) mod help;
 /// # Examples
 ///
 /// ```rust
-/// use color_eyre::{eyre::eyre, SectionExt, Section, eyre::Report};
+/// use color_eyre::{eyre, Report, Section, SectionExt};
 /// use std::process::Command;
 /// use tracing::instrument;
 ///
@@ -88,7 +88,7 @@ pub trait SectionExt: Sized {
     /// # Examples
     ///
     /// ```rust,no_run
-    /// use color_eyre::{eyre::eyre, Section, SectionExt, eyre::Report};
+    /// use color_eyre::{eyre, Report, Section, SectionExt};
     ///
     /// let all_in_header = "header\n   body\n   body";
     /// let report = Err::<(), Report>(eyre!("an error occurred"))
@@ -133,7 +133,7 @@ where
 /// sections are displayed after all other sections with no extra newlines between subsequent Help
 /// sections. They consist only of a header portion and are prepended with a colored string
 /// indicating the kind of section, e.g. `Note: This might have failed due to ..."
-pub trait Section: crate::private::Sealed {
+pub trait Section: crate::sealed::Sealed {
     /// The return type of each method after adding context
     type Return;
 
@@ -149,10 +149,9 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section};
+    /// use color_eyre::{eyre, Report, Section};
     ///
-    /// Err(eyre!("command failed"))
-    ///     .section("Please report bugs to https://real.url/bugs")?;
+    /// Err(eyre!("command failed")).section("Please report bugs to https://real.url/bugs")?;
     /// # Ok::<_, Report>(())
     /// ```
     fn section<D>(self, section: D) -> Self::Return
@@ -165,12 +164,11 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section, SectionExt};
+    /// use color_eyre::{eyre, Report, Section, SectionExt};
     ///
     /// # #[cfg(not(miri))]
     /// # {
-    /// let output = std::process::Command::new("ls")
-    ///     .output()?;
+    /// let output = std::process::Command::new("ls").output()?;
     ///
     /// let output = if !output.status.success() {
     ///     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -195,7 +193,7 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section};
+    /// use color_eyre::{eyre, Report, Section};
     /// use thiserror::Error;
     ///
     /// #[derive(Debug, Error)]
@@ -217,7 +215,7 @@ pub trait Section: crate::private::Sealed {
     /// # Examples
     ///
     /// ```rust,should_panic
-    /// use color_eyre::{eyre::eyre, eyre::Report, Section};
+    /// use color_eyre::{eyre, Report, Section};
     /// use thiserror::Error;
     ///
     /// #[derive(Debug, Error)]
@@ -240,7 +238,7 @@ pub trait Section: crate::private::Sealed {
     ///
     /// ```rust
     /// # use std::{error::Error, fmt::{self, Display}};
-    /// # use color_eyre::eyre::Result;
+    /// # use color_eyre::Result;
     /// # #[derive(Debug)]
     /// # struct FakeErr;
     /// # impl Display for FakeErr {
@@ -270,7 +268,7 @@ pub trait Section: crate::private::Sealed {
     ///
     /// ```rust
     /// # use std::{error::Error, fmt::{self, Display}};
-    /// # use color_eyre::eyre::Result;
+    /// # use color_eyre::Result;
     /// # #[derive(Debug)]
     /// # struct FakeErr;
     /// # impl Display for FakeErr {
@@ -286,8 +284,11 @@ pub trait Section: crate::private::Sealed {
     /// use color_eyre::Section as _;
     ///
     /// fallible_fn().with_note(|| {
-    ///         format!("This might have failed due to ... It has failed {} times", 100)
-    ///     })?;
+    ///     format!(
+    ///         "This might have failed due to ... It has failed {} times",
+    ///         100
+    ///     )
+    /// })?;
     /// # Ok(())
     /// # }
     /// ```

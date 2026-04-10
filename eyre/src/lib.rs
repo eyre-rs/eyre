@@ -677,10 +677,10 @@ pub trait EyreHandler: core::any::Any + Send + Sync {
     ///
     /// ```rust
     /// use backtrace::Backtrace;
-    /// use eyre::EyreHandler;
     /// use eyre::Chain;
-    /// use std::error::Error;
+    /// use eyre::EyreHandler;
     /// use indenter::indented;
+    /// use std::error::Error;
     ///
     /// pub struct Handler {
     ///     backtrace: Backtrace,
@@ -775,7 +775,7 @@ impl DefaultHandler {
     /// # Example
     ///
     /// ```rust,should_panic
-    /// use eyre::{DefaultHandler, eyre, InstallError, Result, set_hook};
+    /// use eyre::{eyre, set_hook, DefaultHandler, InstallError, Result};
     ///
     /// fn main() -> Result<()> {
     ///     install_default().expect("default handler inexplicably already installed");
@@ -785,7 +785,6 @@ impl DefaultHandler {
     /// fn install_default() -> Result<(), InstallError> {
     ///     set_hook(Box::new(DefaultHandler::default_with))
     /// }
-    ///
     /// ```
     #[allow(unused_variables)]
     #[cfg_attr(not(feature = "auto-install"), allow(dead_code))]
@@ -1019,8 +1018,8 @@ pub type Result<T = (), E = Report> = core::result::Result<T, E>;
 /// We encourage you to write this:
 ///
 /// ```rust
+/// use eyre::{eyre, Report, ResultExt};
 /// use std::error::Error;
-/// use eyre::{ResultExt, Report, eyre};
 ///
 /// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
 ///     err.map_err(|e| eyre!(e)).wrap_err("saw a downstream error")
