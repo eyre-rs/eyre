@@ -1,7 +1,7 @@
 #![allow(missing_debug_implementations, missing_docs)]
-// Tagged dispatch mechanism for resolving the behavior of `eyre!($expr)`.
+// Tagged dispatch mechanism for resolving the behavior of `report!($expr)`.
 //
-// When eyre! is given a single expr argument to turn into eyre::Report, we
+// When report! is given a single expr argument to turn into eyre::Report, we
 // want the resulting Report to pick up the input's implementation of source()
 // and backtrace() if it has a std::error::Error impl, otherwise require nothing
 // more than Display and Debug.
@@ -38,7 +38,7 @@
 // is resolved by AdhocKind requiring an extra autoref so that it has lower
 // precedence.
 //
-// The eyre! macro will set up the call in this form:
+// The report! macro will set up the call in this form:
 //
 //     #[allow(unused_imports)]
 //     use $crate::private::{AdhocKind, TraitKind};

@@ -136,7 +136,7 @@
 //!   mutable reference as needed.
 //!
 //!   ```rust
-//!   # use eyre::{Report, eyre};
+//!   # use eyre::{Report, report};
 //!   # use std::fmt::{self, Display};
 //!   # use std::task::Poll;
 //!   #
@@ -158,7 +158,7 @@
 //!   # #[cfg(not(feature = "auto-install"))]
 //!   # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 //!   #
-//!   # let error: Report = eyre!("...");
+//!   # let error: Report = report!("...");
 //!   # let root_cause = &error;
 //!   #
 //!   # let ret =
@@ -207,15 +207,15 @@
 //!   }
 //!   ```
 //!
-//! - One-off error messages can be constructed using the `eyre!` macro, which
+//! - One-off error messages can be constructed using the `report!` macro, which
 //!   supports string interpolation and produces an `eyre::Report`.
 //!
 //!   ```rust
-//!   # use eyre::{eyre, Result};
+//!   # use eyre::{report, Result};
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   return Err(eyre!("Missing attribute: {}", missing));
+//!   return Err(report!("Missing attribute: {}", missing));
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -235,11 +235,11 @@
 //!   This macro also supports format args captures.
 //!
 //!   ```rust
-//!   # use eyre::{eyre, Result};
+//!   # use eyre::{report, Result};
 //!   #
 //!   # fn demo() -> Result<()> {
 //!   #     let missing = "...";
-//!   return Err(eyre!("Missing attribute: {missing}"));
+//!   return Err(report!("Missing attribute: {missing}"));
 //!   #     Ok(())
 //!   # }
 //!   ```
@@ -320,14 +320,14 @@
 //! With `eyre` we want users to write:
 //!
 //! ```rust
-//! use eyre::{eyre, OptionExt, Result};
+//! use eyre::{report, OptionExt, Result};
 //!
 //! # #[cfg(not(feature = "auto-install"))]
 //! # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
 //! #
 //! let opt: Option<()> = None;
 //! let result_static: Result<()> = opt.ok_or_eyre("static error message");
-//! let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
+//! let result_dynamic: Result<()> = opt.ok_or_else(|| report!("{} error message", "dynamic"));
 //! ```
 //!
 //! **NOTE**: However, to help with porting we do provide a `ContextCompat` trait which
@@ -411,10 +411,10 @@ pub use Report as Error;
 /// Compatibility re-export of `ResultExt` for interop with `anyhow`
 #[cfg(feature = "anyhow")]
 pub use ResultExt as Context;
-/// Compatibility re-export of `eyre` for interop with `anyhow`
-#[cfg(feature = "anyhow")]
-pub use eyre as anyhow;
 use ptr::OwnedPtr;
+/// Compatibility re-export of `report!` for interop with `anyhow`
+#[cfg(feature = "anyhow")]
+pub use report as anyhow;
 
 /// The core error reporting type of the library, a wrapper around a dynamic error reporting type.
 ///
@@ -535,7 +535,7 @@ impl StdError for InstallError {}
 ///     install().unwrap();
 ///
 ///     // construct a report with, hopefully, our custom handler!
-///     let mut report = eyre::eyre!("hello from custom error town!");
+///     let mut report = eyre::report!("hello from custom error town!");
 ///
 ///     // manually set the custom msg for this report after it has been constructed
 ///     if let Some(handler) = report.handler_mut().downcast_mut::<Handler>() {
@@ -775,11 +775,11 @@ impl DefaultHandler {
     /// # Example
     ///
     /// ```rust,should_panic
-    /// use eyre::{DefaultHandler, eyre, InstallError, Result, set_hook};
+    /// use eyre::{DefaultHandler, report, InstallError, Result, set_hook};
     ///
     /// fn main() -> Result<()> {
     ///     install_default().expect("default handler inexplicably already installed");
-    ///     Err(eyre!("hello from default error city!"))
+    ///     Err(report!("hello from default error city!"))
     /// }
     ///
     /// fn install_default() -> Result<(), InstallError> {
@@ -1020,10 +1020,10 @@ pub type Result<T = (), E = Report> = core::result::Result<T, E>;
 ///
 /// ```rust
 /// use std::error::Error;
-/// use eyre::{ResultExt, Report, eyre};
+/// use eyre::{ResultExt, Report, report};
 ///
 /// fn wrap_example(err: Result<(), Box<dyn Error + Send + Sync + 'static>>) -> Result<(), Report> {
-///     err.map_err(|e| eyre!(e)).wrap_err("saw a downstream error")
+///     err.map_err(|e| report!(e)).wrap_err("saw a downstream error")
 /// }
 /// ```
 ///
@@ -1167,16 +1167,16 @@ pub trait ResultExt<T, E>: context::private::Sealed {
 ///
 /// If string interpolation is required for the generated [report][Report],
 /// use [`ok_or_else`][Option::ok_or_else] instead,
-/// invoking [`eyre!`] to perform string interpolation:
+/// invoking [`report!`] to perform string interpolation:
 ///
 /// ```
 /// # #[cfg(not(feature = "auto-install"))]
 /// # eyre::set_hook(Box::new(eyre::DefaultHandler::default_with)).unwrap();
-/// use eyre::eyre;
+/// use eyre::report;
 ///
 /// let option: Option<()> = None;
 ///
-/// let result = option.ok_or_else(|| eyre!("{} error", "dynamic"));
+/// let result = option.ok_or_else(|| report!("{} error", "dynamic"));
 ///
 /// assert_eq!(result.unwrap_err().to_string(), "dynamic error");
 /// ```
@@ -1193,7 +1193,7 @@ pub trait OptionExt<T>: context::private::Sealed {
     /// to be lazily created from static messages in the `None` case.
     ///
     /// For dynamic error messages, use [`ok_or_else`][Option::ok_or_else],
-    /// invoking [`eyre!`] in the closure to perform string interpolation.
+    /// invoking [`report!`] in the closure to perform string interpolation.
     fn ok_or_eyre<M>(self, message: M) -> crate::Result<T>
     where
         M: Debug + Display + Send + Sync + 'static;
@@ -1235,12 +1235,12 @@ pub trait OptionExt<T>: context::private::Sealed {
 /// We encourage you to use this:
 ///
 /// ```rust
-/// use eyre::eyre;
+/// use eyre::report;
 ///
 /// fn get_thing(mut things: impl Iterator<Item = u32>) -> eyre::Result<u32> {
 ///     things
 ///         .find(|&thing| thing == 42)
-///         .ok_or_else(|| eyre!("the thing wasnt in the list"))
+///         .ok_or_else(|| report!("the thing wasnt in the list"))
 /// }
 /// ```
 #[cfg(feature = "anyhow")]
@@ -1317,10 +1317,10 @@ pub mod private {
         let fmt_arguments_as_str = args.as_str();
 
         if let Some(message) = fmt_arguments_as_str {
-            // eyre!("literal"), can downcast to &'static str
+            // report!("literal"), can downcast to &'static str
             Report::msg(message)
         } else {
-            // eyre!("interpolate {var}"), can downcast to String
+            // report!("interpolate {var}"), can downcast to String
             Report::msg(fmt::format(args))
         }
     }
