@@ -8,6 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.0](https://github.com/eyre-rs/eyre/compare/color-spantrace-v0.3.0...color-spantrace-v0.4.0) - 2026-04-10
+
+### Fixed
+
+- typos in documentation files ([#210](https://github.com/eyre-rs/eyre/pull/210))
+
+### Other
+
+- Bump edition to 2024 ([#279](https://github.com/eyre-rs/eyre/pull/279))
+- Rename the `WrapErr` trait to `ResultExt` ([#270](https://github.com/eyre-rs/eyre/pull/270))
+- switch from `once_cell` to `std::sync::OnceLock` ([#218](https://github.com/eyre-rs/eyre/pull/218))
+- Remove unnecessary `cfg` due to MSRV increase ([#275](https://github.com/eyre-rs/eyre/pull/275))
+- [**breaking**] remove `anyhow` from default features ([#180](https://github.com/eyre-rs/eyre/pull/180))
+- Make cargo.toml consistent
+- Add simple-eyre to workspace
+- Use doc_auto_cfg for docs.rs
+- Unify lint config
+- Remove doc(html_root_url)
+- Delete unnecessary gitignore
+- Bump pyo3 dependency to fix the CI error
+- Exclude development scripts from published package
+
 ## [0.2.1] - 2023-11-17
 ### Fixed
 - Add license files [by erickt](https://github.com/eyre-rs/color-spantrace/pull/19)

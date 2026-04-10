@@ -8,6 +8,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - ReleaseDate
 
+## [0.7.0](https://github.com/eyre-rs/eyre/compare/color-eyre-v0.6.5...color-eyre-v0.7.0) - 2026-04-10
+
+### Added
+
+- add column number to error location display in reports and backtraces ([#268](https://github.com/eyre-rs/eyre/pull/268))
+
+### Fixed
+
+- incorrect type annotation for tuple return value ([#221](https://github.com/eyre-rs/eyre/pull/221))
+- typos in documentation files ([#210](https://github.com/eyre-rs/eyre/pull/210))
+
+### Other
+
+- Bump edition to 2024 ([#279](https://github.com/eyre-rs/eyre/pull/279))
+- Rename the `WrapErr` trait to `ResultExt` ([#270](https://github.com/eyre-rs/eyre/pull/270))
+- switch from `once_cell` to `std::sync::OnceLock` ([#218](https://github.com/eyre-rs/eyre/pull/218))
+- Remove unnecessary `cfg` due to MSRV increase ([#275](https://github.com/eyre-rs/eyre/pull/275))
+- [**breaking**] remove `anyhow` from default features ([#180](https://github.com/eyre-rs/eyre/pull/180))
+- Port rest of the tests
+- Fix broken links
+- Make cargo.toml consistent
+- Add simple-eyre to workspace
+- Make sure the fmt check runs on all crates
+- Use doc_auto_cfg for docs.rs
+- Unify lint config
+- Fix broken links
+- Ignore some tests in nightly
+- Bump pyo3 dependency to fix the CI error
+- Exclude development scripts from published package
+- Add release-plz to CI ([#242](https://github.com/eyre-rs/eyre/pull/242))
+- Redo eyre version bump
+
 ## [0.6.2] - 2022-07-11
 ### Added
 - Option to disable display of location section in error reports
