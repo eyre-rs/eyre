@@ -5,6 +5,7 @@ members = [
   "eyre",
   "simple-eyre",
 ]
+resolver = "3"
 
 [workspace.package]
 authors = ["Jane Lusby <jlusby@yaah.dev>"]
