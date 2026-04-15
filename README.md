@@ -237,13 +237,13 @@ implies that you're creating a new error that saves the old error as its
 `source`. With `Option` there is no source error to wrap, so `wrap_err` ends up
 being somewhat meaningless.
 
-Instead `eyre` offers [`OptionExt::ok_or_eyre`] to yield _static_ errors from `None`,
+Instead `eyre` offers [`OptionExt::ok_or_report`] to yield _static_ errors from `None`,
 and intends for users to use the combinator functions provided by
 `std`, converting `Option`s to `Result`s, for _dynamic_ errors.
 So where you would write this with
 anyhow:
 
-[`OptionExt::ok_or_eyre`]: https://docs.rs/eyre/latest/eyre/trait.OptionExt.html#tymethod.ok_or_eyre
+[`OptionExt::ok_or_report`]: https://docs.rs/eyre/latest/eyre/trait.OptionExt.html#tymethod.ok_or_report
 
 ```rust
 use anyhow::Context;
@@ -259,7 +259,7 @@ With `eyre` we want users to write:
 use eyre::{eyre, OptionExt, Result};
 
 let opt: Option<()> = None;
-let result_static: Result<()> = opt.ok_or_eyre("static error message");
+let result_static: Result<()> = opt.ok_or_report("static error message");
 let result_dynamic: Result<()> = opt.ok_or_else(|| eyre!("{} error message", "dynamic"));
 ```
 
