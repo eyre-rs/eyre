@@ -36,6 +36,7 @@ impl Handler {
             filters: &self.filters,
             inner: trace,
             theme: self.theme,
+            reversed_stacktrace: self.reversed_stacktrace,
         }
     }
 }

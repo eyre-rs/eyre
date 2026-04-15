@@ -393,6 +393,7 @@ pub struct HookBuilder {
     filters: Vec<Box<FilterCallback>>,
     capture_span_trace_by_default: bool,
     display_env_section: bool,
+    reversed_stacktrace: bool,
     #[cfg(feature = "track-caller")]
     display_location_section: bool,
     panic_section: Option<Box<dyn Display + Send + Sync + 'static>>,
@@ -436,6 +437,7 @@ impl HookBuilder {
             filters: vec![],
             capture_span_trace_by_default: false,
             display_env_section: true,
+            reversed_stacktrace: false,
             #[cfg(feature = "track-caller")]
             display_location_section: true,
             panic_section: None,
@@ -619,9 +621,15 @@ impl HookBuilder {
         self
     }
 
-    /// Configures the enviroment varible info section and whether or not it is displayed
+    /// Configures the environment variable info section and whether or not it is displayed
     pub fn display_env_section(mut self, cond: bool) -> Self {
         self.display_env_section = cond;
+        self
+    }
+
+    /// Configures the whether or not the stacktrace frame order is reversed
+    pub fn reversed_stacktrace(mut self, cond: bool) -> Self {
+        self.reversed_stacktrace = cond;
         self
     }
 
@@ -699,6 +707,7 @@ impl HookBuilder {
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
             display_env_section: self.display_env_section,
+            reversed_stacktrace: self.reversed_stacktrace,
             panic_message: self
                 .panic_message
                 .unwrap_or_else(|| Box::new(DefaultPanicMessage(theme))),
@@ -716,6 +725,7 @@ impl HookBuilder {
             #[cfg(feature = "capture-spantrace")]
             capture_span_trace_by_default: self.capture_span_trace_by_default,
             display_env_section: self.display_env_section,
+            reversed_stacktrace: self.reversed_stacktrace,
             #[cfg(feature = "track-caller")]
             display_location_section: self.display_location_section,
             theme,
@@ -919,6 +929,7 @@ pub struct PanicHook {
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
     display_env_section: bool,
+    reversed_stacktrace: bool,
     #[cfg(feature = "issue-url")]
     issue_url: Option<String>,
     #[cfg(feature = "issue-url")]
@@ -936,6 +947,7 @@ impl PanicHook {
             filters: &self.filters,
             inner: trace,
             theme: self.theme,
+            reversed_stacktrace: self.reversed_stacktrace,
         }
     }
 
@@ -999,6 +1011,7 @@ pub struct EyreHook {
     #[cfg(feature = "capture-spantrace")]
     capture_span_trace_by_default: bool,
     display_env_section: bool,
+    reversed_stacktrace: bool,
     #[cfg(feature = "track-caller")]
     display_location_section: bool,
     theme: Theme,
@@ -1043,6 +1056,7 @@ impl EyreHook {
             span_trace,
             sections: Vec::new(),
             display_env_section: self.display_env_section,
+            reversed_stacktrace: self.reversed_stacktrace,
             #[cfg(feature = "track-caller")]
             display_location_section: self.display_location_section,
             #[cfg(feature = "issue-url")]
@@ -1079,6 +1093,7 @@ pub(crate) struct BacktraceFormatter<'a> {
     pub(crate) filters: &'a [Box<FilterCallback>],
     pub(crate) inner: &'a backtrace::Backtrace,
     pub(crate) theme: Theme,
+    pub(crate) reversed_stacktrace: bool,
 }
 
 impl fmt::Display for BacktraceFormatter<'_> {
@@ -1121,6 +1136,10 @@ impl fmt::Display for BacktraceFormatter<'_> {
         // Don't let filters mess with the order.
         filtered_frames.sort_by_key(|x| x.n);
 
+        if self.reversed_stacktrace {
+            filtered_frames.reverse();
+        }
+
         let mut buf = String::new();
 
         macro_rules! print_hidden {
@@ -1143,9 +1162,13 @@ impl fmt::Display for BacktraceFormatter<'_> {
             };
         }
 
-        let mut last_n = 0;
+        let mut last_n = if self.reversed_stacktrace {
+            frames.last().unwrap().n
+        } else {
+            0
+        };
         for frame in &filtered_frames {
-            let frame_delta = frame.n - last_n - 1;
+            let frame_delta = frame.n.abs_diff(last_n) - 1;
             if frame_delta != 0 {
                 print_hidden!(frame_delta);
             }
@@ -1154,9 +1177,13 @@ impl fmt::Display for BacktraceFormatter<'_> {
         }
 
         let last_filtered_n = filtered_frames.last().unwrap().n;
-        let last_unfiltered_n = frames.last().unwrap().n;
-        if last_filtered_n < last_unfiltered_n {
-            print_hidden!(last_unfiltered_n - last_filtered_n);
+        let last_unfiltered_n = if self.reversed_stacktrace {
+            0
+        } else {
+            frames.last().unwrap().n
+        };
+        if last_filtered_n != last_unfiltered_n {
+            print_hidden!(last_unfiltered_n.abs_diff(last_filtered_n));
         }
 
         Ok(())
