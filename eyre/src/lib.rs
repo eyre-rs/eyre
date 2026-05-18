@@ -850,22 +850,21 @@ impl EyreHandler for DefaultHandler {
             }
         }
 
+        use std::backtrace::BacktraceStatus;
+
+        let backtrace = self.backtrace.as_ref();
+
         #[cfg(generic_member_access)]
+        // The backtrace can be stored either in the handler instance, or the error itself.
+        // If the source error has a backtrace, the handler should not capture one
+        let backtrace = backtrace.or_else(|| {
+            Some(std::error::request_ref::<Backtrace>(error).expect("backtrace capture failed"))
+        });
+
+        if let Some(backtrace) = backtrace
+            && BacktraceStatus::Captured == backtrace.status()
         {
-            use std::backtrace::BacktraceStatus;
-
-            // The backtrace can be stored either in the handler instance, or the error itself.
-            //
-            // If the source error has a backtrace, the handler should not capture one
-            let backtrace = self
-                .backtrace
-                .as_ref()
-                .or_else(|| std::error::request_ref::<Backtrace>(error))
-                .expect("backtrace capture failed");
-
-            if let BacktraceStatus::Captured = backtrace.status() {
-                write!(f, "\n\nStack backtrace:\n{}", backtrace)?;
-            }
+            write!(f, "\n\nStack backtrace:\n{}", backtrace)?;
         }
 
         Result::Ok(())
