@@ -14,9 +14,9 @@ impl fmt::Display for LocationSection<'_> {
         if let Some(loc) = self.0 {
             write!(f, "{}", style(loc.file(), theme.panic_file))?;
             write!(f, ":")?;
-            write!(f, "{}", style(&loc.line(), theme.panic_line_number))?;
+            write!(f, "{}", style(loc.line(), theme.panic_line_number))?;
             write!(f, ":")?;
-            write!(f, "{}", style(&loc.column(), theme.panic_line_number))?;
+            write!(f, "{}", style(loc.column(), theme.panic_line_number))?;
         } else {
             write!(f, "<unknown>")?;
         }
