@@ -230,7 +230,7 @@
 //! [`examples/custom_section.rs`]:
 //!
 //! ```rust
-//! use color_eyre::{eyre::eyre, SectionExt, Section, eyre::Report};
+//! use color_eyre::{eyre::report, SectionExt, Section, eyre::Report};
 //! use std::process::Command;
 //! use tracing::instrument;
 //!
@@ -247,7 +247,7 @@
 //!
 //!         if !output.status.success() {
 //!             let stderr = String::from_utf8_lossy(&output.stderr);
-//!             Err(eyre!("cmd exited with non-zero status code"))
+//!             Err(report!("cmd exited with non-zero status code"))
 //!                 .with_section(move || stdout.trim().to_string().header("Stdout:"))
 //!                 .with_section(move || stderr.trim().to_string().header("Stderr:"))
 //!         } else {
