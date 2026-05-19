@@ -84,14 +84,14 @@ fn test_wrap_err_with() {
 }
 
 #[test]
-fn test_option_ok_or_eyre() {
+fn test_option_ok_or_report() {
     let _ = eyre::set_hook(Box::new(|_e| {
         let expected_location = file!();
         Box::new(LocationHandler::new(expected_location))
     }));
 
     use eyre::OptionExt;
-    let err = None::<()>.ok_or_eyre("oopsie").unwrap_err();
+    let err = None::<()>.ok_or_report("oopsie").unwrap_err();
 
     // should panic if the location isn't in our crate
     println!("{err:?}");
