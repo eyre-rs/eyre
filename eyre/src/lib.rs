@@ -861,10 +861,10 @@ impl EyreHandler for DefaultHandler {
             Some(std::error::request_ref::<Backtrace>(error).expect("backtrace capture failed"))
         });
 
-        if let Some(backtrace) = backtrace
-            && BacktraceStatus::Captured == backtrace.status()
-        {
-            write!(f, "\n\nStack backtrace:\n{}", backtrace)?;
+        if let Some(backtrace) = backtrace {
+            if BacktraceStatus::Captured == backtrace.status() {
+                write!(f, "\n\nStack backtrace:\n{}", backtrace)?;
+            }
         }
 
         Result::Ok(())
