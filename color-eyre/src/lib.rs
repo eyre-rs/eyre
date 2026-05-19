@@ -39,7 +39,7 @@
 //! And install the panic and error report handlers:
 //!
 //! ```rust
-//! use color_eyre::eyre::Result;
+//! use color_eyre::Result;
 //!
 //! fn main() -> Result<()> {
 //!     color_eyre::install()?;
@@ -230,7 +230,7 @@
 //! [`examples/custom_section.rs`]:
 //!
 //! ```rust
-//! use color_eyre::{eyre::eyre, SectionExt, Section, eyre::Report};
+//! use color_eyre::{eyre, Report, Section, SectionExt};
 //! use std::process::Command;
 //! use tracing::instrument;
 //!
@@ -362,11 +362,7 @@ use std::sync::Arc;
 #[doc(hidden)]
 pub use Handler as Context;
 use backtrace::Backtrace;
-pub use eyre;
-#[doc(hidden)]
-pub use eyre::Report;
-#[doc(hidden)]
-pub use eyre::Result;
+pub use eyre::*;
 pub use owo_colors;
 #[doc(hidden)]
 pub use section::Section as Help;
@@ -378,7 +374,7 @@ use tracing_error::SpanTrace;
 pub mod config;
 mod fmt;
 mod handler;
-pub(crate) mod private;
+pub(crate) mod sealed;
 pub mod section;
 mod writers;
 
@@ -446,7 +442,7 @@ pub enum ErrorKind<'a> {
 /// # Examples
 ///
 /// ```rust
-/// use color_eyre::eyre::Result;
+/// use color_eyre::Result;
 ///
 /// fn main() -> Result<()> {
 ///     color_eyre::install()?;
@@ -455,6 +451,6 @@ pub enum ErrorKind<'a> {
 ///     # Ok(())
 /// }
 /// ```
-pub fn install() -> Result<(), crate::eyre::Report> {
+pub fn install() -> Result<(), crate::Report> {
     config::HookBuilder::default().install()
 }

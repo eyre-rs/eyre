@@ -1,6 +1,7 @@
 #![allow(dead_code, unused_imports)]
-use color_eyre::eyre;
-use eyre::{Report, Result};
+use color_eyre::{
+    eyre, {Report, Result},
+};
 use tracing::instrument;
 
 #[instrument]

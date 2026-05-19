@@ -1,4 +1,4 @@
-use color_eyre::{Section, eyre::Report, eyre::eyre};
+use color_eyre::{Report, Section, eyre};
 use thiserror::Error;
 
 fn main() -> Result<(), Report> {
