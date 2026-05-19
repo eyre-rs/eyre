@@ -53,6 +53,10 @@ fn test_backwards_compatibility() {
     use tracing_error::ErrorLayer;
     use tracing_subscriber::{prelude::*, registry::Registry};
     unsafe { std::env::set_var("RUST_LIB_BACKTRACE", "full") };
+    // Colors are emitted only when the output stream supports them; under
+    // `cargo test` stderr is a pipe, so force them on to match the colored
+    // control data.
+    unsafe { std::env::set_var("CLICOLOR_FORCE", "1") };
 
     // This integration is ran by cargo with cwd="color-spantrace", but the string literals for
     // `file!` are relative to the workspace root. This changes the cwd to the workspace root.

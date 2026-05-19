@@ -2,6 +2,7 @@ use crate::{
     Handler,
     config::BacktraceFormatter,
     section::help::HelpInfo,
+    style,
     writers::{EnvSection, WriterExt},
 };
 use backtrace::Backtrace;
@@ -62,7 +63,7 @@ impl eyre::EyreHandler for Handler {
 
         for (n, error) in errors() {
             writeln!(f)?;
-            write!(indented(f).ind(n), "{}", self.theme.error.style(error))?;
+            write!(indented(f).ind(n), "{}", style(error, self.theme.error))?;
         }
 
         let mut separated = f.header("\n\n");

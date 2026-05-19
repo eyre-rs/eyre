@@ -128,6 +128,12 @@ fn test_panic_backwards_compatibility() {
         .args(&features)
         .env("RUSTFLAGS", "-Awarnings")
         .env("CARGO_FUTURE_INCOMPAT_REPORT_FREQUENCY", "never")
+        // Colors are emitted only when the output stream supports them; the
+        // helper's stderr is a pipe, so force them on to match the colored
+        // control data. `CARGO_TERM_COLOR=never` keeps `cargo`'s own progress
+        // lines uncolored so they don't add stray ANSI to the comparison.
+        .env("CLICOLOR_FORCE", "1")
+        .env("CARGO_TERM_COLOR", "never")
         .output()
         .expect("failed to execute process");
     let target = String::from_utf8(output.stderr).expect("failed to convert output to `String`");
@@ -256,6 +262,10 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
 
 fn setup() {
     unsafe { std::env::set_var("RUST_LIB_BACKTRACE", "1") };
+    // Colors are emitted only when the output stream supports them; under
+    // `cargo test` stderr is a pipe, so force them on to match the colored
+    // control data.
+    unsafe { std::env::set_var("CLICOLOR_FORCE", "1") };
 
     #[cfg(feature = "capture-spantrace")]
     {
@@ -298,8 +308,8 @@ fn setup() {
     use owo_colors::style;
     let styles = color_eyre::config::Styles::dark()
         // ^ or, instead of `dark`, use `new` for blank styles or `light` if you what to derive from a light theme. Now configure your styles (see the docs for all options):
-        .line_number(style().blue())
-        .help_info_suggestion(style().red());
+        .line_number(Style::new().blue())
+        .help_info_suggestion(Style::new().red());
 
     color_eyre::config::HookBuilder::new()
         .styles(styles)
