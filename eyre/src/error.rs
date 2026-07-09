@@ -71,7 +71,7 @@ impl Report {
     }
 
     #[cfg_attr(track_caller, track_caller)]
-    /// Creates a new error from an implementor of [`std::error::Error`]
+    /// Creates a new error from an implementer of [`std::error::Error`]
     pub(crate) fn from_std<E>(error: E) -> Self
     where
         E: StdError + Send + Sync + 'static,
@@ -827,7 +827,7 @@ impl<E> ErrorImpl<E> {
     fn erase(&self) -> RefPtr<'_, ErrorImpl<()>> {
         // Erase the concrete type of E but preserve the vtable in self.vtable
         // for manipulating the resulting thin pointer. This is analogous to an
-        // unsize coersion.
+        // unsize coercion.
         RefPtr::new(self).cast()
     }
 }

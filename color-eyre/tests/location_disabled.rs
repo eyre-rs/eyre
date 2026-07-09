@@ -9,7 +9,7 @@ fn disabled() {
         .install()
         .unwrap();
 
-    let report = eyre!("error occured");
+    let report = eyre!("error occurred");
 
     let report = format!("{report:?}");
     assert!(!report.contains("Location:"));
