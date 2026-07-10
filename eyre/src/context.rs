@@ -36,7 +36,7 @@ mod ext {
 
 impl<T, E> ResultExt<T, E> for Result<T, E>
 where
-    E: ext::StdError + Send + Sync + 'static,
+    E: ext::StdError + std::error::Error + Send + Sync + 'static,
 {
     fn wrap_err<D>(self, msg: D) -> Result<T, Report>
     where
@@ -56,6 +56,34 @@ where
         match self {
             Ok(t) => Ok(t),
             Err(e) => Err(e.ext_report(msg())),
+        }
+    }
+
+    fn die_with<D, F>(self, msg: F) -> T
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D
+    {
+        match self {
+            Ok(t) => t,
+            Err(e) => std::panic::panic_any(e.ext_report(msg())),
+        }
+    }
+
+    fn die<D>(self, msg: D) -> T
+    where
+        D: Display + Send + Sync + 'static
+    {
+        match self {
+            Ok(t) => t,
+            Err(e) => std::panic::panic_any(e.ext_report(msg)),
+        }
+    }
+
+    fn die_transparent(self) -> T {
+        match self {
+            Ok(t) => t,
+            Err(e) => std::panic::panic_any(Report::new(e)),
         }
     }
 }

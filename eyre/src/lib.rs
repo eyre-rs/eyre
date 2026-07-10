@@ -1141,6 +1141,25 @@ pub trait ResultExt<T, E>: context::private::Sealed {
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D;
+
+    /// Wrap the error value with a new adhoc error, and panic on it
+    #[cfg_attr(track_caller, track_caller)]
+    fn die<D>(self, msg: D) -> T
+    where
+        D: Display + Send + Sync + 'static;
+
+    /// Wrap the error value with a new adhoc error that is evaluated lazily
+    /// only once an error does occur, and panic on it
+    #[cfg_attr(track_caller, track_caller)]
+    fn die_with<D, F>(self, f: F) -> T
+    where
+        D: Display + Send + Sync + 'static,
+        F: FnOnce() -> D;
+
+
+    /// Panic on an error transparently
+    #[cfg_attr(track_caller, track_caller)]
+    fn die_transparent(self) -> T;
 }
 
 /// Provides the [`ok_or_eyre`][OptionExt::ok_or_eyre] method for [`Option`].
@@ -1196,6 +1215,17 @@ pub trait OptionExt<T>: context::private::Sealed {
     fn ok_or_eyre<M>(self, message: M) -> crate::Result<T>
     where
         M: Debug + Display + Send + Sync + 'static;
+
+    /// Unwrap the [`Option<T>`] into [`T`], or die with `msg`.
+    fn die<D>(self, msg: D) -> T
+    where
+        D: Debug + Display + Send + Sync + 'static;
+
+    /// Unwrap the [`Option<T>`] into [`T`], or die with `msg`, lazily evaluated.
+    fn die_with<D, F>(self, msg: F) -> T
+    where
+        D: Debug + Display + Send + Sync + 'static,
+        F: FnOnce() -> D;
 }
 
 /// Provides the `context` and `with_context` methods for `Result` and `Option` to enhance
