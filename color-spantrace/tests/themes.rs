@@ -102,9 +102,9 @@ fn test_backwards_compatibility() {
     assert!(
         colored_spantrace_ansi.eq(colored_spantrace_control_ansi),
         "\x1b[0mANSI escape sequences are not identical to control!\n\nCONTROL:\n\n{}\n\n\n\n{:?}\n\nCURRENT:\n\n{}\n\n\n\n{:?}\n\n",
-        &colored_spantrace_control,
-        &colored_spantrace_control,
-        &colored_spantrace,
-        &colored_spantrace // `\x1b[0m` clears previous ANSI escape sequences
+        colored_spantrace_control,
+        colored_spantrace_control,
+        colored_spantrace,
+        colored_spantrace // `\x1b[0m` clears previous ANSI escape sequences
     );
 }
