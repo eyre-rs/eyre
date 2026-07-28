@@ -362,6 +362,7 @@ impl Frame {
                     || starts_with_crate_path_prefix(name, "core", "option::expect_none_failed")
                     || starts_with_crate_path_prefix(name, "core", "panicking::panic_fmt")
                     || starts_with_crate_path_prefix(name, "std", "panicking::begin_panic")
+                    || starts_with_crate_path_prefix(name, "backtrace", "capture")
                     || SYM_PREFIXES.iter().any(|x| name.starts_with(x))
             }
             None => false,
