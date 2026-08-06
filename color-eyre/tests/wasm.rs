@@ -7,7 +7,7 @@ pub fn color_eyre_simple() {
     install().expect("Failed to install color_eyre");
     let err_str = format!(
         "{:?}",
-        Err::<(), Report>(eyre::eyre!("Base Error"))
+        Err::<(), Report>(eyre::report!("Base Error"))
             .note("A note")
             .suggestion("A suggestion")
             .wrap_err("A wrapped error")

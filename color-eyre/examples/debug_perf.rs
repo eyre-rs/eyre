@@ -3,7 +3,7 @@
 use color_eyre::{
     Section,
     eyre::Report,
-    eyre::{ResultExt, eyre},
+    eyre::{ResultExt, report},
 };
 use tracing::instrument;
 
@@ -25,7 +25,7 @@ fn time_report() {
 #[instrument]
 fn time_report_inner() {
     let start = std::time::Instant::now();
-    let report = Err::<(), Report>(eyre!("fake error"))
+    let report = Err::<(), Report>(report!("fake error"))
         .wrap_err("wrapped error")
         .suggestion("try using a file that exists next time")
         .unwrap_err();

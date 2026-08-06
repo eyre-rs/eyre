@@ -1,7 +1,7 @@
 mod common;
 
 use self::common::maybe_install_handler;
-use eyre::{Report, eyre};
+use eyre::{Report, report};
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io;
@@ -31,7 +31,7 @@ impl StdError for TestError {
 fn test_literal_source() {
     maybe_install_handler().unwrap();
 
-    let error: Report = eyre!("oh no!");
+    let error: Report = report!("oh no!");
     assert!(error.source().is_none());
 }
 
@@ -40,11 +40,11 @@ fn test_variable_source() {
     maybe_install_handler().unwrap();
 
     let msg = "oh no!";
-    let error = eyre!(msg);
+    let error = report!(msg);
     assert!(error.source().is_none());
 
     let msg = msg.to_owned();
-    let error: Report = eyre!(msg);
+    let error: Report = report!(msg);
     assert!(error.source().is_none());
 }
 
@@ -52,7 +52,7 @@ fn test_variable_source() {
 fn test_fmt_source() {
     maybe_install_handler().unwrap();
 
-    let error: Report = eyre!("{} {}!", "oh", "no");
+    let error: Report = report!("{} {}!", "oh", "no");
     assert!(error.source().is_none());
 }
 
@@ -61,7 +61,7 @@ fn test_io_source() {
     maybe_install_handler().unwrap();
 
     let io = io::Error::other("oh no!");
-    let error: Report = eyre!(TestError::Io(io));
+    let error: Report = report!(TestError::Io(io));
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }
 
@@ -69,7 +69,7 @@ fn test_io_source() {
 fn test_eyre_from_eyre() {
     maybe_install_handler().unwrap();
 
-    let error: Report = eyre!("oh no!").wrap_err("context");
-    let error = eyre!(error);
+    let error: Report = report!("oh no!").wrap_err("context");
+    let error = report!(error);
     assert_eq!("oh no!", error.source().unwrap().to_string());
 }

@@ -1,5 +1,5 @@
 use color_eyre::eyre;
-use eyre::eyre;
+use eyre::report;
 
 #[test]
 fn disabled() {
@@ -8,7 +8,7 @@ fn disabled() {
         .install()
         .unwrap();
 
-    let report = eyre!("error occured");
+    let report = report!("error occured");
 
     let report = format!("{report:?}");
     assert!(!report.contains("RUST_BACKTRACE"));

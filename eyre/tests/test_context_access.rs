@@ -6,10 +6,10 @@ use crate::common::maybe_install_handler;
 
 #[test]
 fn test_context() {
-    use eyre::{Report, eyre};
+    use eyre::{Report, report};
 
     maybe_install_handler().unwrap();
 
-    let error: Report = eyre!("oh no!");
+    let error: Report = report!("oh no!");
     let _ = error.context();
 }
