@@ -1,3 +1,5 @@
+#![cfg(feature = "anyhow")]
+
 mod common;
 
 use crate::common::maybe_install_handler;
