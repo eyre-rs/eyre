@@ -52,13 +52,13 @@
 #[clippy::format_args]
 macro_rules! bail {
     ($msg:literal $(,)?) => {
-        return $crate::private::Err($crate::eyre!($msg));
+        return $crate::private::Err($crate::eyre!($msg))
     };
     ($err:expr $(,)?) => {
-        return $crate::private::Err($crate::eyre!($err));
+        return $crate::private::Err($crate::eyre!($err))
     };
     ($fmt:expr, $($arg:tt)*) => {
-        return $crate::private::Err($crate::eyre!($fmt, $($arg)*));
+        return $crate::private::Err($crate::eyre!($fmt, $($arg)*))
     };
 }
 
