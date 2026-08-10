@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 
 ## [Unreleased] - ReleaseDate
+
+## [0.6.13] - 2026-08-10
+### Fixed
+- Don't evaluate 1-argument `ensure!` condition twice [by DaniPopes](https://github.com/eyre-rs/eyre/pull/166)
+- Make `ContextCompat` consistent and non-ambiguous with `WrapErr` [by ten3roberts](https://github.com/eyre-rs/eyre/pull/150)
+- Fix compile probe and nightly backtraces [by ten3roberts](https://github.com/eyre-rs/eyre/pull/160)
+- Eliminate pointer->reference->pointer during downcast [by dfoxfranke](https://github.com/eyre-rs/eyre/pull/286)
+- Don't emit trailing semicolon from `bail!` [by phil-opp](https://github.com/eyre-rs/eyre/pull/294)
+
 ### Added
-- feature flag for `anyhow` compatibility traits [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/138)
+- Feature flag for `anyhow` compatibility traits (enabled by default) [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/138)
+- Add default type parameter value of `T = ()` to `eyre::Result<T>` [by nik-rev](https://github.com/eyre-rs/eyre/pull/273)
+- Use std `backtrace` on `stable` [by mitch9654](https://github.com/eyre-rs/eyre/pull/284)
 
 ## [0.6.12] - 2024-01-31
 ### Fixed
@@ -80,7 +91,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/eyre-rs/eyre/compare/v0.6.11...HEAD
+[Unreleased]: https://github.com/eyre-rs/eyre/compare/v0.6.13...HEAD
+[0.6.13]: https://github.com/eyre-rs/eyre/compare/v0.6.12...v0.6.13
+[0.6.12]: https://github.com/eyre-rs/eyre/compare/v0.6.11...v0.6.12
 [0.6.11]: https://github.com/eyre-rs/eyre/compare/v0.6.9...v0.6.11
 [0.6.9]:  https://github.com/eyre-rs/eyre/compare/v0.6.8...v0.6.9
 [0.6.8]:  https://github.com/eyre-rs/eyre/compare/v0.6.7...v0.6.8

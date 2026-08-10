@@ -24,14 +24,10 @@ jobs:
           - stable
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --all
+      - run: cargo check --locked --all
 
   test-matrix:
     name: Test Suite
@@ -53,14 +49,10 @@ jobs:
           - --all-features
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all ${{ matrix.features }}
+      - run: cargo test --locked --all ${{ matrix.features }}
 
   test-os:
     name: Test Suite
@@ -71,15 +63,10 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
-          profile: minimal
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all
+      - run: cargo test --locked --all
 
   fmt:
     name: Rustfmt
@@ -90,15 +77,11 @@ jobs:
           - stable
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
-      - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all --check
+          components: rustfmt
+      - run: cargo fmt --all --check
 
   clippy:
     name: Clippy
@@ -109,28 +92,20 @@ jobs:
           - stable
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all-targets --all-features -- -D clippy::style -D clippy::suspicious -D clippy::complexity
+          components: clippy
+      - run: cargo clippy --locked --all-targets --all-features -- -D clippy::style -D clippy::suspicious -D clippy::complexity
 
   miri:
     name: Miri
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
           components: miri
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: miri
-          args: test
+      - run: cargo miri test
 
