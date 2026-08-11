@@ -1,5 +1,4 @@
 use color_eyre::eyre;
-use eyre::eyre;
 
 #[test]
 fn enabled() {

@@ -1,6 +1,6 @@
 // Note: It's recommended, not to change anything above or below (see big comment below)
 
-use color_eyre::{Section, eyre::Report};
+use color_eyre::{Report, Section};
 
 #[rustfmt::skip]
 #[derive(Debug, thiserror::Error)]

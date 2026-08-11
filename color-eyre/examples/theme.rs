@@ -1,4 +1,4 @@
-use color_eyre::{Section, config::Theme, eyre::Report, owo_colors::style};
+use color_eyre::{Report, Section, config::Theme, owo_colors::style};
 
 /// To experiment with theme values, edit `theme()` below and execute `cargo run --example theme`
 fn theme() -> Theme {

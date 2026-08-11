@@ -16,7 +16,7 @@
 //! # Example
 //!
 //! ```rust,should_panic
-//! use simple_eyre::eyre::{eyre, ResultExt, Report};
+//! use simple_eyre::eyre::{eyre, Report, ResultExt};
 //!
 //! fn main() -> Result<(), Report> {
 //!     simple_eyre::install()?;

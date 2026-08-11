@@ -4,7 +4,7 @@
 
 //! See "tests/theme.rs" for more information.
 
-use color_eyre::{Section, eyre::Report};
+use color_eyre::{Report, Section};
 
 #[rustfmt::skip]
 #[derive(Debug, thiserror::Error)]

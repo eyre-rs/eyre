@@ -1,10 +1,6 @@
 //! example for manually testing the perf of color-eyre in debug vs release
 
-use color_eyre::{
-    Section,
-    eyre::Report,
-    eyre::{ResultExt, eyre},
-};
+use color_eyre::{Report, ResultExt, Section, eyre};
 use tracing::instrument;
 
 fn main() -> Result<(), Report> {

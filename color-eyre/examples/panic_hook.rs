@@ -1,4 +1,4 @@
-use color_eyre::eyre::Report;
+use color_eyre::Report;
 use tracing::instrument;
 
 #[instrument]

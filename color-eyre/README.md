@@ -32,7 +32,7 @@ color-eyre = "0.6"
 And install the panic and error report handlers:
 
 ```rust
-use color_eyre::eyre::Result;
+use color_eyre::Result;
 
 fn main() -> Result<()> {
     color_eyre::install()?;
@@ -129,7 +129,7 @@ to contain `stderr` and `stdout` from a failed command, taken from
 [`examples/custom_section.rs`]:
 
 ```rust
-use color_eyre::{eyre::eyre, SectionExt, Section, eyre::Report};
+use color_eyre::{eyre, SectionExt, Section, Report};
 use std::process::Command;
 use tracing::instrument;
 
