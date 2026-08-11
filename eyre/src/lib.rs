@@ -1227,7 +1227,7 @@ pub trait OptionExt<T>: context::private::Sealed {
 /// fn get_thing(mut things: impl Iterator<Item = u32>) -> eyre::Result<u32> {
 ///     things
 ///         .find(|&thing| thing == 42)
-///         .context("the thing wasnt in the list")
+///         .context("the thing wasn't in the list")
 /// }
 /// ```
 ///
@@ -1239,7 +1239,7 @@ pub trait OptionExt<T>: context::private::Sealed {
 /// fn get_thing(mut things: impl Iterator<Item = u32>) -> eyre::Result<u32> {
 ///     things
 ///         .find(|&thing| thing == 42)
-///         .ok_or_else(|| eyre!("the thing wasnt in the list"))
+///         .ok_or_else(|| eyre!("the thing wasn't in the list"))
 /// }
 /// ```
 #[cfg(feature = "anyhow")]

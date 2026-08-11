@@ -1,4 +1,4 @@
-//! Module for new types that isolate complext formatting
+//! Module for new types that isolate complex formatting
 use std::fmt;
 
 use owo_colors::OwoColorize;

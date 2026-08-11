@@ -270,7 +270,7 @@ fn test_backwards_compatibility(target: String, file_name: &str) {
 
         ## Compare `ansi_parser` tokens
 
-        If you fixed all potential problems above, and the test still failes, compare the actual ANSI escape sequences:
+        If you fixed all potential problems above, and the test still fails, compare the actual ANSI escape sequences:
 
         1) Activate "CURRENT ANSI PARSER OUTPUT" and "CURRENT ANSI PARSER OUTPUT" above
 

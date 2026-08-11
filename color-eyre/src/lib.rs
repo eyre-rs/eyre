@@ -78,7 +78,7 @@
 //!
 //! ### Improving perf on debug builds
 //!
-//! In debug mode `color-eyre` behaves noticably worse than `eyre`. This is caused
+//! In debug mode `color-eyre` behaves noticeably worse than `eyre`. This is caused
 //! by the fact that `eyre` uses `std::backtrace::Backtrace` instead of
 //! `backtrace::Backtrace`. The std version of backtrace is precompiled with
 //! optimizations, this means that whether or not you're in debug mode doesn't

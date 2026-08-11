@@ -641,7 +641,7 @@ impl HookBuilder {
         self
     }
 
-    /// Configures the enviroment varible info section and whether or not it is displayed
+    /// Configures the environment variable info section and whether or not it is displayed
     pub fn display_env_section(mut self, cond: bool) -> Self {
         self.display_env_section = cond;
         self
