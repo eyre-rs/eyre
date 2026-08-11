@@ -116,7 +116,6 @@ impl Report {
         unsafe { Report::construct(error, vtable, handler) }
     }
 
-    #[cfg(feature = "anyhow")]
     #[cfg_attr(track_caller, track_caller)]
     pub(crate) fn from_display<M>(message: M) -> Self
     where

@@ -13,8 +13,7 @@ readme = { workspace = true }
 rust-version = { workspace = true }
 
 [features]
-default = ["anyhow", "auto-install", "track-caller"]
-anyhow = []
+default = ["auto-install", "track-caller"]
 auto-install = []
 track-caller = []
 

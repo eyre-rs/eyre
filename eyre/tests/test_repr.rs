@@ -4,6 +4,7 @@ mod drop;
 use self::common::maybe_install_handler;
 use self::drop::{DetectDrop, Flag};
 use eyre::Report;
+use std::marker::Unpin;
 use std::mem;
 
 #[test]
