@@ -119,9 +119,12 @@ avoid using `eyre::Report` as your public error type.
   }
   ```
 
-- If using the nightly channel, a backtrace is captured and printed with the
-  error if the underlying error type does not already provide its own. In order
-  to see backtraces, they must be enabled through the environment variables
+- If using rust >1.65, a backtrace is captured and printed with the
+  error.
+
+  On nightly eyre will use the underlying error's backtrace if it has one.
+
+  In order to see backtraces, they must be enabled through the environment variables
   described in [`std::backtrace`]:
 
   - If you want panics and errors to both have backtraces, set
@@ -138,7 +141,7 @@ avoid using `eyre::Report` as your public error type.
 - Eyre works with any error type that has an impl of `std::error::Error`,
   including ones defined in your crate. We do not bundle a `derive(Error)` macro
   but you can write the impls yourself or use a standalone macro like
-  [thiserror].
+  [thiserror](https://github.com/dtolnay/thiserror).
 
   ```rust
   use thiserror::Error;
@@ -175,6 +178,15 @@ No-std support was removed in 2020 in [commit 608a16a] due to unaddressed upstre
 [commit 608a16a]:
 https://github.com/eyre-rs/eyre/pull/29/commits/608a16aa2c2c27eca6c88001cc94c6973c18f1d5
 
+
+## Backtrace support
+
+The built in default handler has support for capturing backtrace using `rustc-1.65` or later.
+
+Backtraces are captured when an error is converted to an `eyre::Report` (such as using `?` or `eyre!`).
+
+If using the nightly toolchain, backtraces will also be captured and accessed from other errors using [error_generic_member_access](https://github.com/rust-lang/rfcs/pull/2895) if available.
+
 ## Comparison to failure
 
 The `eyre::Report` type works something like `failure::Error`, but unlike
@@ -200,7 +212,17 @@ This crate does its best to be usable as a drop in replacement of `anyhow` and
 vice-versa by `re-exporting` all of the renamed APIs with the names used in
 `anyhow`, though there are some differences still.
 
-#### `Context` and `Option`
+### Disabling the compatibility layer
+
+The `anyhow` compatibility layer is enabled by default.
+If you do not need anyhow compatibility, it is advisable
+to disable the `"anyhow"` feature:
+
+```toml
+eyre = { version = "0.6", default-features = false, features = ["auto-install", "track-caller"] }
+```
+
+### `Context` and `Option`
 
 As part of renaming `Context` to `WrapErr` we also intentionally do not
 implement `WrapErr` for `Option`. This decision was made because `wrap_err`

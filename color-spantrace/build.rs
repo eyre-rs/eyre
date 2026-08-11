@@ -20,6 +20,9 @@ enum Toolchain {
 
 impl Toolchain {
     fn set_feature(self) {
+        println!("cargo:rustc-check-cfg=cfg(nightly)");
+        println!("cargo:rustc-check-cfg=cfg(beta)");
+        println!("cargo:rustc-check-cfg=cfg(stable)");
         match self {
             Toolchain::Nightly => println!("cargo:rustc-cfg=nightly"),
             Toolchain::Beta => println!("cargo:rustc-cfg=beta"),

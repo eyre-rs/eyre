@@ -1,9 +1,6 @@
 use crate::error::{ContextError, ErrorImpl};
-use crate::{ContextCompat, Report, StdError, WrapErr};
+use crate::{Report, StdError, WrapErr};
 use core::fmt::{self, Debug, Display, Write};
-
-#[cfg(backtrace)]
-use std::backtrace::Backtrace;
 
 mod ext {
     use super::*;
@@ -61,39 +58,34 @@ where
             Err(e) => Err(e.ext_report(msg())),
         }
     }
+}
 
-    fn context<D>(self, msg: D) -> Result<T, Report>
+#[cfg(feature = "anyhow")]
+impl<T, E> crate::ContextCompat<T> for Result<T, E>
+where
+    Self: WrapErr<T, E>,
+{
+    #[track_caller]
+    fn context<D>(self, msg: D) -> crate::Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
     {
         self.wrap_err(msg)
     }
 
-    fn with_context<D, F>(self, msg: F) -> Result<T, Report>
+    #[track_caller]
+    fn with_context<D, F>(self, f: F) -> crate::Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
         F: FnOnce() -> D,
     {
-        self.wrap_err_with(msg)
+        self.wrap_err_with(f)
     }
 }
 
-impl<T> ContextCompat<T> for Option<T> {
-    fn wrap_err<D>(self, msg: D) -> Result<T, Report>
-    where
-        D: Display + Send + Sync + 'static,
-    {
-        self.context(msg)
-    }
-
-    fn wrap_err_with<D, F>(self, msg: F) -> Result<T, Report>
-    where
-        D: Display + Send + Sync + 'static,
-        F: FnOnce() -> D,
-    {
-        self.with_context(msg)
-    }
-
+#[cfg(feature = "anyhow")]
+impl<T> crate::ContextCompat<T> for Option<T> {
+    #[track_caller]
     fn context<D>(self, msg: D) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
@@ -104,6 +96,7 @@ impl<T> ContextCompat<T> for Option<T> {
         }
     }
 
+    #[track_caller]
     fn with_context<D, F>(self, msg: F) -> Result<T, Report>
     where
         D: Display + Send + Sync + 'static,
@@ -143,9 +136,9 @@ where
     D: Display,
     E: StdError + 'static,
 {
-    #[cfg(backtrace)]
-    fn backtrace(&self) -> Option<&Backtrace> {
-        self.error.backtrace()
+    #[cfg(generic_member_access)]
+    fn provide<'a>(&'a self, request: &mut std::error::Request<'a>) {
+        self.error.provide(request);
     }
 
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
