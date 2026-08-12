@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - tl;dr: `wrap_err_with` is faster unless the constructed error object already exists
 - ~~automated conversion to external errors for ensure! and bail! [by j-baker](https://github.com/eyre-rs/eyre/pull/95)~~ breaking change: shelved for next major release
 - eyre::Ok for generating eyre::Ok() without fully specifying the type [by kylewlacy](https://github.com/eyre-rs/eyre/pull/91)
-- `OptionExt::ok_or_eyre` for yielding static `Report`s from `None` [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/125)
+- `OptionExt::ok_or_report` for yielding static `Report`s from `None` [by LeoniePhiline](https://github.com/eyre-rs/eyre/pull/125)
 
 ### New Contributors
 - @sharnoff made their first contribution in https://github.com/eyre-rs/eyre/pull/86
